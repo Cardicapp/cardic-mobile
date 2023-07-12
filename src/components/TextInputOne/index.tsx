@@ -1,7 +1,6 @@
-import React, { Component, useState } from 'react';
+import React, { useState } from 'react';
 import {
     View,
-    Text,
     Platform,
     StyleProp,
     ViewStyle,
@@ -13,14 +12,9 @@ import {
 } from 'react-native';
 import {
     heightPercentageToDP as hp,
-    widthPercentageToDP as wp,
 } from 'react-native-responsive-screen';
-import { RFPercentage, RFValue } from 'react-native-responsive-fontsize';
+import { RFPercentage } from 'react-native-responsive-fontsize';
 import { TextInput } from 'react-native-gesture-handler';
-// import Colors from '../shared/Theme/Colors';
-// import Dimensions from '../shared/Theme/Dimensions';
-// import AppText, { defaultStyle } from './AppText';
-import TextInputMask from 'react-native-text-input-mask';
 import Colors from 'CardicApp/src/theme/Colors';
 import Dimensions from 'CardicApp/src/theme/Dimensions';
 import AppText, { defaultStyle } from '../AppText/AppText';
@@ -44,7 +38,6 @@ export interface TextInputOneProps extends TextInputProps {
     icon?: any;
     onPressIcon?: () => void;
     placeholder?: string;
-    useMask?: boolean;
     mask?: string;
     autoFocus?: boolean;
     multiline?: boolean;
@@ -95,39 +88,7 @@ const TextInputOne = (props: TextInputOneProps) => {
                     style={{
                         width: '100%',
                     }}>
-                    {props.useMask ? (
-                        <TextInputMask
-                            onChangeText={props.onChangeMaskText}
-                            mask={props.mask}
-                            // @ts-ignore
-                            ref={props.inputRef}
-                            value={props.value}
-                            onFocus={() => setActive(true)}
-                            onBlur={() => setActive(false)}
-                            keyboardType={props.keyboardType}
-                            placeholder={props.placeholder}
-                            onSubmitEditing={props.onSubmitEditing}
-                            style={[
-                                defaultStyle.root,
-                                styles.inputRoot,
-                                props.inputStyle,
-                                active
-                                    ? {
-                                        borderColor: '#7594FB',
-                                    }
-                                    : {
-                                        borderColor: '#CBCBCB',
-                                    },
-                            ]}
-                            placeholderTextColor={Colors.PlaceHolder}
-                            maxLength={props.maxLength}
-                            secureTextEntry={props.secureTextEntry}
-                            editable={props.editable}
-                            autoFocus={props.autoFocus}
-                            multiline={props.multiline}
-                            numberOfLines={props.numberOfLines}
-                        />
-                    ) : (
+                    
                         <TextInput
                             ref={props.inputRef}
                             value={formatAmount ? amount : props.value}
@@ -164,7 +125,6 @@ const TextInputOne = (props: TextInputOneProps) => {
                             multiline={props.multiline}
                             numberOfLines={props.numberOfLines}
                         />
-                    )}
 
                     {props.icon && (
                         <TouchableOpacity

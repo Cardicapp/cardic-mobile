@@ -10,6 +10,7 @@ export const endsWithAny = (str: string, suffixes: string[]) => {
 
 export const Values = {
     NairaSymbol: "₦",
+    DollarSymbol: '$',
     OptimizationUrl: "https://res.cloudinary.com/sammxin/image/fetch/t_media_lib_thumb/"
 }
 
