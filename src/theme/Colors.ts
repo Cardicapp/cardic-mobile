@@ -23,7 +23,7 @@ export default {
     ShyYellow: "#FEFBF1",
     ShyOrange: "#FEF4F1",
     ShyPurple: "rgba(254, 243, 253, 0.9)",
-    PinkBG: "#FCEEF5",
+    PrimaryBGLight: "#E1FCF7",
     LightPinkBG: "rgba(252, 238, 245, 1)",
     ShyGrey: "rgba(101, 111, 119, 1)",
     GreyOne: 'rgba(247, 249, 251, 1)',
@@ -65,5 +65,7 @@ export default {
     BorderTwo: "#ED1F8E",
     AgoColor: '#151522',
     SwitchInactive: "#E4E4E4",
-    Primary: '#3c4b64'
+    Primary: '#1DA18A',
+    BorderColor: "#C4C4C4",
+    ChatBg: "#F8F9FF",
 }

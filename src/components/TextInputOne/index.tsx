@@ -61,7 +61,6 @@ const TextInputOne = (props: TextInputOneProps) => {
                 {
                     alignItems: 'center',
                     marginTop: 20,
-                    marginHorizontal: 20,
                 },
                 props.containerStyle,
             ]}>
@@ -151,8 +150,10 @@ const styles = StyleSheet.create({
         width: '100%',
         minHeight: Platform.OS == 'ios' ? hp(6) : undefined,
         borderRadius: 2,
+        borderWidth: 1,
+        borderColor: Colors.BorderColor,
         color: Colors.Black,
-        backgroundColor: Colors.GreyOne,
+        backgroundColor: Colors.InputBgTwo,
         paddingHorizontal: 10,
     },
 });
