@@ -1,5 +1,5 @@
-import moment, {Moment} from 'moment';
-import {Alert} from 'react-native';
+import moment, { Moment } from 'moment';
+import { Alert } from 'react-native';
 import {
   heightPercentageToDP,
   widthPercentageToDP,
@@ -130,9 +130,9 @@ class Utils {
 
   static shuffleArray = (unshuffled: any[]) => {
     let shuffled = unshuffled
-      .map((value) => ({value, sort: Math.random()}))
+      .map((value) => ({ value, sort: Math.random() }))
       .sort((a, b) => a.sort - b.sort)
-      .map(({value}) => value);
+      .map(({ value }) => value);
     return shuffled;
   };
 
@@ -232,10 +232,10 @@ class Utils {
     const result =
       plan['target_savings']['target_amount'] == data['target_amount'] &&
       plan['target_saving_settings']['frequency_amount'] ==
-        data['frequency_amount'] &&
+      data['frequency_amount'] &&
       plan['target_saving_settings']['frequency'] == data['frequency'] &&
       plan['target_saving_settings']['authorization']['id'] ==
-        data['authorization']['id'] &&
+      data['authorization']['id'] &&
       plan['target_saving_settings']['status'] == data['status'];
     return result;
   };
@@ -346,25 +346,49 @@ class Utils {
     return size > 800;
   };
 
-  static stripString = (str : string, symbol: string) => {
+  static stripString = (str: string, symbol: string) => {
     const tempStringArray: string[] = []
     str.split('').forEach(v => {
-      if(v !== symbol){
+      if (v !== symbol) {
         tempStringArray.push(v)
       }
     })
     return tempStringArray.join('')
   };
 
-  static showAddCardPrompt = () => {
-    Alert.alert(
-        'Add card',
-        'You will be charged NGN100.00 when you add a new card.',
-        [
-            { text: "Yes, Proceed", style: 'default', onPress: () => {} },
-        ]
-    );
-}
+  static uniqueBy<A>(a: A[], key: (param: A) => string) {
+    let index: any[] = [];
+    return a.filter(function (item: any) {
+      let k: string = key(item);
+      return index.indexOf(k) >= 0 ? false : index.push(k);
+    });
+  }
+
+  static compare<A>(a: A, b: A, key: string): number {
+    // @ts-ignore
+    if (a[key] < b[key]) {
+      return -1;
+    }
+    // @ts-ignore
+    if (a[key] > b[key]) {
+      return 1;
+    }
+    return 0;
+  }
+
+  static compareByDate<A>(a: A, b: A, key: string): number {
+    // @ts-ignore
+    if (new Date(a[key]) < new Date(b[key])) {
+      return -1;
+    }
+    // @ts-ignore
+    if (new Date(a[key]) > new Date(b[key])) {
+      return 1;
+    }
+    return 0;
+  }
+
+  static calculateRate = (a: number, b: number, c: number) => a * (b * c)
 }
 
 export default Utils;

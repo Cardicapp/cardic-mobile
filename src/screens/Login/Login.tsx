@@ -23,7 +23,12 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import ButtonOne from 'CardicApp/src/components/ButtonOne';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectAuthState, setAuthState } from 'CardicApp/src/store/auth';
+import { selectAuthState, setAuthState, setAuthToken, setUserInfo } from 'CardicApp/src/store/auth';
+import routes from 'CardicApp/src/lib/network/routes';
+import axiosExtended from 'CardicApp/src/lib/network/axios-extended';
+import { ApplicationScreenProps, ApplicationStackParamList } from 'CardicApp/@types/navigation';
+import { NavigationProp } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 
 
 interface UserData {
@@ -45,7 +50,7 @@ interface State {
 }
 
 interface Props {
-  navigation: any,
+  navigation: StackNavigationProp<ApplicationStackParamList, keyof ApplicationStackParamList, undefined>;
   showToast: any,
   login: (data: any) => void,
   loading: boolean,
@@ -69,9 +74,10 @@ const Login = (props: Props) => {
     biometricPassword: "",
     useExistingEmail: false,
   })
-  
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [loading, setLoading] = useState(false)
   const emailRef: MutableRefObject<TextInput | null> | null = useRef(null);
-  const passwordRef: MutableRefObject<TextInput | null> | null  = useRef(null);
+  const passwordRef: MutableRefObject<TextInput | null> | null = useRef(null);
 
   // componentDidMount() {
   // EncryptedStorage.getItem("user_data").then(val => {
@@ -107,23 +113,44 @@ const Login = (props: Props) => {
   //     setState({ showSuccessModal: false });
   // }
 
-  const login = () => {
+  const login = async () => {
     const result = validateForm(true);
     if (!result) {
+      setLoading(true)
       const { email, password, useExistingEmail, userData } = pageState;
       let formdata = {
-        email: useExistingEmail && userData ? userData['email'] : email,
+        // email: useExistingEmail && userData ? userData['email'] : email,
+        email,
         password
       }
-      props.login(formdata);
+      try {
+        const res = await axiosExtended.post(routes.userLoginEmail, formdata)
+        console.log("Res", res)
+        if (res.status === 200) {
+          // localStorage.setItem('auth', JSON.stringify(res.data))
+          // setCookie('auth', JSON.stringify(res.data));
+          dispatch(setUserInfo(res.data.user));
+          dispatch(setAuthToken(res.data.token))
+          props.navigation.reset({
+            index: 0,
+            routes: [{
+              name: 'BottomTab',
+            }],
+          });
+        }
+      } catch (err) {
+        console.error(JSON.stringify(err, null, 6))
+      } finally {
+        setLoading(false)
+      }
     }
     else showToast(result);
   }
 
   const showToast = (msg: string, theme = 'danger') => {
-    props.showToast([msg], {
-      duration: 2000, theme,
-    });
+    // props.showToast([msg], {
+    //   duration: 2000, theme,
+    // });
   }
 
   const validateForm = (react: boolean = false) => {
@@ -138,7 +165,8 @@ const Login = (props: Props) => {
       return "Email is required";
     }
 
-    if (!Utils.validateEmail(email) && useExistingEmail == false) {
+    if (!Utils.validateEmail(email) // && useExistingEmail == false
+    ) {
       if (react) setTimeout(() => {
         emailRef?.current?.focus();
       }, 0)
@@ -153,12 +181,12 @@ const Login = (props: Props) => {
       return "Password is required";
     }
 
-    if (password.length < 8) {
-      if (react) setTimeout(() => {
-        passwordRef?.current?.focus();
-      }, 100);
-      return "Password is too short";
-    }
+    // if (password.length < 8) {
+    //   if (react) setTimeout(() => {
+    //     passwordRef?.current?.focus();
+    //   }, 100);
+    //   return "Password is too short";
+    // }
     return null;
 
   }
@@ -191,10 +219,10 @@ const Login = (props: Props) => {
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="interactive"
         onKeyboardDidShow={() => {
-          setPageState({ ...pageState, keyboardVisible: true });
+          setKeyboardVisible(true)
         }}
         onKeyboardDidHide={() => {
-          setPageState({ ...pageState, keyboardVisible: false });
+          setKeyboardVisible(false)
         }}
         contentContainerStyle={{
           paddingBottom: 20,
@@ -204,13 +232,14 @@ const Login = (props: Props) => {
 
         <View
           style={{
-            paddingHorizontal: wp(5)
+            marginLeft: wp(2),
+            marginTop: 80,
           }}>
-          <AppText style={{
+          {/* <AppText style={{
             marginTop: 80,
             color: Colors.Primary,
             fontWeight: '700'
-          }}>Sign In</AppText>
+          }}>Sign In</AppText> */}
 
           <View style={{
             flexDirection: 'row',
@@ -222,7 +251,7 @@ const Login = (props: Props) => {
                   fontSize: 24,
                 }}
               >
-                Welcome Back!
+                Sign In
               </AppBoldText>
               {/* {
                                     // @ts-ignore
@@ -324,6 +353,7 @@ const Login = (props: Props) => {
                   onSubmitEditing={() => login()}
                   containerStyle={{
                     marginTop: 0,
+                    paddingHorizontal: 10,
                   }}
                 />
               )
@@ -366,6 +396,9 @@ const Login = (props: Props) => {
             />)}
             onPressIcon={() => {
               setPageState({ ...pageState, showPassword: !pageState.showPassword })
+            }}
+            containerStyle={{
+              paddingHorizontal: 10,
             }}
           />
 
@@ -420,9 +453,9 @@ const Login = (props: Props) => {
             textStyle={{
               fontSize: RFPercentage(2.2),
             }}
-            loading={props.loading}
+            loading={loading}
             containerStyle={{
-              backgroundColor: validateForm() == null ? Colors.PrimaryBlack : Colors.SlightlyShyGrey,
+              backgroundColor: validateForm() == null ? Colors.Primary : Colors.SlightlyShyGrey,
 
             }}
             outerStyle={{
@@ -472,7 +505,7 @@ const Login = (props: Props) => {
 
         </View>
         {
-          pageState.keyboardVisible ?
+          keyboardVisible ?
             undefined
             : (
               <TouchableOpacity
@@ -491,7 +524,7 @@ const Login = (props: Props) => {
                     color: Colors.Primary,
                   }}
                 >
-                  I do not have an account
+                  Register
                 </AppBoldText>
               </TouchableOpacity>
             )

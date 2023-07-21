@@ -14,6 +14,8 @@
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		7699B88040F8A987B510C191 /* libPods-CardicApp-CardicAppTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19F6CBCC0A4E27FBF8BF4A61 /* libPods-CardicApp-CardicAppTests.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		FACD705B2A65BF5F00A870C6 /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = FACD705A2A65BF5F00A870C6 /* Config.xcconfig */; };
+		FACD705C2A65BF5F00A870C6 /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = FACD705A2A65BF5F00A870C6 /* Config.xcconfig */; };
 		FAD1AC7E2A5BF563009632A9 /* Fontisto.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FAD1AC6E2A5BF563009632A9 /* Fontisto.ttf */; };
 		FAD1AC7F2A5BF563009632A9 /* Fontisto.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FAD1AC6E2A5BF563009632A9 /* Fontisto.ttf */; };
 		FAD1AC802A5BF563009632A9 /* Octicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FAD1AC6F2A5BF563009632A9 /* Octicons.ttf */; };
@@ -76,6 +78,7 @@
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = CardicApp/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		89C6BE57DB24E9ADA2F236DE /* Pods-CardicApp-CardicAppTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CardicApp-CardicAppTests.release.xcconfig"; path = "Target Support Files/Pods-CardicApp-CardicAppTests/Pods-CardicApp-CardicAppTests.release.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+		FACD705A2A65BF5F00A870C6 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 		FAD1AC6E2A5BF563009632A9 /* Fontisto.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Fontisto.ttf; sourceTree = "<group>"; };
 		FAD1AC6F2A5BF563009632A9 /* Octicons.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Octicons.ttf; sourceTree = "<group>"; };
 		FAD1AC702A5BF563009632A9 /* Feather.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Feather.ttf; sourceTree = "<group>"; };
@@ -164,6 +167,7 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				FACD705A2A65BF5F00A870C6 /* Config.xcconfig */,
 				FAD1AC6D2A5BF563009632A9 /* Fonts */,
 				13B07FAE1A68108700A75B9A /* CardicApp */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
@@ -312,6 +316,7 @@
 				FAD1AC9B2A5BF563009632A9 /* SimpleLineIcons.ttf in Resources */,
 				FAD1AC8F2A5BF563009632A9 /* Ionicons.ttf in Resources */,
 				FAD1AC992A5BF563009632A9 /* EvilIcons.ttf in Resources */,
+				FACD705C2A65BF5F00A870C6 /* Config.xcconfig in Resources */,
 				FAD1AC932A5BF563009632A9 /* FontAwesome5_Regular.ttf in Resources */,
 				FAD1AC972A5BF563009632A9 /* Zocial.ttf in Resources */,
 				FAD1AC852A5BF563009632A9 /* Entypo.ttf in Resources */,
@@ -344,6 +349,7 @@
 				FAD1AC802A5BF563009632A9 /* Octicons.ttf in Resources */,
 				FAD1AC862A5BF563009632A9 /* FontAwesome5_Brands.ttf in Resources */,
 				FAD1AC8A2A5BF563009632A9 /* AntDesign.ttf in Resources */,
+				FACD705B2A65BF5F00A870C6 /* Config.xcconfig in Resources */,
 				FAD1AC9C2A5BF563009632A9 /* MaterialIcons.ttf in Resources */,
 				FAD1AC902A5BF563009632A9 /* FontAwesome5_Solid.ttf in Resources */,
 				FAD1AC882A5BF563009632A9 /* MaterialCommunityIcons.ttf in Resources */,
@@ -645,6 +651,7 @@
 		};
 		83CBBA201A601CBA00E9B192 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = FACD705A2A65BF5F00A870C6 /* Config.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
@@ -718,6 +725,7 @@
 		};
 		83CBBA211A601CBA00E9B192 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = FACD705A2A65BF5F00A870C6 /* Config.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;

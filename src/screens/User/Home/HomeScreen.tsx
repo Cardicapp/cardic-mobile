@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   RefreshControl,
   SafeAreaView,
@@ -15,7 +15,7 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 // import CommunityIcon from '../../icons/CommunityIcon';
 // import BlogIcon from '../../icons/BlogIcon';
 // import SheCard from '../../components/SheCard';
-import {connect} from 'react-redux';
+import { connect, useSelector } from 'react-redux';
 // import {ShecludedState} from '../../store/root.reducer';
 // import * as actions from '../../store/actions/index';
 import {
@@ -28,8 +28,8 @@ import {
 // import Utils from '../../shared/Utils';
 // import {LoadingGradient} from '../Loan/LoanLoader';
 // import {LearnItem} from '../Learn/LearnHome';
-import {RFPercentage} from 'react-native-responsive-fontsize';
-import {heightPercentageToDP} from 'react-native-responsive-screen';
+import { RFPercentage } from 'react-native-responsive-fontsize';
+import { heightPercentageToDP } from 'react-native-responsive-screen';
 import Colors from 'CardicApp/src/theme/Colors';
 import { Values } from 'CardicApp/src/lib';
 import Utils from 'CardicApp/src/lib/utils/Utils';
@@ -37,11 +37,21 @@ import AppText, { AppBoldText } from 'CardicApp/src/components/AppText/AppText';
 import CardicCard from 'CardicApp/src/components/Card/CardicCard';
 import BlogIcon from 'CardicApp/src/components/Icons/BlogIcon';
 import GCCardOne from 'CardicApp/src/components/Card/GCCardOne';
+import { AuthState, selectAuthState } from 'CardicApp/src/store/auth';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { ApplicationStackParamList } from 'CardicApp/@types/navigation';
+import { User } from 'CardicApp/src/types/user';
+import { Wallet } from 'CardicApp/src/types/wallet';
+import axiosExtended from 'CardicApp/src/lib/network/axios-extended';
+import routes from 'CardicApp/src/lib/network/routes';
+import { UserRoleEnum } from 'CardicApp/src/types/enums';
+import CardicCardThree from 'CardicApp/src/components/Card/CardicCardThree';
 // import SimpleBackHeader from '../../components/SimpleBackHeader';
 // import PushNotification from 'react-native-push-notification';
 
 interface Props {
-  navigation: any;
+  navigation: StackNavigationProp<ApplicationStackParamList, keyof ApplicationStackParamList, undefined>;
+
   // loadingPersonalSavings: boolean;
   // loadingGroupSavings: boolean;
   // loadingCourses: boolean;
@@ -76,30 +86,41 @@ const HomeScreen = (props: Props) => {
     // },
   } = props;
 
-  // const [updatedWallet, setUpdatedWallet] = useState(false);
-  // const [updatedSavings, setUpdatedSavings] = useState(false);
-  // const [updatedLearn, setUpdatedLearn] = useState(false);
+  const authState = useSelector(selectAuthState);
+  // console.log("authState", authState)
 
+
+  const [user, setUser] = useState<User>();
+  const [wallet, setWallet] = useState<Wallet>();
+
+  const [loading, setLoading] = useState(false);
+
+  const getUserInfo = async () => {
+    try {
+      setLoading(true)
+      const res = await axiosExtended.get(`${routes.users}/${authState.user?.id}`);
+      if (res.status === 200) {
+        setUser(res.data);
+        const usr = res.data;
+        if (usr.role.id == UserRoleEnum.user) {
+          console.log("Before wallet call")
+          const walletRes = await axiosExtended.get(`${routes.wallet}/info/${usr.id}`);
+          console.log("Wallet res", walletRes)
+          if (walletRes.status === 200) {
+            setWallet(walletRes.data);
+          }
+        }
+      }
+    } catch (e) {
+      console.error(e)
+      console.log(JSON.stringify(e, null, 5))
+    } finally {
+      setLoading(false)
+    }
+  }
   useEffect(() => {
-    // if (!updatedWallet) {
-    //   props.loadWallet();
-    //   setUpdatedWallet(true);
-    // }
-    // if (!updatedSavings) {
-    //   props.getPersonalSavings();
-    //   props.getGroupSavings();
-    //   setUpdatedSavings(true);
-    // }
-
-    // if (!updatedLearn) {
-    //   getCourses();
-    // }
-    // props.loadNotifications();
-  }, []);
-
-  const getCourses = (shouldLoadCourses: boolean = true) => {
-    // props.getCourseCategories(null, null, shouldLoadCourses);
-  };
+    getUserInfo();
+  }, [])
 
   const refresh = () => {
     // props.getPersonalSavings();
@@ -126,7 +147,7 @@ const HomeScreen = (props: Props) => {
         // animatedComponent={<LoadingGradient />}
         duration={1000}
         delay={1000}
-        loader={new Promise((resolve) => {})}>
+        loader={new Promise((resolve) => { })}>
         {/* <SimpleBackHeader
           centered={false}
           text={`Hey ${
@@ -161,228 +182,53 @@ const HomeScreen = (props: Props) => {
             />
           }>
           {
-          //props.loadingWallet 
-          false ? (
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-evenly',
-                width: '90%',
-                alignSelf: 'center',
-              }}>
-              <Placeholder
-                style={[
-                  styles.placeholder,
-                  {
-                    width: '20%',
-                    aspectRatio: 1,
-                    height: 80,
-                    alignSelf: 'center',
-                    marginTop: heightPercentageToDP(2),
-                    borderRadius: 5,
-                  },
-                ]}
-              />
-              <Placeholder
-                style={[
-                  styles.placeholder,
-                  {
-                    width: '70%',
-                    height: 80,
-                    alignSelf: 'center',
-                    marginTop: heightPercentageToDP(2),
-                    borderRadius: 5,
-                  },
-                ]}
-              />
-            </View>
-          ) : (
-            <TouchableOpacity
-              onPress={() => {
-                // props.navigation.navigate('/wallet');
-              }}
-              style={{
-                marginTop: heightPercentageToDP(2),
-                // height: 96,
-                width: '90%',
-                backgroundColor: Colors.CardicGreyBgOne,
-                alignSelf: 'center',
-                flexDirection: 'row',
-                paddingHorizontal: 15,
-                paddingVertical: heightPercentageToDP(3.5),
-                borderRadius: 4,
-              }}>
+            //props.loadingWallet 
+            false ? (
               <View
                 style={{
-                  height: heightPercentageToDP(4),
-                  aspectRatio: 1,
-                  borderRadius: 100,
-                  justifyContent: 'center',
+                  flexDirection: 'row',
                   alignItems: 'center',
-                  backgroundColor: Colors.Primary,
-                  // shadowColor: 'grey',
-                  // elevation: 5,
-                }}>
-                {/* <SaveIcon
-                  height={RFPercentage(2)}
-                  width={RFPercentage(2)}
-                  pathOneProps={{
-                    fill: Colors.White,
-                  }}
-                  pathTwoProps={{
-                    fill: Colors.White,
-                  }}
-                  style={{
-                    marginBottom: 3,
-                  }}
-                /> */}
-              </View>
-              <View
-                style={{
-                  marginLeft: 16,
-                }}>
-                <AppText
-                  style={{
-                    color: Colors.HomeBlack,
-                  }}>
-                  Wallet
-                </AppText>
-                <AppBoldText
-                  style={{
-                    color: Colors.HomeBlack,
-                    fontSize: RFPercentage(3),
-                    marginTop: 3,
-                  }}>
-                  {Values.NairaSymbol}{' '}
-                  {/* {Utils.currencyFormat(wallet.balance || 0, 2)} */}
-                </AppBoldText>
-              </View>
-
-              <AntDesign
-                name="right"
-                size={RFPercentage(2.5)}
-                color={Colors.Primary}
-                style={{
-                  marginLeft: 'auto',
+                  justifyContent: 'space-evenly',
+                  width: '90%',
                   alignSelf: 'center',
-                  // marginBottom: 'auto',
-                }}
-              />
-            </TouchableOpacity>
-          )}
-
-          {
-          // props.loadingGroupSavings || props.loadingPersonalSavings 
-          false ? (
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-evenly',
-                width: '90%',
-                alignSelf: 'center',
-              }}>
-              <Placeholder
-                style={[
-                  styles.placeholder,
-                  {
-                    width: '20%',
-                    aspectRatio: 1,
-                    height: 80,
-                    alignSelf: 'center',
-                    marginTop: heightPercentageToDP(2),
-                    borderRadius: 5,
-                  },
-                ]}
-              />
-              <Placeholder
-                style={[
-                  styles.placeholder,
-                  {
-                    width: '70%',
-                    height: 80,
-                    alignSelf: 'center',
-                    marginTop: heightPercentageToDP(2),
-                    borderRadius: 5,
-                  },
-                ]}
-              />
-            </View>
-          ) : totalGroupAmount + totalPersonalAmount > 0 ? (
-            <TouchableOpacity
-              onPress={() => {
-                // props.navigation.navigate('/save');
-              }}
-              style={{
-                marginTop: 5,
-                // height: 96,
-                width: '90%',
-                backgroundColor: Colors.SavingsLightPrimary,
-                alignSelf: 'center',
-                flexDirection: 'row',
-                paddingHorizontal: 15,
-                paddingVertical: heightPercentageToDP(3.5),
-                borderRadius: 4,
-              }}>
-              <View
-                style={{
-                  height: heightPercentageToDP(4),
-                  aspectRatio: 1,
-                  borderRadius: 100,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  backgroundColor: Colors.Primary,
-                  // shadowColor: 'grey',
-                  // elevation: 5,
                 }}>
-                {/* <SaveIcon
-                  height={RFPercentage(2)}
-                  width={RFPercentage(2)}
-                  pathOneProps={{
-                    fill: Colors.White,
-                  }}
-                  pathTwoProps={{
-                    fill: Colors.White,
-                  }}
-                /> */}
+                <Placeholder
+                  style={[
+                    styles.placeholder,
+                    {
+                      width: '20%',
+                      aspectRatio: 1,
+                      height: 80,
+                      alignSelf: 'center',
+                      marginTop: heightPercentageToDP(2),
+                      borderRadius: 5,
+                    },
+                  ]}
+                />
+                <Placeholder
+                  style={[
+                    styles.placeholder,
+                    {
+                      width: '70%',
+                      height: 80,
+                      alignSelf: 'center',
+                      marginTop: heightPercentageToDP(2),
+                      borderRadius: 5,
+                    },
+                  ]}
+                />
               </View>
-              <View
-                style={{
-                  marginLeft: 16,
-                }}>
-                <AppText
-                  style={{
-                    color: Colors.HomeBlack,
-                  }}>
-                  You have saved
-                </AppText>
-                <AppBoldText
-                  style={{
-                    color: Colors.HomeBlack,
-                    fontSize: RFPercentage(3),
-                    marginTop: 3,
-                  }}>
-                  {Values.NairaSymbol}{' '}
-                  {Utils.currencyFormat(
-                    totalGroupAmount + totalPersonalAmount,
-                    2,
-                  )}
-                </AppBoldText>
-              </View>
+            ) : (
+              <>
+                {
+                  wallet?.balances.map(w => <CardicCardThree
+                    top={`Wallet (${w.currency.currencyCode})`}
+                    bottom={`${w.currency.currencyCode == "USD" ? Values.DollarSymbol : Values.NairaSymbol} ${Utils.currencyFormat(w.amount, 0)}`}
+                  />)
+                }
+              </>
+            )}
 
-              <AntDesign
-                name="right"
-                size={18}
-                color={Colors.Primary}
-                style={{
-                  marginLeft: 'auto',
-                  alignSelf: 'center',
-                  marginBottom: 20,
-                }}
-              />
-            </TouchableOpacity>
-          ) : undefined}
 
           <View
             style={{
@@ -410,19 +256,19 @@ const HomeScreen = (props: Props) => {
             <CardicCard
               key="0"
               onPress={() => {
-                // props.navigation.navigate('/save');
+                props.navigation.push('CategoriesScreen');
               }}
               text="Trade Gift Cards"
               icon={
                 <BlogIcon
-                pathProps={{
-                  fill: Colors.Primary,
-                  scale: 1.1,
-                }}
-              />
+                  pathProps={{
+                    fill: Colors.Primary,
+                    scale: 1.1,
+                  }}
+                />
               }
             />
-           
+
             <CardicCard
               key="1"
               // onPress={() => props.navigation.navigate('/learn')}
@@ -438,57 +284,57 @@ const HomeScreen = (props: Props) => {
               }
             />
 
-            </View>
+          </View>
 
           {
-          //props.loadingCourseCategories || props.loadingCourses
-          false ? (
-            <Placeholder
-              style={[
-                styles.placeholder,
-                {
-                  width: '90%',
-                  height: 20,
-                  alignSelf: 'center',
-                  marginTop: heightPercentageToDP(2),
-                  borderRadius: 20,
-                },
-              ]}
-            />
-          ) : 
-          // props.courses.length > 0 
-          true ? (
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                paddingHorizontal: 20,
-                marginTop: heightPercentageToDP(2),
-              }}>
-              <AppBoldText
-                style={{
-                  fontSize: RFPercentage(1.9),
-                  color: Colors.HomeBlack,
-                }}>
-                Popular gift cards
-              </AppBoldText>
-
-              <TouchableOpacity
-                onPress={() => {
-                  // props.navigation.navigate('/learn');
-                }}>
-                <AppText
+            //props.loadingCourseCategories || props.loadingCourses
+            false ? (
+              <Placeholder
+                style={[
+                  styles.placeholder,
+                  {
+                    width: '90%',
+                    height: 20,
+                    alignSelf: 'center',
+                    marginTop: heightPercentageToDP(2),
+                    borderRadius: 20,
+                  },
+                ]}
+              />
+            ) :
+              // props.courses.length > 0 
+              true ? (
+                <View
                   style={{
-                    textDecorationLine: 'underline',
-                    color: Colors.Primary,
-                    letterSpacing: 0,
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    paddingHorizontal: 20,
+                    marginTop: heightPercentageToDP(2),
                   }}>
-                  See All
-                </AppText>
-              </TouchableOpacity>
-            </View>
-          ) : undefined}
+                  <AppBoldText
+                    style={{
+                      fontSize: RFPercentage(1.9),
+                      color: Colors.HomeBlack,
+                    }}>
+                    Popular gift cards
+                  </AppBoldText>
+
+                  <TouchableOpacity
+                    onPress={() => {
+                      // props.navigation.navigate('/learn');
+                    }}>
+                    <AppText
+                      style={{
+                        textDecorationLine: 'underline',
+                        color: Colors.Primary,
+                        letterSpacing: 0,
+                      }}>
+                      See All
+                    </AppText>
+                  </TouchableOpacity>
+                </View>
+              ) : undefined}
           <GCCardOne />
           <GCCardOne />
           <GCCardOne />
@@ -518,4 +364,5 @@ const styles = StyleSheet.create({
   },
 });
 
-export default HomeScreen // connect(mapStateToProps, mapDispatchToProps)(HomeScreen);
+export default HomeScreen;
+

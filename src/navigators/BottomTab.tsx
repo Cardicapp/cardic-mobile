@@ -10,22 +10,29 @@ import SubCategoriesScreen from '../screens/User/Categories/SubCategoriesScreen'
 import TradeSummaryScreen from '../screens/User/Trade/TradeSummaryScreen';
 import CreateTradeScreen from '../screens/User/Trade/CreateTradeScreen';
 import TradeDetailScreen from '../screens/User/Trade/TradeDetailScreen';
+import { createStackNavigator } from '@react-navigation/stack';
+import TradeHomePageScreen from '../screens/User/Trade/TradeHomePage/TradeHomePageScreen';
 
-// function HomeScreen() {
-//     return (
-//         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-//             <Text>Home!</Text>
-//         </View>
-//     );
-// }
 
-function SettingsScreen() {
+
+const Stack = createStackNavigator();
+
+// @refresh reset
+const HomeNavigator = () => {
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Settings!</Text>
-    </View>
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="HomeScreen" component={HomeScreen} />
+    </Stack.Navigator>
   );
-}
+};
+
+// function SettingsScreen() {
+//   return (
+//     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+//       <Text>Settings!</Text>
+//     </View>
+//   );
+// }
 
 const Tab = createBottomTabNavigator();
 
@@ -43,6 +50,8 @@ export default function BottomTab() {
               : 'ios-information-circle-outline';
           } else if (route.name === 'Settings') {
             iconName = focused ? 'ios-list' : 'ios-list-outline';
+          } else if(route.name === 'Trades') {
+            iconName = focused ? 'trending-up' : 'trending-up-outline';
           }
 
           // You can return any component that you like here!
@@ -53,8 +62,8 @@ export default function BottomTab() {
         headerShown: false,
       })}
     >
-      <Tab.Screen name="Home" component={TradeDetailScreen} options={{ tabBarBadge: 3, tabBarBadgeStyle: tabBarStyle }} />
-      <Tab.Screen name="Settings" component={SettingsScreen} />
+      <Tab.Screen name="Home" component={HomeNavigator} options={{ tabBarBadge: 3, tabBarBadgeStyle: tabBarStyle }} />
+      <Tab.Screen name="Trades" component={TradeHomePageScreen} />
     </Tab.Navigator>
   );
 }

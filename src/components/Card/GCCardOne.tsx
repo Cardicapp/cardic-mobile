@@ -1,6 +1,6 @@
 import Colors from 'CardicApp/src/theme/Colors';
 import React from 'react';
-import { TouchableOpacity, View } from 'react-native';
+import { Image, TouchableOpacity, View } from 'react-native';
 import { heightPercentageToDP } from 'react-native-responsive-screen';
 import AppText, { AppBoldText } from '../AppText/AppText';
 import { Values } from 'CardicApp/src/lib';
@@ -11,14 +11,15 @@ interface Props {
   name: string;
   rate?: string;
   cta?: string;
+  image?: string;
+  onPress?: () => void;
+  selected?: boolean;
 }
 
-export default ({ name, rate, cta }: Props) => {
+export default ({ name, rate, cta, image, onPress, selected }: Props) => {
   return (
     <TouchableOpacity
-      onPress={() => {
-        // props.navigation.navigate('/wallet');
-      }}
+      onPress={onPress}
       style={{
         marginTop: heightPercentageToDP(1),
         // height: 96,
@@ -29,6 +30,8 @@ export default ({ name, rate, cta }: Props) => {
         paddingHorizontal: 15,
         paddingVertical: heightPercentageToDP(1),
         borderRadius: 4,
+        borderWidth: selected ? 1 : 0,
+        borderColor: selected ? Colors.Primary : 'transparent',
       }}>
       <View
         style={{
@@ -38,7 +41,15 @@ export default ({ name, rate, cta }: Props) => {
           justifyContent: 'center',
           alignItems: 'center',
           backgroundColor: Colors.Primary,
+          overflow: 'hidden'
         }}>
+          <Image 
+          source={{uri: image}}
+          style={{
+            width: '100%',
+            height: '100%',
+          }}
+          />
       </View>
       <View
         style={{
@@ -69,7 +80,7 @@ export default ({ name, rate, cta }: Props) => {
             style={{
               marginLeft: 'auto',
               alignSelf: 'center',
-              color: Colors.CardicBlueOne
+              color: Colors.Primary
             }}
           >{cta}</AppText> : undefined
       }

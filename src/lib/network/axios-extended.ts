@@ -3,8 +3,10 @@ import {endsWithAny} from '../';
 import {store} from '../../store';
 import createAuthRefreshInterceptor from './refreshAuth';
 import { setAuthState } from 'CardicApp/src/store/auth';
+import Config from "react-native-config";
 
-const baseURL = process.env.NEXT_PUBLIC_API_URL;
+const baseURL = Config.API_URL;
+
 let axiosExtended = axios.create({
   baseURL,
 });

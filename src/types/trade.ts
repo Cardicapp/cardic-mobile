@@ -5,6 +5,8 @@ import { User } from "./user";
 export interface Trade {
     id: number;
     amount: number;
+    noOfCards: number;
+    currentRate: number;
     totalPaid: number;
     comment: string;
     category: Category;

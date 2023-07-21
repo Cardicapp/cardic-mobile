@@ -3,16 +3,21 @@ import ButtonOne from 'CardicApp/src/components/ButtonOne';
 import GCCardOne from 'CardicApp/src/components/Card/GCCardOne';
 import InfoRow from 'CardicApp/src/components/InfoRow/InfoRow';
 import LoadingGradient from 'CardicApp/src/components/LoadingGradient/LoadingGradient';
+import ConfirmModal from 'CardicApp/src/components/Modal/ConfirmModal';
 import SimpleBackHeader from 'CardicApp/src/components/SimpleBackHeader';
 import { Values } from 'CardicApp/src/lib';
+import axiosExtended from 'CardicApp/src/lib/network/axios-extended';
+import routes from 'CardicApp/src/lib/network/routes';
 import Utils from 'CardicApp/src/lib/utils/Utils';
+import { selectTradeState, setSelectedTrade } from 'CardicApp/src/store/trade';
 import Colors from 'CardicApp/src/theme/Colors';
 import { Category } from 'CardicApp/src/types/category';
 import { SubCategory } from 'CardicApp/src/types/sub-category';
-import { Trade } from 'CardicApp/src/types/trade';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 import React, { useEffect, useState } from 'react';
 import {
   FlatList,
+  Image,
   RefreshControl,
   SafeAreaView,
   ScrollView,
@@ -26,6 +31,8 @@ import {
   Placeholder,
 } from 'react-native-loading-placeholder';
 import { heightPercentageToDP } from 'react-native-responsive-screen';
+import { useDispatch, useSelector } from 'react-redux';
+import { RFPercentage } from 'react-native-responsive-fontsize';
 interface Props {
   navigation: any;
 }
@@ -35,61 +42,39 @@ const TradeSummaryScreen
     const {
     } = props;
 
-    const tradeDetail: Trade = {
-      "amount": 250,
-      "comment": "With E-Code",
-      "user": {
-        "id": 2
-      },
-      "subCategory": {
-        "id": 1,
-        "name": "Itunes 100 USD",
-        "nairaRate": 500,
-        "createdAt": "2023-04-09T03:41:40.088Z",
-        "updatedAt": "2023-04-09T03:41:40.088Z",
-        "deletedAt": null,
-        "category": {
-          "id": 3,
-          "name": "Itunes",
-          "createdAt": "2023-04-09T03:26:44.017Z",
-          "updatedAt": "2023-04-09T03:26:44.017Z",
-          "deletedAt": null,
-          "photo": {
-            "id": "8de71c71-7fa7-4b0f-b3d8-404332fcb2e6",
-            "name": "Itunes",
-            "fileName": "2b7a53ad-1623-4855-924e-2ee1df133ae6.jpg",
-            "path": "http://res.cloudinary.com/sammxin/image/upload/v1681014403/cardic-server/files/vhz3xwfgaoyhhgv2jsqk.jpg",
-            "__entity": "FileEntity"
-          },
-          "status": {
-            "id": 1,
-            "name": "Active",
-            "__entity": "Status"
-          },
-          "__entity": "Category"
-        },
-        "status": {
-          "id": 1,
-          "name": "Active",
-          "__entity": "Status"
-        },
-        "__entity": "SubCategory"
-      },
-      "status": {
-        "id": 1
-      },
-      "totalPaid": null,
-      "assignedAt": null,
-      "deletedAt": null,
-      "id": 1,
-      "createdAt": "2023-06-08T12:31:45.024Z",
-      "updatedAt": "2023-06-08T12:31:45.024Z"
-    }
+    const [showConfirmStartTrade, setShowConfirmStartTrade] = useState(false);
+    const [showTradeStarted, setShowTradeStarted] = useState(false);
+
+    const dispatch = useDispatch();
+    const { form } = useSelector(selectTradeState);
+    const calculatedAmount = Utils.calculateRate(form.subCategory?.nairaRate, parseInt(form?.noOfCards ?? 0), form?.subCategory?.amount ?? 0)
+    const isValidForm = form?.noOfCards && parseInt(form?.noOfCards) > 0 && form?.subCategory;
 
     const [loading, setLoading] = useState(false);
 
-    const refresh = () => {
-
+    const startTrade = async () => {
+      try {
+        setLoading(true)
+        let payload = {
+          "subCategory": {
+            "id": form.subCategory.id,
+          },
+          // "comment": "With E-Code",
+          "noOfCards": form.noOfCards,
+        }
+        const res = await axiosExtended.post(`${routes.trade}/start`, payload);
+        if (res.status === 201) {
+          const trade = res.data;
+          dispatch(setSelectedTrade(trade));
+          setShowTradeStarted(true)
+        }
+      } catch (e) {
+        console.error(e)
+        console.log(JSON.stringify(e, null, 5))
+      } finally {
+        setLoading(false)
+        setShowConfirmStartTrade(false);
+      }
     };
 
     return (
@@ -116,37 +101,43 @@ const TradeSummaryScreen
               alignSelf: 'center',
               marginBottom: 10,
             }}
-          />
+          >
+            <Image
+              source={{
+                uri: form?.category.photo.path
+              }}
+              style={{
+                width: '100%',
+                height: '100%',
+              }}
+            />
+          </View>
           <InfoRow
             title='Category Name:'
-            value='Amazon'
+            value={form?.category.name}
           />
           <InfoRow
             title='Sub Category:'
-            value='Amazon USD $100'
+            value={form?.subCategory.name}
           />
           <InfoRow
             title='Rate:'
-            value='N550/$'
+            value={`N${Utils.currencyFormat(form?.subCategory.nairaRate, 0)}/$`}
           />
           <InfoRow
-            title='Category:'
-            value='Amazon'
-          />
-           <InfoRow
             title='No of Cards:'
-            value='3'
+            value={form?.noOfCards}
           />
           <InfoRow
             title='Total Return:'
-            value={`${Values.NairaSymbol}${Utils.currencyFormat(30000)}`}
+            value={`${Values.NairaSymbol}${Utils.currencyFormat(calculatedAmount, 0)}`}
           />
 
         </ScrollView>
         <ButtonOne
           text="Start Trade"
           onPress={() => {
-            // submit();
+            setShowConfirmStartTrade(true)
           }}
           outerStyle={{
             marginTop: 'auto',
@@ -155,10 +146,50 @@ const TradeSummaryScreen
             paddingTop: 10,
             marginBottom: 20,
           }}
-          loading={loading}
+          // loading={loading}
           containerStyle={{
-            backgroundColor: loading ? Colors.SlightlyShyGrey : Colors.Primary,
+            backgroundColor: loading || !isValidForm ? Colors.SlightlyShyGrey : Colors.Primary,
           }}
+        />
+        <ConfirmModal
+          isVisible={showConfirmStartTrade}
+          proceedText={`Yes, I am sure.`}
+          onClose={() => setShowConfirmStartTrade(false)}
+          onProceed={() => {
+            startTrade();
+          }}
+          loading={loading}
+          title="Are you sure you want to start trade?"
+        />
+        <ConfirmModal
+          icon={
+            <View style={{
+              height: heightPercentageToDP(8), aspectRatio: 1, borderRadius: 100, backgroundColor: Colors.Primary,
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}>
+              <AntDesign
+                name="check"
+                size={RFPercentage(3)}
+                color={Colors.White}
+              />
+            </View>
+          }
+          isVisible={showTradeStarted}
+          showCancel={false}
+          proceedText={`Continue`}
+          onClose={() => setShowTradeStarted(false)}
+          onProceed={() => {
+            setShowTradeStarted(false)
+            props.navigation.reset({
+              index: 1,
+              routes: [
+                { name: 'BottomTab' },
+                { name: 'TradeDetailScreen' }
+              ],
+            });
+          }}
+          title="You have successfully started a trade"
         />
       </SafeAreaView>
     );

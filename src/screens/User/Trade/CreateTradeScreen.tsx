@@ -1,24 +1,21 @@
 import AppText from 'CardicApp/src/components/AppText/AppText';
 import ButtonOne from 'CardicApp/src/components/ButtonOne';
-import GCCardOne from 'CardicApp/src/components/Card/GCCardOne';
-import LoadingGradient from 'CardicApp/src/components/LoadingGradient/LoadingGradient';
 import SimpleBackHeader from 'CardicApp/src/components/SimpleBackHeader';
 import TextContainer from 'CardicApp/src/components/TextContainer/TextContainer';
 import TextInputOne from 'CardicApp/src/components/TextInputOne';
 import { Values } from 'CardicApp/src/lib';
+import Utils from 'CardicApp/src/lib/utils/Utils';
+import { selectTradeState, setTradeForm } from 'CardicApp/src/store/trade';
 import Colors from 'CardicApp/src/theme/Colors';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
-  FlatList,
-  RefreshControl,
   SafeAreaView,
   ScrollView,
-  StyleSheet,
   View,
 } from 'react-native';
 import { RFPercentage } from 'react-native-responsive-fontsize';
 import { heightPercentageToDP } from 'react-native-responsive-screen';
-import Entypo from 'react-native-vector-icons/Entypo';
+import { useDispatch, useSelector } from 'react-redux';
 
 
 interface Props {
@@ -30,18 +27,16 @@ const CreateTradeScreen
     const {
     } = props;
 
+    const dispatch = useDispatch();
+    const tradeState = useSelector(selectTradeState);
     const [form, setForm] = useState({
       subCategory: 0,
       noOfCards: 0,
       potentialReturn: 0
     })
-
-    const [loading, setLoading] = useState(false);
-
-    const refresh = () => {
-
-    };
-
+    
+    const calculatedAmount = Utils.calculateRate(tradeState.form.subCategory?.nairaRate, parseInt(tradeState.form?.noOfCards ?? 0), tradeState.form?.subCategory?.amount ?? 0)
+    const isValidForm = tradeState.form?.noOfCards && parseInt(tradeState.form?.noOfCards) > 0  && tradeState.form?.subCategory;
     return (
       <SafeAreaView
         style={{
@@ -90,24 +85,21 @@ const CreateTradeScreen
               props={{ numberOfLines: 1 }}
               style={{
                 fontSize: RFPercentage(2),
-                color: form.subCategory ? Colors.Black : Colors.PlaceHolder,
+                color: tradeState.form.subCategory?.name ? Colors.Black : Colors.PlaceHolder,
                 overflow: 'hidden',
-                // textAlign: 'left'
-              }}>Select Sub Category</AppText>}
+              }}>{tradeState.form.subCategory?.name ? tradeState.form.subCategory.name : "Select Sub Category"}</AppText>}
             onPress={() => {
-              // this.setState({ showStatePicker: true });
+              props.navigation.push("SubCategoriesScreen")
             }}
           />
           <TextInputOne
-            value=''
+            value={tradeState.form?.noOfCards}
             placeholder='No. of Gift Cards'
             containerStyle={{
               width: '95%',
               alignSelf: 'center',
             }}
-            inputStyle={{
-              // backgroundColor: 'red'
-            }}
+            onChange={(val) => dispatch(setTradeForm({ ...tradeState.form, noOfCards: val }))}
           />
           <TextContainer
             rightChild={
@@ -116,8 +108,8 @@ const CreateTradeScreen
                   fontSize: RFPercentage(1.3),
                   top: '90%'
                 }}>
-                  Calculated amount
-                </AppText>
+                Calculated amount
+              </AppText>
             }
             containerStyle={{
               width: '95%',
@@ -127,22 +119,19 @@ const CreateTradeScreen
               marginTop: 20,
             }}
             child={<AppText
-              props={{ numberOfLines: 1 }}
               style={{
                 fontSize: RFPercentage(2),
-                color: form.subCategory ? Colors.Black : Colors.Black,
                 overflow: 'hidden',
-              }}>{Values.NairaSymbol} 0.00</AppText>}
-            onPress={() => {
-              // this.setState({ showStatePicker: true });
-            }}
+              }}>{Values.NairaSymbol} {Utils.currencyFormat(calculatedAmount, 0)}</AppText>}
           />
 
         </ScrollView>
         <ButtonOne
           text="Start Trade"
           onPress={() => {
-            // submit();
+            if(isValidForm){
+              props.navigation.push("TradeSummaryScreen")
+            }
           }}
           outerStyle={{
             marginTop: 'auto',
@@ -151,9 +140,8 @@ const CreateTradeScreen
             paddingTop: 10,
             marginBottom: 20,
           }}
-          loading={loading}
           containerStyle={{
-            backgroundColor: loading ? Colors.SlightlyShyGrey : Colors.Primary,
+            backgroundColor: !isValidForm ? Colors.SlightlyShyGrey : Colors.Primary,
           }}
         />
       </SafeAreaView>

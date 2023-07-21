@@ -29,7 +29,6 @@ export interface TextInputOneProps extends TextInputProps {
     value: string;
     inputRef?: (ref: TextInput) => void | undefined;
     onChange?: (value: string) => void;
-    onChangeMaskText?: (formatted: string, extracted?: string) => void;
     keyboardType?: KeyboardType;
     onSubmitEditing?: () => void;
     maxLength?: number;
