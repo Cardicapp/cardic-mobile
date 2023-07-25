@@ -387,10 +387,7 @@ const TradeDetailScreen
               width: '75%',
               alignSelf: 'center',
               marginTop: 0,
-              // backgroundColor: 'blue'
-            }}
-            inputStyle={{
-              // backgroundColor: 'red'
+              marginBottom: 0,
             }}
             onChange={(val) => {
               setMessage({

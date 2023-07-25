@@ -1,8 +1,5 @@
-import GCCardOne from 'CardicApp/src/components/Card/GCCardOne';
 import GCCardTwo from 'CardicApp/src/components/Card/GCCardTwo';
-import LoadingGradient from 'CardicApp/src/components/LoadingGradient/LoadingGradient';
 import SimpleBackHeader from 'CardicApp/src/components/SimpleBackHeader';
-import { Values } from 'CardicApp/src/lib';
 import axiosExtended from 'CardicApp/src/lib/network/axios-extended';
 import routes from 'CardicApp/src/lib/network/routes';
 import { setTradeForm } from 'CardicApp/src/store/trade';
@@ -13,7 +10,6 @@ import {
   FlatList,
   RefreshControl,
   SafeAreaView,
-  ScrollView,
   StyleSheet,
 } from 'react-native';
 import { useDispatch } from 'react-redux';

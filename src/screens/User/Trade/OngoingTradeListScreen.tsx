@@ -4,6 +4,7 @@ import SimpleBackHeader from 'CardicApp/src/components/SimpleBackHeader';
 import { Values } from 'CardicApp/src/lib';
 import axiosExtended from 'CardicApp/src/lib/network/axios-extended';
 import routes from 'CardicApp/src/lib/network/routes';
+import Utils from 'CardicApp/src/lib/utils/Utils';
 import { selectAuthState } from 'CardicApp/src/store/auth';
 import { selectTradeState, setSelectedTrade, setTradeForm } from 'CardicApp/src/store/trade';
 import Colors from 'CardicApp/src/theme/Colors';
@@ -122,7 +123,7 @@ const OngoingTradeListScreen = (props: Props) => {
           <GCCardOne
             name={item.subCategory.name}
             cta="Continue"
-            rate={`${Values.NairaSymbol}${item.amount}`}
+            rate={`${Values.NairaSymbol}${Utils.currencyFormat(item.amount, 0)}`}
             image={item.subCategory.category.photo.path}
             onPress={() => {
               dispatch(setSelectedTrade(item))

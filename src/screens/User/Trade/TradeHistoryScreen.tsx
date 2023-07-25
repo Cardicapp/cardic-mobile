@@ -122,10 +122,11 @@ const TradeHistoryScreen = (props: Props) => {
         onMomentumScrollEnd={() => setScrolling(false)}
         renderItem={({ item }) => {
           const rejected = [TradeStatusEnum.rejected].includes(item.status.id);
+          const ongoing = [TradeStatusEnum.created, TradeStatusEnum.active].includes(item.status.id);
           return (
             <GCCardOne
               name={item.subCategory.name}
-              cta={rejected ? 'Rejected' : `${Values.NairaSymbol}${Utils.currencyFormat(item.totalPaid, 0)} paid`}
+              cta={rejected ? 'Rejected' : ongoing ? `Ongoing` : `${Values.NairaSymbol}${Utils.currencyFormat(item.totalPaid, 0)} paid`}
               rate={`${Values.NairaSymbol}${Utils.currencyFormat(item.amount, 0)}`}
               image={item.subCategory.category.photo.path}
               onPress={() => {
@@ -133,7 +134,7 @@ const TradeHistoryScreen = (props: Props) => {
                 props.navigation.push('TradeDetailScreen');
               }}
               ctaStyle={{
-                color: rejected ? Colors.Red : Colors.Primary,
+                color: rejected ? Colors.Red : ongoing ? Colors.GreyText : Colors.Primary,
               }}
             />
           )

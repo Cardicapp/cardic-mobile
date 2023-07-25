@@ -38,16 +38,16 @@ export default function BottomTab() {
 
           if (route.name === 'Home') {
             iconName = focused
-              ? 'ios-information-circle'
-              : 'ios-information-circle-outline';
+              ? 'home'
+              : 'home-outline';
           } else if (route.name === 'Settings') {
             iconName = focused ? 'ios-list' : 'ios-list-outline';
-          } else if(route.name === 'Trades') {
+          } else if (route.name === 'Trades') {
             iconName = focused ? 'trending-up' : 'trending-up-outline';
-          } else if(route.name === 'Wallet') {
+          } else if (route.name === 'Wallet') {
             iconName = focused ? 'wallet' : 'wallet-outline';
           }
-          
+
 
           // You can return any component that you like here!
           return <Ionicons name={iconName} size={size} color={color} />;
@@ -57,7 +57,9 @@ export default function BottomTab() {
         headerShown: false,
       })}
     >
-      <Tab.Screen name="Home" component={HomeNavigator} options={{ tabBarBadge: 3, tabBarBadgeStyle: tabBarStyle }} />
+      <Tab.Screen name="Home" component={HomeNavigator}
+        // options={{ tabBarBadge: 3, tabBarBadgeStyle: tabBarStyle }}
+      />
       <Tab.Screen name="Wallet" component={WalletScreen} />
 
       <Tab.Screen name="Trades" component={TradeHomePageScreen} />
@@ -65,9 +67,9 @@ export default function BottomTab() {
   );
 }
 
-const tabBarStyle: StyleProp<TextStyle> = { 
-  backgroundColor: Colors.Primary, 
-  color: Colors.White, 
-  borderWidth: 1, 
+const tabBarStyle: StyleProp<TextStyle> = {
+  backgroundColor: Colors.Primary,
+  color: Colors.White,
+  borderWidth: 1,
   borderColor: Colors.White,
 }

@@ -340,7 +340,8 @@ const WalletScreen = (props: Props) => {
                 onChange={val => setForm({ ...form, amount: val })}
                 containerStyle={{
                   width: '95%',
-                  alignSelf: 'center'
+                  alignSelf: 'center',
+                  marginBottom: 0,
                 }}
                 placeholder={`${Values.NairaSymbol}5,000`}
                 keyboardType='number-pad'

@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { RFPercentage } from 'react-native-responsive-fontsize';
 import { heightPercentageToDP } from 'react-native-responsive-screen';
 import Colors from 'CardicApp/src/theme/Colors';
@@ -25,6 +25,9 @@ import axiosExtended from 'CardicApp/src/lib/network/axios-extended';
 import routes from 'CardicApp/src/lib/network/routes';
 import { UserRoleEnum } from 'CardicApp/src/types/enums';
 import CardicCardThree from 'CardicApp/src/components/Card/CardicCardThree';
+import { Category } from 'CardicApp/src/types/category';
+import queryString from 'query-string';
+import { setTradeForm } from 'CardicApp/src/store/trade';
 
 interface Props {
   navigation: StackNavigationProp<ApplicationStackParamList, keyof ApplicationStackParamList, undefined>;
@@ -32,11 +35,15 @@ interface Props {
 
 const HomeScreen = (props: Props) => {
 
+  const dispatch = useDispatch();
   const authState = useSelector(selectAuthState);
   const [user, setUser] = useState<User>();
   const [wallet, setWallet] = useState<Wallet>();
+  const [popularCards, setPopularCards] = useState<Category[]>([]);
 
   const [loading, setLoading] = useState(false);
+  const [loadingCards, setLoadingCards] = useState(false);
+
 
   const getUserInfo = async () => {
     try {
@@ -59,12 +66,34 @@ const HomeScreen = (props: Props) => {
       setLoading(false)
     }
   }
+
+  const getPopularGiftCards = async () => {
+    try {
+      setLoadingCards(true)
+      let payload = {
+        page: 1,
+        limit: 5,
+      }
+      const res = await axiosExtended.get(`${routes.categories}?${queryString.stringify(payload)}`);
+      if (res.status === 200) {
+        const cats = res.data.data;
+        setPopularCards(cats)
+      }
+    } catch (e) {
+      console.error(e)
+      console.log(JSON.stringify(e, null, 5))
+    } finally {
+      setLoadingCards(false)
+    }
+  }
   useEffect(() => {
     getUserInfo();
+    getPopularGiftCards();
   }, [])
 
   const refresh = () => {
   };
+
 
   return (
     <SafeAreaView
@@ -73,20 +102,20 @@ const HomeScreen = (props: Props) => {
         backgroundColor: Colors.White,
       }}>
       <ScrollView
-        // refreshControl={
-        //   <RefreshControl
-        //     // refreshing={false}
-        //     // onRefresh={refresh}
-        //     colors={[Colors.Primary]}
-        //   />
-        // }
-        >
+      // refreshControl={
+      //   <RefreshControl
+      //     // refreshing={false}
+      //     // onRefresh={refresh}
+      //     colors={[Colors.Primary]}
+      //   />
+      // }
+      >
 
         {
           wallet?.balances.map(w => <CardicCardThree
-              onPress={() => {
-                props.navigation.navigate("Wallet");
-              }}
+            onPress={() => {
+              props.navigation.navigate("Wallet");
+            }}
             top={`Wallet (${w.currency.currencyCode})`}
             bottom={`${w.currency.currencyCode == "USD" ? Values.DollarSymbol : Values.NairaSymbol} ${Utils.currencyFormat(w.amount, 0)}`}
           />)
@@ -148,38 +177,66 @@ const HomeScreen = (props: Props) => {
           />
 
         </View>
-
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            paddingHorizontal: 20,
-            marginTop: heightPercentageToDP(2),
-          }}>
-          <AppBoldText
-            style={{
-              fontSize: RFPercentage(1.9),
-              color: Colors.HomeBlack,
-            }}>
-            Popular gift cards
-          </AppBoldText>
-
-          <TouchableOpacity
-            onPress={() => {
-              // props.navigation.navigate('/learn');
-            }}>
-            <AppText
+        {
+          loading || popularCards.length ? (
+            <View
               style={{
-                textDecorationLine: 'underline',
-                color: Colors.Primary,
-                letterSpacing: 0,
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                paddingHorizontal: 20,
+                marginTop: heightPercentageToDP(2),
+                marginBottom: 5,
               }}>
-              See All
-            </AppText>
-          </TouchableOpacity>
-        </View>
-        <GCCardOne />
+              <AppBoldText
+                style={{
+                  fontSize: RFPercentage(1.9),
+                  color: Colors.HomeBlack,
+                }}>
+                Popular gift cards
+              </AppBoldText>
+
+              <TouchableOpacity
+                onPress={() => {
+                  // props.navigation.navigate('/learn');
+                }}>
+                <AppText
+                  style={{
+                    textDecorationLine: 'underline',
+                    color: Colors.Primary,
+                    letterSpacing: 0,
+                  }}>
+                  See All
+                </AppText>
+              </TouchableOpacity>
+            </View>
+          ) : undefined
+        }
+
+        {
+          popularCards && popularCards.length ? popularCards.map(c =>
+            <GCCardOne
+              name={c.name}
+              cta='Trade'
+              image={c.photo.path}
+              // rate={`${Values.NairaSymbol} ${Utils.currencyFormat(t.amount, 0)}`}
+              onPress={() => {
+                dispatch(setTradeForm({ category: c }))
+                props.navigation.push("CreateTradeScreen")
+              }}
+            />) :
+            loading ?
+              <AppText
+                style={{
+                  textAlign: 'center',
+                  letterSpacing: 0,
+                  marginTop: '1%',
+                }}>
+                Loading...
+              </AppText>
+              : undefined
+
+        }
       </ScrollView>
     </SafeAreaView>
   );

@@ -60,25 +60,12 @@ const CreateTradeScreen
             paddingTop: 10
           }}>
           <TextContainer
-            rightChild={
-              <View
-                style={{
-                  height: heightPercentageToDP(3.5),
-                  aspectRatio: 1,
-                  borderRadius: 5,
-                  backgroundColor: Colors.Primary,
-                }} />
-              // <Entypo
-              //   name="chevron-down"
-              //   color={Colors.Primary}
-              //   size={15}
-              // />
-            }
             containerStyle={{
               width: '95%',
               height: heightPercentageToDP(6),
               alignSelf: 'center',
               alignItems: 'flex-start',
+              marginBottom: 10,
             }}
             child={<AppText
               props={{ numberOfLines: 1 }}
@@ -97,6 +84,7 @@ const CreateTradeScreen
             containerStyle={{
               width: '95%',
               alignSelf: 'center',
+              marginBottom: 10,
             }}
             onChange={(val) => dispatch(setTradeForm({ ...tradeState.form, noOfCards: val }))}
           />
@@ -115,7 +103,7 @@ const CreateTradeScreen
               height: heightPercentageToDP(6),
               alignSelf: 'center',
               alignItems: 'flex-start',
-              marginTop: 20,
+              // marginTop: 20,
             }}
             child={<AppText
               style={{
