@@ -1,6 +1,6 @@
 import Colors from 'CardicApp/src/theme/Colors';
 import React from 'react';
-import { Image, TouchableOpacity, View } from 'react-native';
+import { Image, StyleProp, TextStyle, TouchableOpacity, View, ViewStyle } from 'react-native';
 import { heightPercentageToDP } from 'react-native-responsive-screen';
 import AppText, { AppBoldText } from '../AppText/AppText';
 import { Values } from 'CardicApp/src/lib';
@@ -14,13 +14,18 @@ interface Props {
   image?: string;
   onPress?: () => void;
   selected?: boolean;
+  containerStyle?: StyleProp<ViewStyle>;
+  ctaStyle?: StyleProp<TextStyle>;
+  rateStyle?: StyleProp<TextStyle>;
+  nameStyle?: StyleProp<TextStyle>;
+  showImage?: boolean;
 }
 
-export default ({ name, rate, cta, image, onPress, selected }: Props) => {
+export default ({ name, rate, cta, image, onPress, selected, containerStyle, nameStyle, ctaStyle, rateStyle, showImage = true }: Props) => {
   return (
     <TouchableOpacity
       onPress={onPress}
-      style={{
+      style={[{
         marginTop: heightPercentageToDP(1),
         // height: 96,
         width: '90%',
@@ -32,44 +37,49 @@ export default ({ name, rate, cta, image, onPress, selected }: Props) => {
         borderRadius: 4,
         borderWidth: selected ? 1 : 0,
         borderColor: selected ? Colors.Primary : 'transparent',
-      }}>
+      }, containerStyle]}>
+      {
+        showImage ?
+          <View
+            style={{
+              height: heightPercentageToDP(5),
+              aspectRatio: 1,
+              borderRadius: 100,
+              justifyContent: 'center',
+              alignItems: 'center',
+              backgroundColor: Colors.Primary,
+              overflow: 'hidden'
+            }}>
+            <Image
+              source={{ uri: image }}
+              style={{
+                width: '100%',
+                height: '100%',
+              }}
+            />
+          </View>
+          : undefined
+      }
+
       <View
         style={{
-          height: heightPercentageToDP(5),
-          aspectRatio: 1,
-          borderRadius: 100,
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: Colors.Primary,
-          overflow: 'hidden'
-        }}>
-          <Image 
-          source={{uri: image}}
-          style={{
-            width: '100%',
-            height: '100%',
-          }}
-          />
-      </View>
-      <View
-        style={{
-          marginLeft: 16,
+          marginLeft: showImage ? 16 : 0,
           justifyContent: 'center'
         }}>
         <AppText
-          style={{
+          style={[{
             color: Colors.HomeBlack,
-          }}>
+          }, nameStyle]}>
           {name}
         </AppText>
         {
           rate ?
             <AppBoldText
-              style={{
+              style={[{
                 color: Colors.HomeBlack,
                 fontSize: RFPercentage(2.8),
                 marginTop: 3,
-              }}>
+              }, rateStyle]}>
               {rate}
             </AppBoldText> : undefined
         }
@@ -77,11 +87,11 @@ export default ({ name, rate, cta, image, onPress, selected }: Props) => {
       {
         cta ?
           <AppText
-            style={{
+            style={[{
               marginLeft: 'auto',
               alignSelf: 'center',
               color: Colors.Primary
-            }}
+            }, ctaStyle]}
           >{cta}</AppText> : undefined
       }
     </TouchableOpacity>

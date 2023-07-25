@@ -12,6 +12,7 @@ import CreateTradeScreen from '../screens/User/Trade/CreateTradeScreen';
 import TradeDetailScreen from '../screens/User/Trade/TradeDetailScreen';
 import { createStackNavigator } from '@react-navigation/stack';
 import TradeHomePageScreen from '../screens/User/Trade/TradeHomePage/TradeHomePageScreen';
+import WalletScreen from '../screens/User/Wallet/WalletScreen';
 
 
 
@@ -26,20 +27,11 @@ const HomeNavigator = () => {
   );
 };
 
-// function SettingsScreen() {
-//   return (
-//     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-//       <Text>Settings!</Text>
-//     </View>
-//   );
-// }
-
 const Tab = createBottomTabNavigator();
 
 export default function BottomTab() {
   return (
     <Tab.Navigator
-
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
@@ -52,7 +44,10 @@ export default function BottomTab() {
             iconName = focused ? 'ios-list' : 'ios-list-outline';
           } else if(route.name === 'Trades') {
             iconName = focused ? 'trending-up' : 'trending-up-outline';
+          } else if(route.name === 'Wallet') {
+            iconName = focused ? 'wallet' : 'wallet-outline';
           }
+          
 
           // You can return any component that you like here!
           return <Ionicons name={iconName} size={size} color={color} />;
@@ -63,6 +58,8 @@ export default function BottomTab() {
       })}
     >
       <Tab.Screen name="Home" component={HomeNavigator} options={{ tabBarBadge: 3, tabBarBadgeStyle: tabBarStyle }} />
+      <Tab.Screen name="Wallet" component={WalletScreen} />
+
       <Tab.Screen name="Trades" component={TradeHomePageScreen} />
     </Tab.Navigator>
   );

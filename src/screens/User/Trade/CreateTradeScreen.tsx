@@ -17,7 +17,6 @@ import { RFPercentage } from 'react-native-responsive-fontsize';
 import { heightPercentageToDP } from 'react-native-responsive-screen';
 import { useDispatch, useSelector } from 'react-redux';
 
-
 interface Props {
   navigation: any;
 }

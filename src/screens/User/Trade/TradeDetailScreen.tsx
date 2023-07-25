@@ -1,9 +1,5 @@
 import AppText from 'CardicApp/src/components/AppText/AppText';
-import ButtonOne from 'CardicApp/src/components/ButtonOne';
-import GCCardOne from 'CardicApp/src/components/Card/GCCardOne';
-import LoadingGradient from 'CardicApp/src/components/LoadingGradient/LoadingGradient';
 import SimpleBackHeader from 'CardicApp/src/components/SimpleBackHeader';
-import TextContainer from 'CardicApp/src/components/TextContainer/TextContainer';
 import TextInputOne from 'CardicApp/src/components/TextInputOne';
 import { Values } from 'CardicApp/src/lib';
 import Colors from 'CardicApp/src/theme/Colors';
@@ -11,7 +7,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
-  RefreshControl,
+  Platform,
   SafeAreaView,
   TouchableOpacity,
   View,
@@ -22,8 +18,8 @@ import Entypo from 'react-native-vector-icons/Entypo';
 import ChatMessage from 'CardicApp/src/components/Chat/ChatMessage';
 import InfoRow from 'CardicApp/src/components/InfoRow/InfoRow';
 import Utils from 'CardicApp/src/lib/utils/Utils';
-import { useSelector } from 'react-redux';
-import { selectTradeState } from 'CardicApp/src/store/trade';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectTradeState, setSelectedTrade } from 'CardicApp/src/store/trade';
 import { TradeChat } from 'CardicApp/src/types/chat';
 import axiosExtended from 'CardicApp/src/lib/network/axios-extended';
 import routes from 'CardicApp/src/lib/network/routes';
@@ -33,10 +29,13 @@ import { io } from "socket.io-client";
 import TradeEvents from 'CardicApp/src/lib/enums/trade-events.enum';
 import Config from "react-native-config";
 import { selectAuthState } from 'CardicApp/src/store/auth';
+import { Asset, ImagePickerResponse, launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import CustomModal from 'CardicApp/src/components/Modal/CustomModal';
+import { heightPercentageToDP } from 'react-native-responsive-screen';
+import AntDesign from 'react-native-vector-icons/AntDesign';
+import { Trade } from 'CardicApp/src/types/trade';
 
 const baseURL = Config.API_URL;
-
-
 
 interface Props {
   navigation: any;
@@ -52,16 +51,19 @@ const TradeDetailScreen
     const [messages, setMessages] = useState<TradeChat[]>([])
     const pageIndex = useRef(1);
     const chatsRef = useRef<FlatList<TradeChat>>(null);
-
+    const [showImagePicker, setShowImagePicker] = useState(false);
     const [loadingMessages, setLoadingMessages] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [message, setMessage] = useState({
       text: '',
       images: []
     });
+    const [showTradeSuccessModal, setShowTradeSuccessModal] = useState(false);
+    const [showTradeFailedModal, setShowTradeFailedModal] = useState(false);
+
+    const dispatch = useDispatch();
 
     const fetchMessages = async (fn: any = undefined, optionalParams?: any) => {
-      console.log("fetchMessages Called")
       setLoadingMessages(true)
       let payload = {
         page: pageIndex.current,
@@ -93,25 +95,55 @@ const TradeDetailScreen
 
     useEffect(() => {
       fetchMessages(() => {
-        scrollToBottom();
+        scrollToBottom(false, 500);
       });
       const socketRes = setupWebsocket();
       return () => {
         socketRes && socketRes();
       }
     }, [])
-    console.log("Messages length", messages.length)
 
     const refresh = () => {
 
     };
+    const openCamera = async () => {
+      const result = await launchCamera({
+        mediaType: 'photo',
+      });
+      processImageResponse(result);
+    }
 
-    const createFormData = (type: TradeChatTypeEnum, images: any[]) => {
+    const openGallery = async () => {
+      const result = await launchImageLibrary({
+        mediaType: 'photo',
+      });
+      processImageResponse(result);
+    }
+
+    const processImageResponse = (res: ImagePickerResponse) => {
+      if (!res.didCancel) {
+        const assets = res.assets?.map(a => ({ ...a, base64: undefined }))
+        sendMessage(TradeChatTypeEnum.image, assets)
+      }
+    }
+
+    const createFormData = (type: TradeChatTypeEnum, images: Asset[]) => {
       const data = new FormData();
 
       if (images && images.length) {
         for (let i = 0; i < images.length; i++) {
-          data.append('images', images[i])
+          const image = images[i]
+          data.append('images', {
+            name: image.fileName,
+            type: image.type,
+            uri:
+              Platform.OS === 'android'
+                ? image.uri
+                : image.uri?.replace('file://', ''),
+          },
+            //@ts-ignore
+            'file',
+          )
         }
       }
       data.append('message', message.text);
@@ -119,7 +151,7 @@ const TradeDetailScreen
       data.append('typeId', type.toString());
       return data;
     };
-    const sendMessage = async (type: TradeChatTypeEnum = TradeChatTypeEnum.text, images?: any[]) => {
+    const sendMessage = async (type: TradeChatTypeEnum = TradeChatTypeEnum.text, images?: Asset[]) => {
       setSubmitting(true)
       // @ts-ignore
       let payload = createFormData(type, images);
@@ -127,7 +159,6 @@ const TradeDetailScreen
         const res = await axiosExtended.post(`${routes.trade}/chat`, payload, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
-        console.log("Res", res)
         if (res.status === 201) {
           setMessage({ images: [], text: '' })
           fetchMessages(() => {
@@ -141,27 +172,38 @@ const TradeDetailScreen
       }
     }
 
-    const scrollToBottom = () => {
-      setTimeout(() => chatsRef.current?.scrollToEnd({ animated: true }), 1000)
+    const scrollToBottom = (animated = true, delay = 0) => {
+      setTimeout(() => chatsRef.current?.scrollToEnd({ animated }), delay)
     }
 
     const setupWebsocket = () => {
+      // @ts-ignore
       const socket = io(baseURL);
       socket.on(`${TradeEvents.chatAdded}:${trade?.id}`, onMessageAdded)
+      socket.on(`${TradeEvents.tradeAccepted}:${trade?.id}`, onTradeAccepted)
+      socket.on(`${TradeEvents.tradeRejected}:${trade?.id}`, onTradeRejected)
       return () => {
-        socket.off(`${TradeEvents.chatAdded}:${trade?.id}`, onMessageAdded)
         socket.removeAllListeners(`${TradeEvents.chatAdded}:${trade?.id}`)
+        socket.removeAllListeners(`${TradeEvents.tradeAccepted}:${trade?.id}`)
+        socket.removeAllListeners(`${TradeEvents.tradeRejected}:${trade?.id}`)
       }
     }
 
     const onMessageAdded = (chat: any) => {
-      // console.log("Messages:", messages.length)
-      // setMessages([...messages, chat]);
       if (chat.from?.id != user?.id)
         fetchMessages(() => {
           setTimeout(scrollToBottom, 500);
         });
+    }
 
+    const onTradeAccepted = (trade: Trade) => {
+      dispatch(setSelectedTrade(trade));
+      setShowTradeSuccessModal(true);
+    }
+
+    const onTradeRejected = (trade: Trade) => {
+      dispatch(setSelectedTrade(trade));
+      setShowTradeFailedModal(true);
     }
 
     return (
@@ -172,17 +214,12 @@ const TradeDetailScreen
         }}>
 
         <FlatList
+          // inverted={true}
+          keyExtractor={(item) => item.id.toString()}
           ref={chatsRef}
           style={{
             backgroundColor: Colors.ChatBg,
           }}
-          refreshControl={
-            <RefreshControl
-              refreshing={loadingMessages}
-              onRefresh={refresh}
-              colors={[Colors.Primary]}
-            />
-          }
           data={messages}
           renderItem={({ item, index }) =>
             <ChatMessage
@@ -295,6 +332,13 @@ const TradeDetailScreen
                       }}
                     />
                     <InfoRow
+                      title='Rate'
+                      value={`${Values.NairaSymbol}${Utils.currencyFormat(trade?.currentRate ?? 0, 0)}/${Values.DollarSymbol}`}
+                      containerStyle={{
+                        marginBottom: 10
+                      }}
+                    />
+                    <InfoRow
                       title='Est. Amount'
                       value={`${Values.NairaSymbol} ${Utils.currencyFormat(trade?.amount ?? 0)}`}
                       containerStyle={{
@@ -309,8 +353,6 @@ const TradeDetailScreen
 
           }
           stickyHeaderIndices={[0]}
-          stickyHeaderHiddenOnScroll={true}
-
         />
 
         <View
@@ -322,6 +364,7 @@ const TradeDetailScreen
             marginBottom: 10,
           }}>
           <TouchableOpacity
+            onPress={() => setShowImagePicker(true)}
             style={{
               padding: 12,
               // marginHorizontal: 7,
@@ -381,6 +424,144 @@ const TradeDetailScreen
 
           </TouchableOpacity>
         </View>
+        <CustomModal
+          isVisible={showImagePicker}
+          onClose={() => setShowImagePicker(false)}
+          title="Share Gift Card"
+          titleStyle={{
+            marginTop: 5,
+          }}
+          content="Select a photo or open the camera"
+          contentStyle={{
+            fontWeight: '400',
+            fontSize: 13,
+            marginTop: heightPercentageToDP(0.8),
+            lineHeight: 18,
+            marginVertical: 0,
+          }}
+          icon={
+            <View
+              style={{
+                height: 63,
+                aspectRatio: 1,
+                backgroundColor: Colors.Primary,
+                borderRadius: 100,
+              }}
+            />
+          }
+          actions={[
+            {
+              text: 'Camera',
+              onPress: openCamera,
+              containerStyle: {
+                backgroundColor: Colors.Primary,
+              },
+            },
+            {
+              text: 'Gallery',
+              onPress: openGallery,
+              containerStyle: {
+                backgroundColor: Colors.White,
+              },
+              textStyle: {
+                color: Colors.Black,
+              },
+            },
+
+          ]}
+        />
+
+        <CustomModal
+          isVisible={showTradeSuccessModal}
+          onClose={() => setShowTradeSuccessModal(false)}
+          content="Trade Completed Successfully"
+          contentStyle={{
+            fontWeight: '400',
+            fontSize: 13,
+            marginTop: heightPercentageToDP(0.8),
+            lineHeight: 18,
+            marginVertical: 0,
+          }}
+          icon={
+            <View style={{
+              height: heightPercentageToDP(8), aspectRatio: 1, borderRadius: 100, backgroundColor: Colors.Primary,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+              <AntDesign
+                name="check"
+                size={RFPercentage(3)}
+                color={Colors.White}
+              />
+            </View>
+          }
+          actions={[
+            {
+              text: 'Proceed to Dashboard',
+              onPress: () => {
+                props.navigation.reset({
+                  index: 0,
+                  routes: [{ name: 'BottomTab' }]
+                })
+              },
+              containerStyle: {
+                backgroundColor: Colors.Primary,
+                marginTop: 10
+              },
+            },
+            {
+              text: 'Close',
+              onPress: () => setShowTradeSuccessModal(false),
+              containerStyle: {
+                backgroundColor: Colors.White,
+              },
+              textStyle: {
+                color: Colors.Black,
+              },
+            },
+
+          ]}
+        />
+
+        <CustomModal
+          isVisible={showTradeFailedModal}
+          onClose={() => setShowTradeFailedModal(false)}
+          content="Trade Failed"
+          contentStyle={{
+            fontWeight: '400',
+            fontSize: 13,
+            marginTop: heightPercentageToDP(0.8),
+            lineHeight: 18,
+            marginVertical: 0,
+          }}
+          icon={
+            <View style={{
+              height: heightPercentageToDP(8), aspectRatio: 1, borderRadius: 100, backgroundColor: Colors.Red,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+              <Feather
+                name="x"
+                color={Colors.White}
+                size={RFPercentage(3)}
+              />
+            </View>
+          }
+          actions={[
+            {
+              text: 'Close',
+              onPress: () => setShowTradeFailedModal(false),
+              containerStyle: {
+                backgroundColor: Colors.White,
+              },
+              textStyle: {
+                color: Colors.Black,
+                marginTop: 10
+              },
+            },
+
+          ]}
+        />
 
       </SafeAreaView >
     );

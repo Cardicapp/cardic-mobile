@@ -18,6 +18,7 @@ import { RFPercentage } from 'react-native-responsive-fontsize';
 import Utils from 'CardicApp/src/lib/utils/Utils';
 import Colors from 'CardicApp/src/theme/Colors';
 import { AppBoldText } from '../AppText/AppText';
+import { useNavigation, useNavigationContainerRef } from '@react-navigation/native';
 
 interface Props {
   text?: string;
@@ -58,6 +59,9 @@ const SimpleBackHeader = (props: Props) => {
   //   }
   // }
   //   }, [props.notifications]);
+
+  const navigation = useNavigation();
+
   return (
     <View
       style={[
@@ -94,7 +98,7 @@ const SimpleBackHeader = (props: Props) => {
         {showBack ? (
           <TouchableOpacity
             onPress={() => {
-              //   RootNavigator.pop();
+              navigation.goBack();
             }}
           >
             <AntDesign

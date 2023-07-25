@@ -19,7 +19,6 @@ const authNotRequiredURLs = [
 axiosExtended.interceptors.request.use((config) => {
   if (!getExcludedURLs(config)) {
     const auth = store.getState().auth;
-    console.log("Auth State", auth )
     const {
       token
     } = auth;

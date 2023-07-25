@@ -70,5 +70,9 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Select a photo of your gift card</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Take a photo of your gift card</string>
 </dict>
 </plist>

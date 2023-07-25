@@ -59,8 +59,6 @@ const Login = (props: Props) => {
   const auth = useSelector(selectAuthState);
   const dispatch = useDispatch();
 
-  console.log("Auth state", auth)
-
   const [pageState, setPageState] = useState<State>({
     email: "",
     password: "",
@@ -125,10 +123,7 @@ const Login = (props: Props) => {
       }
       try {
         const res = await axiosExtended.post(routes.userLoginEmail, formdata)
-        console.log("Res", res)
         if (res.status === 200) {
-          // localStorage.setItem('auth', JSON.stringify(res.data))
-          // setCookie('auth', JSON.stringify(res.data));
           dispatch(setUserInfo(res.data.user));
           dispatch(setAuthToken(res.data.token))
           props.navigation.reset({
@@ -139,6 +134,7 @@ const Login = (props: Props) => {
           });
         }
       } catch (err) {
+        console.error(err)
         console.error(JSON.stringify(err, null, 6))
       } finally {
         setLoading(false)

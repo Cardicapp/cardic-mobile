@@ -14,14 +14,13 @@ interface CardicCardThreeProps {
   bottom?: string;
   image?: any;
   showIcon?: boolean;
+  onPress?: () => void;
 }
 const CardicCardThree: (props: CardicCardThreeProps) => React.ReactNode = ({
-  top, bottom, image, showIcon = true
+  top, bottom, image, showIcon = true, onPress
 }) => {
   return <TouchableOpacity
-    onPress={() => {
-      // props.navigation.navigate('/wallet');
-    }}
+    onPress={onPress}
     style={{
       marginTop: heightPercentageToDP(2),
       // height: 96,

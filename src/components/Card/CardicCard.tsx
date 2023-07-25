@@ -1,5 +1,5 @@
 import React from 'react';
-import { TouchableWithoutFeedback, View } from 'react-native';
+import { StyleProp, TouchableWithoutFeedback, View, ViewStyle } from 'react-native';
 import { RFPercentage } from 'react-native-responsive-fontsize';
 import { heightPercentageToDP, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import Colors from 'CardicApp/src/theme/Colors';
@@ -8,24 +8,26 @@ import { AppBoldText } from '../AppText/AppText';
 
 
 interface CardicCardProps {
-    text: string,
-    description?: string,
-    icon?: any,
-    onPress?: () => void,
+    text: string;
+    description?: string;
+    icon?: any;
+    onPress?: () => void;
+    centered?: boolean;
+    containerStyle?: StyleProp<ViewStyle>;
 }
 const CardicCard = (props: CardicCardProps) => {
     const {
         text,
-        icon
+        icon,
+        centered = false,
+        containerStyle
     } = props;
     return (
         <TouchableWithoutFeedback
             onPress={() => props.onPress && props.onPress()}
-
-
         >
             <View
-                style={{
+                style={[{
                     width: wp(45),
                     marginHorizontal: 5,
                     borderRadius: 5,
@@ -35,11 +37,12 @@ const CardicCard = (props: CardicCardProps) => {
                         height: 0,
                         width: 0,
                     },
-                    elevation: 2,
+                    elevation: 3,
                     shadowOpacity: .3,
                     shadowRadius: 4,
-                    padding: 10
-                }}>
+                    padding: 10,
+                    alignItems: centered ? 'center' : 'flex-start',
+                }, containerStyle]}>
                 <View
                     style={{
                         height: heightPercentageToDP(6),
@@ -64,8 +67,9 @@ const CardicCard = (props: CardicCardProps) => {
                             style={{
                                 marginTop: 20,
                                 fontSize: RFPercentage(2),
-                                marginLeft: 5,
+                                marginLeft: centered ? 0 : 5,
                                 color: Colors.Primary,
+                                textAlign: centered ? 'center' : 'left',
                             }}>{text}</AppBoldText>
                     )
                 }

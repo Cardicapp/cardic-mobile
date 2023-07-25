@@ -37,6 +37,7 @@ import CardicCardThree from 'CardicApp/src/components/Card/CardicCardThree';
 import { Trade } from 'CardicApp/src/types/trade';
 import queryString from 'query-string';
 import { setSelectedTrade } from 'CardicApp/src/store/trade';
+import { useFocusEffect } from '@react-navigation/native';
 // import SimpleBackHeader from '../../components/SimpleBackHeader';
 // import PushNotification from 'react-native-push-notification';
 
@@ -72,9 +73,16 @@ const TradeHomePageScreen = (props: Props) => {
       setLoading(false)
     }
   }
-  useEffect(() => {
-    loadTrades()
-  }, [])
+  React.useEffect(() => {
+    const unsubscribe = props.navigation.addListener('focus', () => {
+      // The screen is focused
+      // Call any action
+      loadTrades()
+    });
+
+    // Return the function to unsubscribe from the event so it gets removed on unmount
+    return unsubscribe;
+  }, [props.navigation]);
 
   const loadTrades = () => {
     getTrades({
@@ -93,12 +101,6 @@ const TradeHomePageScreen = (props: Props) => {
     });
   };
 
-  let totalPersonalAmount = 0;
-  let totalGroupAmount = 0;
-  // props.groupSavings.forEach((e) => (totalGroupAmount += e['balance'] || 0));
-  // props.personalSavings.forEach(
-  //   (e) => (totalPersonalAmount += e['balance'] || 0),
-  // );
   return (
     <SafeAreaView
       style={{
@@ -116,18 +118,16 @@ const TradeHomePageScreen = (props: Props) => {
             colors={[Colors.Primary]}
           />
         }>
-        <CardicCardThree
+        {/* <CardicCardThree
           top={`Trade Total (${Values.NairaSymbol})`}
           bottom={`${1000}`}
           showIcon={false}
-        />
+        /> */}
         <View
           style={{
             marginTop: 25,
             marginBottom: 10,
             paddingHorizontal: 10,
-            // paddingTop: 10,
-            // paddingBottom: 10,
             flexDirection: 'row',
             justifyContent: 'space-between'
           }}>
@@ -149,8 +149,48 @@ const TradeHomePageScreen = (props: Props) => {
 
           <CardicCard
             key="1"
-            // onPress={() => props.navigation.navigate('/learn')}
+            onPress={() => props.navigation.push('TradeHistoryScreen')}
             text="View Trade History"
+            description=""
+            icon={
+              <BlogIcon
+                pathProps={{
+                  fill: Colors.Primary,
+                  scale: 1.1,
+                }}
+              />
+            }
+          />
+
+        </View>
+        <View
+          style={{
+            marginTop: 25,
+            marginBottom: 10,
+            paddingHorizontal: 10,
+            flexDirection: 'row',
+            justifyContent: 'space-between'
+          }}>
+          <CardicCard
+            key="2"
+            onPress={() => {
+              props.navigation.push('OngoingTradeListScreen');
+            }}
+            text="Ongoing Trades"
+            icon={
+              <BlogIcon
+                pathProps={{
+                  fill: Colors.Primary,
+                  scale: 1.1,
+                }}
+              />
+            }
+          />
+
+          <CardicCard
+            key="3"
+            onPress={() => props.navigation.push('CompletedTradeListScreen')}
+            text="Completed Trades"
             description=""
             icon={
               <BlogIcon
@@ -183,7 +223,7 @@ const TradeHomePageScreen = (props: Props) => {
 
           <TouchableOpacity
             onPress={() => {
-              // props.navigation.navigate('/learn');
+              props.navigation.push('OngoingTradeListScreen');
             }}>
             <AppText
               style={{
@@ -235,7 +275,7 @@ const TradeHomePageScreen = (props: Props) => {
 
           <TouchableOpacity
             onPress={() => {
-              // props.navigation.navigate('/learn');
+              props.navigation.push('CompletedTradeListScreen');
             }}>
             <AppText
               style={{

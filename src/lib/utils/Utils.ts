@@ -330,8 +330,8 @@ class Utils {
     return transactionSections;
   };
 
-  static shortenText(text: string, length: number) {
-    return text.length < length ? text : text.substring(0, length) + '...';
+  static shortenText(text: string, length: number, postfix: string = '...') {
+    return text.length < length ? text : text.substring(0, length) + postfix;
   }
 
   static createDate(date: Date, days: number, months: number, years: number) {

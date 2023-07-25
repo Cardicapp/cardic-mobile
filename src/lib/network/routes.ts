@@ -14,4 +14,5 @@ export default {
     trade: `${prefix}/trades`,
     users: `${prefix}/users`,
     wallet: `${prefix}/wallet`,
+    banks:  `${prefix}/banks`,
 }
