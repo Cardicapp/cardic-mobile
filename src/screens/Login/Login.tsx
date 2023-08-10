@@ -511,7 +511,7 @@ const Login = (props: Props) => {
                 }}
                 onPress={() => {
                   props.
-                    navigation.push("/welcome-signup")
+                    navigation.push("Register")
                 }}>
                 <AppBoldText
                   style={{

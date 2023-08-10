@@ -385,7 +385,7 @@ const AddBankModal = (props: Props) => {
                     setShowAddBankSuccessModal(false)
                     onClose();
                 }}
-                title="Bank add successfully"
+                title="Bank added successfully"
             />
         </>
 

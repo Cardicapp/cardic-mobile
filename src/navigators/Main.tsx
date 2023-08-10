@@ -12,6 +12,7 @@ import OngoingTradeListScreen from '../screens/User/Trade/OngoingTradeListScreen
 import CompletedTradeListScreen from '../screens/User/Trade/CompletedTradeListScreen';
 import TradeHistoryScreen from '../screens/User/Trade/TradeHistoryScreen';
 import WalletScreen from '../screens/User/Wallet/WalletScreen';
+import Register from '../screens/Register/Register';
 
 const Stack = createStackNavigator();
 
@@ -20,6 +21,7 @@ const MainNavigator = () => {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Login" component={Login} />
+      <Stack.Screen name="Register" component={Register} />
       <Stack.Screen name="BottomTab" component={BottomTab} />
       <Stack.Screen name="Home" component={Example} />
       <Stack.Screen name="CategoriesScreen" component={CategoriesScreen} />

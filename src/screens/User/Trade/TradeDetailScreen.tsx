@@ -47,7 +47,7 @@ const TradeDetailScreen
     } = props;
     const { user } = useSelector(selectAuthState);
     const { selectedTrade: trade } = useSelector(selectTradeState);
-    const [showDetail, setShowDetail] = useState(false);
+    const [showDetail, setShowDetail] = useState(true);
     const [messages, setMessages] = useState<TradeChat[]>([])
     const pageIndex = useRef(1);
     const chatsRef = useRef<FlatList<TradeChat>>(null);
