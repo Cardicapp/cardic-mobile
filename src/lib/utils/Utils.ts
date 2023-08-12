@@ -197,34 +197,12 @@ class Utils {
 
   static handleError = (res) => {
     let message;
-    if (
-      res &&
-      res.error &&
-      res.error.errors &&
-      res.error.errors.length &&
-      res.error.errors.length > 0
-    ) {
-      message = res.error.errors[0];
-    } else if (
-      res &&
-      res.error &&
-      res.error.error &&
-      res.error.error.length &&
-      res.error.error.length > 0
-    ) {
-      message = res.error.error[0];
-    } else if (
-      res &&
-      res.data &&
-      res.data.data &&
-      res.data.data.error &&
-      res.data.data.error.length &&
-      res.data.data.error.length > 0
-    ) {
-      message = res.data.data.error[0];
-    } else {
-      message = 'Network unavailable';
-    }
+    if(res.response && res.response.data && res.response.data.message)
+      message = res.response.data.message;
+    else if(!res.response)
+      message = "Network unavailable"
+    else
+      message = "Request failed. Please try again later."
     return message;
   };
 

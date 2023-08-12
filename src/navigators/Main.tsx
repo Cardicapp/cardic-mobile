@@ -13,6 +13,8 @@ import CompletedTradeListScreen from '../screens/User/Trade/CompletedTradeListSc
 import TradeHistoryScreen from '../screens/User/Trade/TradeHistoryScreen';
 import WalletScreen from '../screens/User/Wallet/WalletScreen';
 import Register from '../screens/Register/Register';
+import CreateWithdrawalPin from '../screens/User/WithdrawalPin/CreateWithdrawalPin';
+import SettingsScreen from '../screens/User/Settings/SettingsScreen';
 
 const Stack = createStackNavigator();
 
@@ -33,6 +35,7 @@ const MainNavigator = () => {
       <Stack.Screen name="CompletedTradeListScreen" component={CompletedTradeListScreen} />
       <Stack.Screen name="TradeHistoryScreen" component={TradeHistoryScreen} />
       <Stack.Screen name="WalletScreen" component={WalletScreen} />
+      <Stack.Screen name="CreateWithdrawalPin" component={CreateWithdrawalPin} />
 
 
     </Stack.Navigator>

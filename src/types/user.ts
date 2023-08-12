@@ -1,10 +1,11 @@
 export interface User {
     id: number;
-    email: string | null;
-    userName: string | null;
-    firstName: string | null;
-    lastName: string | null;
-    role?: UserRole | null;
+    email: string;
+    userName: string;
+    firstName: string;
+    lastName: string;
+    hasWithdrawalPin: string;
+    role: UserRole;
     status: any;
     deletedAt: string | null;
   }

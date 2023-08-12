@@ -13,6 +13,7 @@ import TradeDetailScreen from '../screens/User/Trade/TradeDetailScreen';
 import { createStackNavigator } from '@react-navigation/stack';
 import TradeHomePageScreen from '../screens/User/Trade/TradeHomePage/TradeHomePageScreen';
 import WalletScreen from '../screens/User/Wallet/WalletScreen';
+import SettingsScreen from '../screens/User/Settings/SettingsScreen';
 
 
 
@@ -41,7 +42,7 @@ export default function BottomTab() {
               ? 'home'
               : 'home-outline';
           } else if (route.name === 'Settings') {
-            iconName = focused ? 'ios-list' : 'ios-list-outline';
+            iconName = focused ? 'settings' : 'settings-outline';
           } else if (route.name === 'Trades') {
             iconName = focused ? 'trending-up' : 'trending-up-outline';
           } else if (route.name === 'Wallet') {
@@ -63,6 +64,8 @@ export default function BottomTab() {
       <Tab.Screen name="Wallet" component={WalletScreen} />
 
       <Tab.Screen name="Trades" component={TradeHomePageScreen} />
+      <Tab.Screen name="Settings" component={SettingsScreen} />
+
     </Tab.Navigator>
   );
 }

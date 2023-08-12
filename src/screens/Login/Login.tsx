@@ -3,22 +3,13 @@ import TextInputOne from 'CardicApp/src/components/TextInputOne';
 import Utils from 'CardicApp/src/lib/utils/Utils';
 import Colors from 'CardicApp/src/theme/Colors';
 import React, { MutableRefObject, useRef, useState } from 'react';
-import { Image, SafeAreaView, View, TouchableOpacity, TextInput, ActivityIndicator, Platform, DevSettings, } from 'react-native';
+import { Image, SafeAreaView, View, TouchableOpacity, TextInput, } from 'react-native';
 import { RFPercentage } from 'react-native-responsive-fontsize';
-// import Images from '../../shared/Images';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from "react-native-responsive-screen";
-// import AppText, { AppBoldText } from '../../components/AppText';
-// import Colors from '../../shared/Theme/Colors';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-// import TextInputOne from '../../components/TextInputOne';
-// import ButtonOne from '../../components/ButtonOne';
-// import * as actions from '../../store/actions/index';
-// import { connect } from 'react-redux';
-// import { ShecludedState } from '../../store/root.reducer';
-// import Utils from '../../shared/Utils';
-// import EncryptedStorage from 'react-native-encrypted-storage';
+import Toast from 'react-native-toast-message';
+
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-// import { RFPercentage } from 'react-native-responsive-fontsize';
 // import ReactNativeBiometrics from 'react-native-biometrics'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import ButtonOne from 'CardicApp/src/components/ButtonOne';
@@ -134,19 +125,23 @@ const Login = (props: Props) => {
           });
         }
       } catch (err) {
-        console.error(err)
-        console.error(JSON.stringify(err, null, 6))
+        console.log(err)
+        console.log(JSON.stringify(err, null, 6))
+        if (err.response && err.response.status == 417) {
+          // showToast('Account not yet activated. Please check your mailbox for the activation link.')
+          Toast.show({
+            type: 'error',
+            text1: 'Account not yet activated',
+            text2: 'Please check your mailbox for the activation link.'
+          });
+        } else {
+          showToast('Unable to login. Confirm credentials and try again')
+        }
       } finally {
         setLoading(false)
       }
     }
     else showToast(result);
-  }
-
-  const showToast = (msg: string, theme = 'danger') => {
-    // props.showToast([msg], {
-    //   duration: 2000, theme,
-    // });
   }
 
   const validateForm = (react: boolean = false) => {
@@ -176,15 +171,15 @@ const Login = (props: Props) => {
 
       return "Password is required";
     }
-
-    // if (password.length < 8) {
-    //   if (react) setTimeout(() => {
-    //     passwordRef?.current?.focus();
-    //   }, 100);
-    //   return "Password is too short";
-    // }
     return null;
 
+  }
+
+  const showToast = (msg: string, theme = 'error') => { // TOAST types = success, error, info
+    Toast.show({
+      type: theme,
+      text1: msg,
+    });
   }
   // promptFingerprint = async () => {
   // const res = await ReactNativeBiometrics.simplePrompt({

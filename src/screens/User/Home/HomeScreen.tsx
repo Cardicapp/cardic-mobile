@@ -87,11 +87,12 @@ const HomeScreen = (props: Props) => {
     }
   }
   useEffect(() => {
-    getUserInfo();
-    getPopularGiftCards();
+    loadPage();
   }, [])
 
-  const refresh = () => {
+  const loadPage = () => {
+    getUserInfo();
+    getPopularGiftCards();
   };
 
 
@@ -102,13 +103,13 @@ const HomeScreen = (props: Props) => {
         backgroundColor: Colors.White,
       }}>
       <ScrollView
-      // refreshControl={
-      //   <RefreshControl
-      //     // refreshing={false}
-      //     // onRefresh={refresh}
-      //     colors={[Colors.Primary]}
-      //   />
-      // }
+      refreshControl={
+        <RefreshControl
+          refreshing={loading}
+          onRefresh={loadPage}
+          colors={[Colors.Primary]}
+        />
+      }
       >
 
         {

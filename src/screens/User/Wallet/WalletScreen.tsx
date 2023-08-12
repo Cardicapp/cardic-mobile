@@ -31,7 +31,8 @@ import TextContainer from 'CardicApp/src/components/TextContainer/TextContainer'
 import SelectBankModal from 'CardicApp/src/components/Modal/SelectBankModal';
 import AntDesign from 'react-native-vector-icons/AntDesign'
 import ConfirmModal from 'CardicApp/src/components/Modal/ConfirmModal';
-
+import Entypo from 'react-native-vector-icons/Entypo';
+import Toast from 'react-native-toast-message';
 
 interface Props {
   navigation: StackNavigationProp<ApplicationStackParamList, keyof ApplicationStackParamList, undefined>;
@@ -51,17 +52,22 @@ const WalletScreen = (props: Props) => {
   const [banks, setBanks] = useState<Bank[]>([])
   const [showWithdrawModal, setShowWithdrawModal] = useState(false)
   const [showBanksModal, setShowBanksModal] = useState(false)
+  const [showSetWithdrawalPinModal, setShowSetWithdrawalPinModal] = useState(false)
   const pageIndexRef = useRef(1);
   const [form, setForm] = useState<{
     amount: string;
     bank?: Bank;
+    pin: string;
     tx_ref: string;
     didFail: boolean;
+    errorMessage: string | null;
   }>({
     amount: '',
     bank: undefined,
+    pin: '',
     tx_ref: '',
     didFail: false,
+    errorMessage: null
   })
 
   const getBanks = async () => {
@@ -96,6 +102,7 @@ const WalletScreen = (props: Props) => {
   const withdraw = async () => {
     if (validateForm() != null || withdrawing) return;
     try {
+      setForm({...form, errorMessage: ''})
       setWithdrawing(true)
       const reference = `${Date.now()}-${authState.user?.id}`;
       if (!form.didFail) {
@@ -110,29 +117,38 @@ const WalletScreen = (props: Props) => {
         },
         amount: parseFloat(form.amount),
         tx_ref: form.didFail ? form.tx_ref : reference,
+        pin: form.pin,
       }
       const res = await axiosExtended.post(`${routes.wallet}/withdraw`, payload);
       if (res.status === 200) {
-        setForm({
-          amount: '',
-          bank: undefined,
-          tx_ref: '',
-          didFail: false,
-        })
+        resetForm()
         setShowWithdrawalSuccessModal(true)
         setShowWithdrawModal(false)
         refresh();
       }
     } catch (e) {
-      console.error(e)
+      console.log(e)
       console.log(JSON.stringify(e, null, 5))
       setForm({
         ...form,
         didFail: true,
+        errorMessage: Utils.handleError(e),
       })
     } finally {
       setWithdrawing(false)
+      setLoadingBanks(false)
     }
+  }
+
+  const resetForm = () => {
+    setForm({
+      amount: '',
+      bank: undefined,
+      tx_ref: '',
+      didFail: false,
+      pin: '',
+      errorMessage: '',
+    })
   }
 
   const getWalletInfo = async () => {
@@ -212,6 +228,13 @@ const WalletScreen = (props: Props) => {
     });
   };
 
+  const showToast = (msg: string, theme = 'error') => { // TOAST types = success, error, info
+    Toast.show({
+      type: theme,
+      text1: msg,
+    });
+  }
+
 
   return (
     <SafeAreaView
@@ -276,6 +299,7 @@ const WalletScreen = (props: Props) => {
               <CardicCard
                 centered={true}
                 onPress={() => {
+                  if (!authState.user?.hasWithdrawalPin) return setShowSetWithdrawalPinModal(true);
                   setShowWithdrawModal(true)
                 }}
                 text="Withdraw"
@@ -318,7 +342,10 @@ const WalletScreen = (props: Props) => {
       <CustomModal
         autoClose={false}
         isVisible={showWithdrawModal}
-        onClose={() => setShowWithdrawModal(false)}
+        onClose={() => {
+          setShowWithdrawModal(false)
+          setLoadingBanks(false)
+        }}
         title="Withdraw"
         titleStyle={{
           marginTop: 5,
@@ -333,6 +360,17 @@ const WalletScreen = (props: Props) => {
         }}
 
         actions={[
+          {
+            element: (
+              <AppText style={{
+                margin: 0,
+                padding: 0,
+                textAlign: 'center',
+                display: form.errorMessage ? 'flex' : 'none',
+                color: Colors.DangerTwo,
+              }}>{form.errorMessage}</AppText>
+            ),
+          },
           {
             element: (
               <TextInputOne
@@ -380,6 +418,23 @@ const WalletScreen = (props: Props) => {
             )
           },
           {
+            element: (
+              <TextInputOne
+                maxLength={4}
+                value={`${form.pin}`}
+                onChange={val => setForm({ ...form, pin: val })}
+                secureTextEntry={true}
+                containerStyle={{
+                  width: '95%',
+                  alignSelf: 'center',
+                  marginBottom: 0,
+                }}
+                placeholder={`PIN`}
+                keyboardType='number-pad'
+              />
+            )
+          },
+          {
             text: 'Proceed',
             onPress: () => {
               withdraw();
@@ -389,13 +444,17 @@ const WalletScreen = (props: Props) => {
               marginTop: 10,
               width: '95%',
             },
+            loading: withdrawing,
             textStyle: {
               color: Colors.White,
             },
           },
           {
             text: 'Cancel',
-            onPress: () => setShowWithdrawModal(false),
+            onPress: () => {
+              setShowWithdrawModal(false)
+              resetForm();
+            },
             containerStyle: {
               backgroundColor: Colors.White,
               width: '95%',
@@ -444,6 +503,43 @@ const WalletScreen = (props: Props) => {
         }}
         title="Withdrawal successful"
       />
+
+      <CustomModal
+        icon={
+          <View style={{
+            height: heightPercentageToDP(8), aspectRatio: 1, borderRadius: 100, backgroundColor: Colors.Red,
+            justifyContent: 'center',
+            alignItems: 'center'
+          }}>
+            <Entypo
+              name="cross"
+              size={RFPercentage(3)}
+              color={Colors.White}
+            />
+          </View>
+        }
+        isVisible={showSetWithdrawalPinModal}
+        onClose={() => {
+          setShowSetWithdrawalPinModal(false)
+        }}
+        title="No withdrawal PIN"
+        content='Kindly proceed to set up your withdrawal pin'
+        actions={[
+          {
+            text: 'Proceed',
+            onPress: () => props.navigation.push("CreateWithdrawalPin"),
+            containerStyle: {
+              backgroundColor: Colors.White,
+              width: '95%',
+            },
+            textStyle: {
+              color: Colors.Black,
+            },
+          },
+        ]}
+
+      />
+
     </SafeAreaView>
   );
 };

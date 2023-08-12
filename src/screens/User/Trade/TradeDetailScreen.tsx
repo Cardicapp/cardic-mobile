@@ -24,7 +24,7 @@ import { TradeChat } from 'CardicApp/src/types/chat';
 import axiosExtended from 'CardicApp/src/lib/network/axios-extended';
 import routes from 'CardicApp/src/lib/network/routes';
 import queryString from 'query-string';
-import { TradeChatTypeEnum, TradeStatusEnum } from 'CardicApp/src/types/enums';
+import { TradeChatTypeEnum, TradeStatusEnum, UserRoleEnum } from 'CardicApp/src/types/enums';
 import { io } from "socket.io-client";
 import TradeEvents from 'CardicApp/src/lib/enums/trade-events.enum';
 import Config from "react-native-config";
@@ -354,73 +354,77 @@ const TradeDetailScreen
           }
           stickyHeaderIndices={[0]}
         />
+        {
+          [UserRoleEnum.admin].includes(user?.role.id ?? -1) || [TradeStatusEnum.created, TradeStatusEnum.active].includes(trade?.status.id) ?
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                paddingHorizontal: 5,
+                marginBottom: 10,
+              }}>
+              <TouchableOpacity
+                onPress={() => setShowImagePicker(true)}
+                style={{
+                  padding: 12,
+                  // marginHorizontal: 7,
+                  backgroundColor: Colors.Primary,
+                  borderRadius: 5,
+                  alignSelf: "flex-end",
+                  // marginBottom: 5,
 
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            paddingHorizontal: 5,
-            marginBottom: 10,
-          }}>
-          <TouchableOpacity
-            onPress={() => setShowImagePicker(true)}
-            style={{
-              padding: 12,
-              // marginHorizontal: 7,
-              backgroundColor: Colors.Primary,
-              borderRadius: 5,
-              alignSelf: "flex-end",
-              // marginBottom: 5,
-
-            }}>
-            <Entypo
-              name="attachment"
-              color={Colors.White}
-              size={RFPercentage(2.8)}
-            />
-          </TouchableOpacity>
-          <TextInputOne
-            value={message.text}
-            placeholder='Type message here...'
-            containerStyle={{
-              width: '75%',
-              alignSelf: 'center',
-              marginTop: 0,
-              marginBottom: 0,
-            }}
-            onChange={(val) => {
-              setMessage({
-                ...message,
-                text: val
-              })
-            }}
-          />
-          <TouchableOpacity
-            style={{
-              padding: 12,
-              backgroundColor: Colors.Primary,
-              borderRadius: 5,
-              alignSelf: "flex-end",
-            }}
-            onPress={() => message.text && !submitting && sendMessage(TradeChatTypeEnum.text)}
-          >
-            {
-              submitting ?
-                <ActivityIndicator
-                  size={RFPercentage(2.8)}
+                }}>
+                <Entypo
+                  name="attachment"
                   color={Colors.White}
-                /> :
-                <Feather
-                  name="send"
                   size={RFPercentage(2.8)}
-                  color={Colors.White}
                 />
-            }
+              </TouchableOpacity>
+              <TextInputOne
+                value={message.text}
+                placeholder='Type message here...'
+                containerStyle={{
+                  width: '75%',
+                  alignSelf: 'center',
+                  marginTop: 0,
+                  marginBottom: 0,
+                }}
+                onChange={(val) => {
+                  setMessage({
+                    ...message,
+                    text: val
+                  })
+                }}
+              />
+              <TouchableOpacity
+                style={{
+                  padding: 12,
+                  backgroundColor: Colors.Primary,
+                  borderRadius: 5,
+                  alignSelf: "flex-end",
+                }}
+                onPress={() => message.text && !submitting && sendMessage(TradeChatTypeEnum.text)}
+              >
+                {
+                  submitting ?
+                    <ActivityIndicator
+                      size={RFPercentage(2.8)}
+                      color={Colors.White}
+                    /> :
+                    <Feather
+                      name="send"
+                      size={RFPercentage(2.8)}
+                      color={Colors.White}
+                    />
+                }
 
 
-          </TouchableOpacity>
-        </View>
+              </TouchableOpacity>
+            </View>
+            : undefined
+        }
+
         <CustomModal
           isVisible={showImagePicker}
           onClose={() => setShowImagePicker(false)}
