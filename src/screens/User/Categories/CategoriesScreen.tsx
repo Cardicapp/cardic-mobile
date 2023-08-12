@@ -76,8 +76,8 @@ const CategoriesScreen = (props: Props) => {
           <SimpleBackHeader
             // centered={false} 
             text="Select Gift Card"
-            showBack={false}
-            showMenu={true}
+            showBack={true}
+            showMenu={false}
           />}
         stickyHeaderIndices={[0]}
         stickyHeaderHiddenOnScroll={true}

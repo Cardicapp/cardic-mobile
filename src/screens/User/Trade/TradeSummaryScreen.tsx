@@ -85,8 +85,8 @@ const TradeSummaryScreen
         }}>
         <SimpleBackHeader
           text="Summary"
-          showBack={false}
-          showMenu={true}
+          showBack={true}
+          showMenu={false}
         />
         <ScrollView
           contentContainerStyle={{

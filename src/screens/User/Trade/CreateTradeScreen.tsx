@@ -44,8 +44,8 @@ const CreateTradeScreen
         }}>
         <SimpleBackHeader
           text="Trade"
-          showBack={false}
-          showMenu={true}
+          showBack={true}
+          showMenu={false}
           centered={false}
           style={{
             backgroundColor: Colors.Primary

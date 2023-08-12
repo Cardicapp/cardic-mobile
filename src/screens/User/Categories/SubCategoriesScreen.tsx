@@ -79,8 +79,8 @@ const SubCategoriesScreen = (props: Props) => {
         ListHeaderComponent={
           <SimpleBackHeader
             text="Select Sub-Category"
-            showBack={false}
-            showMenu={true}
+            showBack={true}
+            showMenu={false}
           />}
       />
       <ButtonOne
