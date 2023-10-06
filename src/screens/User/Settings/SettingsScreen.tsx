@@ -18,6 +18,8 @@ import { AppBoldText } from 'CardicApp/src/components/AppText/AppText';
 import SimpleBackHeader from 'CardicApp/src/components/SimpleBackHeader';
 import { heightPercentageToDP } from 'react-native-responsive-screen';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import axiosExtended from 'CardicApp/src/lib/network/axios-extended';
+import routes from 'CardicApp/src/lib/network/routes';
 
 interface Props {
   navigation: StackNavigationProp<ApplicationStackParamList, keyof ApplicationStackParamList, undefined>;
@@ -44,7 +46,8 @@ const SettingsScreen = (props: Props) => {
     ]);
   };
 
-  const proceed = () => {
+  const proceed = async () => {
+    await serverLogout();
     dispatch(setUserInfo(null));
     dispatch(setAuthToken(null));
     props.navigation.reset({
@@ -56,6 +59,16 @@ const SettingsScreen = (props: Props) => {
       ]
     })
   }
+  const serverLogout = async () => {
+    try {
+      const res = await axiosExtended.post(`${routes.auth}/logout`)
+      if (res.status === 200) return true;
+    } catch(e) {
+      console.error(e);
+      return false;
+    }
+  }
+
 
   const [successMessage, setSuccessMessage] = useState('');
   const [showSuccessModal, setShowSuccessModal] = useState(false);

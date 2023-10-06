@@ -13,6 +13,7 @@ export default {
     assignTrades: `${prefix}/trades/assign`,
     trade: `${prefix}/trades`,
     users: `${prefix}/users`,
+    auth: `${prefix}/auth`,
     wallet: `${prefix}/wallet`,
     banks:  `${prefix}/banks`,
 }

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1023040988627",
+    "project_id": "cardic-22f5c",
+    "storage_bucket": "cardic-22f5c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1023040988627:android:e8126ef2a3b96ca3ff7b26",
+        "android_client_info": {
+          "package_name": "com.cardicapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDswWc1Pbm8idsNeFSDAz39iPZFrtE-aHA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -34,6 +34,7 @@ import CustomModal from 'CardicApp/src/components/Modal/CustomModal';
 import { heightPercentageToDP } from 'react-native-responsive-screen';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { Trade } from 'CardicApp/src/types/trade';
+import { useRoute } from '@react-navigation/native';
 
 const baseURL = Config.API_URL;
 

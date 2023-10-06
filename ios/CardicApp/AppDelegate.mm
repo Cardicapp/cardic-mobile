@@ -1,5 +1,5 @@
 #import "AppDelegate.h"
-
+#import "RNNotifications.h"
 #import <React/RCTBundleURLProvider.h>
 
 @implementation AppDelegate
@@ -11,6 +11,7 @@
   // They will be passed down to the ViewController used by React Native.
   self.initialProps = @{};
 
+  // [RNNotifications startMonitorNotifications];
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
 

@@ -13,6 +13,8 @@ import { ApplicationStackParamList } from '../../@types/navigation';
 
 const Stack = createStackNavigator<ApplicationStackParamList>();
 
+export const routeNameRef = React.createRef();
+
 // @refresh reset
 const ApplicationNavigator = () => {
   const { Layout, darkMode, NavigationTheme } = useTheme();
@@ -24,7 +26,25 @@ const ApplicationNavigator = () => {
 
   return (
     <SafeAreaView style={[Layout.fill, { backgroundColor: colors.card }]}>
-      <NavigationContainer theme={NavigationTheme} ref={navigationRef}>
+      <NavigationContainer
+        theme={NavigationTheme}
+        ref={navigationRef}
+        // @ts-ignore
+        onReady={() => routeNameRef.current = navigationRef.current.getCurrentRoute().name}
+        onStateChange={() => {
+          const previousRouteName = routeNameRef.current
+          // @ts-ignore
+          const currentRouteName = navigationRef.current.getCurrentRoute().name
+
+          if (previousRouteName !== currentRouteName) {
+            // Do something here with it
+          }
+
+          // Save the current route name for later comparision
+          // @ts-ignore
+          routeNameRef.current = currentRouteName
+        }}
+      >
         <StatusBar barStyle={darkMode ? 'light-content' : 'dark-content'} />
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           {/* <Stack.Screen name="Startup" component={Startup} /> */}

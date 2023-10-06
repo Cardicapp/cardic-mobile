@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
+  Alert,
   RefreshControl,
   SafeAreaView,
   ScrollView,
@@ -16,7 +17,7 @@ import AppText, { AppBoldText } from 'CardicApp/src/components/AppText/AppText';
 import CardicCard from 'CardicApp/src/components/Card/CardicCard';
 import BlogIcon from 'CardicApp/src/components/Icons/BlogIcon';
 import GCCardOne from 'CardicApp/src/components/Card/GCCardOne';
-import { selectAuthState } from 'CardicApp/src/store/auth';
+import { selectAuthState, setUserInfo } from 'CardicApp/src/store/auth';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { ApplicationStackParamList } from 'CardicApp/@types/navigation';
 import { User } from 'CardicApp/src/types/user';
@@ -28,6 +29,12 @@ import CardicCardThree from 'CardicApp/src/components/Card/CardicCardThree';
 import { Category } from 'CardicApp/src/types/category';
 import queryString from 'query-string';
 import { setTradeForm } from 'CardicApp/src/store/trade';
+import messaging from '@react-native-firebase/messaging';
+import { requestNotificationPermission } from 'CardicApp/src/services/notifications/permission';
+import Toast from 'react-native-toast-message';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { routeNameRef } from 'CardicApp/src/navigators/Application';
+
 
 interface Props {
   navigation: StackNavigationProp<ApplicationStackParamList, keyof ApplicationStackParamList, undefined>;
@@ -44,14 +51,63 @@ const HomeScreen = (props: Props) => {
   const [loading, setLoading] = useState(false);
   const [loadingCards, setLoadingCards] = useState(false);
 
+  useEffect(() => {
+    requestNotificationPermission();
+    // Get the device token
+    messaging()
+      .getToken()
+      .then(token => {
+        return updateUser({
+          fcmToken: token
+        });
+      });
+    // If using other push notification providers (ie Amazon SNS, etc)
+    // you may need to get the APNs token instead for iOS:
+    // if(Platform.OS == 'ios') { messaging().getAPNSToken().then(token => { return saveTokenToDatabase(token); }); }
+    // Listen to whether the token changes
+    return messaging().onTokenRefresh(token => {
+      updateUser({
+        fcmToken: token
+      });
+    });
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = messaging().onMessage(async msg => {
+      // Alert.alert('A new FCM message arrived!', JSON.stringify(msg));
+      if (routeNameRef.current !== "TradeDetailScreen") {
+        Toast.show({
+          // @ts-ignore
+          type: msg.data?.type ?? "info",
+          text1: msg.notification?.title,
+          text2: msg.notification?.body,
+        });
+      }
+    });
+
+    return unsubscribe;
+  }, []);
+
+  const updateUser = async (payload: any) => {
+    if (!authState.user) console.log("User not logged in. Can not register user")
+    console.log("Registering token...")
+    try {
+      const res = await axiosExtended.patch(`${routes.users}/${authState.user?.id}`, payload)
+      if (res.status === 200) {
+        console.log("FCM token saved")
+      }
+    } catch (e) {
+      console.log(JSON.stringify(e, null, 5))
+    }
+  }
 
   const getUserInfo = async () => {
     try {
       setLoading(true)
       const res = await axiosExtended.get(`${routes.users}/${authState.user?.id}`);
       if (res.status === 200) {
-        setUser(res.data);
         const usr = res.data;
+        dispatch(setUserInfo(usr))
         if (usr.role.id == UserRoleEnum.user) {
           const walletRes = await axiosExtended.get(`${routes.wallet}/info/${usr.id}`);
           if (walletRes.status === 200) {
@@ -103,13 +159,13 @@ const HomeScreen = (props: Props) => {
         backgroundColor: Colors.White,
       }}>
       <ScrollView
-      refreshControl={
-        <RefreshControl
-          refreshing={loading}
-          onRefresh={loadPage}
-          colors={[Colors.Primary]}
-        />
-      }
+        refreshControl={
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={loadPage}
+            colors={[Colors.Primary]}
+          />
+        }
       >
 
         {
