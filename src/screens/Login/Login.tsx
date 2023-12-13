@@ -400,7 +400,7 @@ const Login = (props: Props) => {
 
             }}
             onPress={() => {
-              props.navigation.push("/forgot-password-email")
+              props.navigation.push("ForgotPassword")
             }}>
             <AppText
               style={{
@@ -531,26 +531,5 @@ const Login = (props: Props) => {
     </SafeAreaView>
   );
 }
-
-
-
-// const mapStateToProps = (state: ShecludedState) => {
-//     return {
-//         loading: state.uiReducer.loginLoading,
-//         userData: state.appReducer.userData,
-//     };
-// };
-// const mapDispatchToProps = (dispatch: any) => {
-//     return {
-//         showToast: (messages: string[], options: any) =>
-//             dispatch(actions.showToast(messages, options)),
-//         login: (data: any) => dispatch(actions.login(data)),
-
-//     };
-// };
-// export default connect(
-//     mapStateToProps,
-//     mapDispatchToProps
-// )(Login);
 
 export default Login;

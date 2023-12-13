@@ -15,6 +15,7 @@ import WalletScreen from '../screens/User/Wallet/WalletScreen';
 import Register from '../screens/Register/Register';
 import CreateWithdrawalPin from '../screens/User/WithdrawalPin/CreateWithdrawalPin';
 import SettingsScreen from '../screens/User/Settings/SettingsScreen';
+import ForgotPassword from '../screens/ForgotPassword/ForgotPassword';
 
 const Stack = createStackNavigator();
 
@@ -23,6 +24,7 @@ const MainNavigator = () => {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Login" component={Login} />
+      <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
       <Stack.Screen name="Register" component={Register} />
       <Stack.Screen name="BottomTab" component={BottomTab} />
       <Stack.Screen name="Home" component={Example} />

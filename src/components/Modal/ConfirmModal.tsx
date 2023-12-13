@@ -85,9 +85,9 @@ const ConfirmModal = (props: Props) => {
                     {
                         content && (
                             <AppText style={{
-                                fontWeight: '700',
-                                fontSize: 20,
-                                marginTop: 20,
+                                // fontWeight: '700',
+                                // fontSize: 20,
+                                marginTop: '3%',
                                 textAlign: 'center',
                                 paddingHorizontal: wp(10)
                             }}>

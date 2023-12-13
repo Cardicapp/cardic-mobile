@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   SafeAreaView,
   ScrollView,
@@ -20,6 +21,8 @@ import { heightPercentageToDP } from 'react-native-responsive-screen';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import axiosExtended from 'CardicApp/src/lib/network/axios-extended';
 import routes from 'CardicApp/src/lib/network/routes';
+import Toast from 'react-native-toast-message';
+import ConfirmModal from 'CardicApp/src/components/Modal/ConfirmModal';
 
 interface Props {
   navigation: StackNavigationProp<ApplicationStackParamList, keyof ApplicationStackParamList, undefined>;
@@ -27,7 +30,7 @@ interface Props {
 
 const SettingsScreen = (props: Props) => {
   const dispatch = useDispatch();
-  const {user} = useSelector(selectAuthState)
+  const { user } = useSelector(selectAuthState)
 
   const logout = () => {
     Alert.alert('Logout?', 'Are you sure to leave Cardic?', [
@@ -63,19 +66,64 @@ const SettingsScreen = (props: Props) => {
     try {
       const res = await axiosExtended.post(`${routes.auth}/logout`)
       if (res.status === 200) return true;
-    } catch(e) {
+    } catch (e) {
       console.error(e);
       return false;
     }
   }
 
+  const [changingPassword, setChangingPassword] = useState(false);
+  const forgotPassword = async () => {
+    setChangingPassword(true)
+    let formdata = {
+      email: user?.email
+    }
+    try {
+      const res = await axiosExtended.post(`${routes.auth}/forgot/password`, formdata)
+      if (res.status === 200) {
+        Toast.show({
+          type: 'success',
+          text1: "Request successful.",
+          text2: "Check you mailbox for futher instructions",
+        });
+      }
+    } catch (err) {
+      console.log(err)
+      console.log(JSON.stringify(err, null, 6))
 
-  const [successMessage, setSuccessMessage] = useState('');
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-  // const [showErrorModal, setShowErrorModal] = useState(false);
-  const [hasWithdrawalPin, setHasWithdrawalPin] = useState(false);
-  const [hasCheckedPin, setHasCheckedPin] = useState(false);
+    } finally {
+      setChangingPassword(false)
+    }
+  }
+
+  const [changingPin, setChangingPin] = useState(false);
+
+  const forgotPin = async () => {
+    setChangingPin(true)
+    let formdata = {
+      email: user?.email
+    }
+    try {
+      const res = await axiosExtended.post(`${routes.auth}/forgot/pin`, formdata)
+      if (res.status === 200) {
+        Toast.show({
+          type: 'success',
+          text1: "Request successful.",
+          text2: "Check you mailbox for futher instructions",
+        });
+      }
+    } catch (err) {
+      console.log(err)
+      console.log(JSON.stringify(err, null, 6))
+
+    } finally {
+      setChangingPin(false)
+    }
+  }
+
+  const [showConfirmChangePasswordModal, setShowConfirmChangePasswordModal] = useState(false);
+  const [showConfirmChangePinModal, setShowConfirmChangePinModal] = useState(false);
+
 
   // const showToast = (message: string) => {
   //   props.showToast([message], {
@@ -150,16 +198,20 @@ const SettingsScreen = (props: Props) => {
         <SettingItem
           text="Change Password"
           onPress={() => {
-            // sendToken();
-            // props.navigation.push('/change-passwword');
+            setShowConfirmChangePasswordModal(true)
           }}
+          disabled={changingPassword}
+          rightItem={changingPassword ? <ActivityIndicator color={Colors.Primary} /> : undefined}
         />
         {user?.hasWithdrawalPin ? (
           <SettingItem
             text="Change Withdrawal PIN"
+            disabled={changingPin}
             onPress={() => {
-              props.navigation.push('/initiate-change-pin');
+              setShowConfirmChangePinModal(true)
             }}
+            rightItem={changingPin ? <ActivityIndicator color={Colors.Primary} /> : undefined}
+
           />
         ) : (
           <SettingItem
@@ -327,44 +379,33 @@ const SettingsScreen = (props: Props) => {
         />
       </ScrollView>
 
-      {/* <CustomModal
-        isVisible={showErrorModal}
+      <ConfirmModal
+        isVisible={showConfirmChangePasswordModal}
+        proceedText={`Continue`}
         onClose={() => {
-          setShowErrorModal(false);
+          setShowConfirmChangePasswordModal(false)
         }}
-        content={errorMessage || 'Could not process request. Please try again'}
-        contentStyle={{
-          fontWeight: '400',
-          fontSize: 13,
-          marginTop: 8,
-          lineHeight: 18,
-          marginVertical: 0,
-          marginBottom: 10,
+        onProceed={() => {
+          setShowConfirmChangePasswordModal(false)
+          forgotPassword()
         }}
-        icon={
-          <View
-            style={{
-              height: 63,
-              aspectRatio: 1,
-              backgroundColor: 'rgba(255, 3, 139, 0.97)',
-              borderRadius: 100,
-            }}
-          />
-        }
-        actions={[
-          {
-            text: 'Continue',
-            onPress: () => { },
-            containerStyle: {
-              backgroundColor: Colors.White,
-            },
-            textStyle: {
-              color: Colors.Black,
-              fontSize: RFPercentage(2),
-            },
-          },
-        ]}
-      /> */}
+        title="Change Password?"
+        content='A mail will be sent to your inbox with further instructions. Would you like to proceed?'
+      />
+
+      <ConfirmModal
+        isVisible={showConfirmChangePinModal}
+        proceedText={`Continue`}
+        onClose={() => {
+          setShowConfirmChangePinModal(false)
+        }}
+        onProceed={() => {
+          setShowConfirmChangePinModal(false)
+          forgotPin()
+        }}
+        title="Change PIN?"
+        content='A mail will be sent to your inbox with further instructions. Would you like to proceed?'
+      />
     </SafeAreaView>
   );
 };
@@ -373,12 +414,15 @@ export interface SettingItemProps {
   text: string;
   rightItem?: React.ReactNode;
   onPress: () => void;
+  disabled?: boolean;
 }
 
 export const SettingItem = (props: SettingItemProps) => {
+  const { disabled } = props;
   return (
     <TouchableOpacity
       activeOpacity={0.6}
+      disabled={disabled}
       onPress={props.onPress}
       style={{
         flexDirection: 'row',
