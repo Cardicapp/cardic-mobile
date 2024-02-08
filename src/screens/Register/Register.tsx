@@ -38,9 +38,6 @@ interface Props {
   loading: boolean,
 }
 const Register = (props: Props) => {
-  const auth = useSelector(selectAuthState);
-  const dispatch = useDispatch();
-
   const [pageState, setPageState] = useState<State>({
     firstName: "",
     lastName: "",
@@ -152,6 +149,27 @@ const Register = (props: Props) => {
       return "Password is too short";
     }
 
+    if(!Utils.containsUpperCase(password)){
+      if (react) setTimeout(() => {
+        passwordRef?.current?.focus();
+      }, 100);
+      return "Password should contain at least one uppercase character";
+    }
+
+    if(!Utils.containsSpecialChar(password)){
+      if (react) setTimeout(() => {
+        passwordRef?.current?.focus();
+      }, 100);
+      return`Password should contain at least one special character. eg. !@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]`;
+    }
+
+    if(!Utils.checkForNumber(password)){
+      if (react) setTimeout(() => {
+        passwordRef?.current?.focus();
+      }, 100);
+      return`Password should contain at least one numeric character`;
+    }
+
     if (password != confirmPassword) {
       if (react) setTimeout(() => {
         confirmPasswordRef?.current?.focus();
@@ -253,7 +271,7 @@ const Register = (props: Props) => {
               userNameRef.current = ref;
             }}
             headText="Username"
-            placeholder="@user_name"
+            placeholder="eg cardic_user"
             value={pageState.userName}
             labelStyle={{
               fontWeight: 'bold',

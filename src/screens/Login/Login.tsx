@@ -349,23 +349,6 @@ const Login = (props: Props) => {
                 />
               )
           }
-          {/* <TextInputOne
-                            inputRef={(ref) => {
-                                // @ts-ignore
-                                emailRef = ref;
-                            }}
-                            headText="Email Address"
-                            placeholder="Your Email Address here"
-                            value={state.email}
-                            labelStyle={{
-                                fontWeight: 'bold',
-                            }}
-                            onChange={(value => setState({ email: value }))}
-                            onSubmitEditing={() => login()}
-                            containerStyle={{
-                                marginTop: 0,
-                            }}
-                        /> */}
           <TextInputOne
             inputRef={(ref) => {
               // @ts-ignore

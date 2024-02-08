@@ -35,7 +35,7 @@ export default ({ name, rate, cta, image, onPress, selected, containerStyle, nam
         paddingHorizontal: 15,
         paddingVertical: heightPercentageToDP(1),
         borderRadius: 4,
-        borderWidth: selected ? 1 : 0,
+        borderWidth: selected ? 2 : 0,
         borderColor: selected ? Colors.Primary : 'transparent',
       }, containerStyle]}>
       {
@@ -66,12 +66,14 @@ export default ({ name, rate, cta, image, onPress, selected, containerStyle, nam
           marginLeft: showImage ? 16 : 0,
           justifyContent: 'center'
         }}>
-        <AppText
+        {
+          name && <AppText
           style={[{
             color: Colors.HomeBlack,
           }, nameStyle]}>
           {name}
         </AppText>
+        }
         {
           rate ?
             <AppBoldText

@@ -16,12 +16,14 @@ import { MMKV } from 'react-native-mmkv';
 import { api } from '../services/api';
 import theme from './theme';
 import auth from './auth';
-import trade from './trade'
+import trade from './trade';
+import bill from './bill';
 
 const reducers = combineReducers({
   theme,
   auth,
   trade,
+  bill,
   [api.reducerPath]: api.reducer,
 });
 

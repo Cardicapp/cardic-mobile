@@ -16,4 +16,5 @@ export default {
     auth: `${prefix}/auth`,
     wallet: `${prefix}/wallet`,
     banks:  `${prefix}/banks`,
+    bills:  `${prefix}/bills`,
 }

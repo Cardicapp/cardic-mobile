@@ -16,6 +16,10 @@ import Register from '../screens/Register/Register';
 import CreateWithdrawalPin from '../screens/User/WithdrawalPin/CreateWithdrawalPin';
 import SettingsScreen from '../screens/User/Settings/SettingsScreen';
 import ForgotPassword from '../screens/ForgotPassword/ForgotPassword';
+import BillsScreenOne from '../screens/User/Bills/BillsScreenOne';
+import BillsScreenTwo from '../screens/User/Bills/BillsScreenTwo';
+import BillsScreenThree from '../screens/User/Bills/BillsScreenThree';
+import BillSummaryScreen from '../screens/User/Bills/BillSummaryScreen';
 
 const Stack = createStackNavigator();
 
@@ -38,6 +42,10 @@ const MainNavigator = () => {
       <Stack.Screen name="TradeHistoryScreen" component={TradeHistoryScreen} />
       <Stack.Screen name="WalletScreen" component={WalletScreen} />
       <Stack.Screen name="CreateWithdrawalPin" component={CreateWithdrawalPin} />
+      <Stack.Screen name="BillsScreenOne" component={BillsScreenOne} />
+      <Stack.Screen name="BillsScreenTwo" component={BillsScreenTwo} />
+      <Stack.Screen name="BillsScreenThree" component={BillsScreenThree} />
+      <Stack.Screen name="BillSummaryScreen" component={BillSummaryScreen} />  
 
 
     </Stack.Navigator>

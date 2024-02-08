@@ -34,6 +34,7 @@ import { requestNotificationPermission } from 'CardicApp/src/services/notificati
 import Toast from 'react-native-toast-message';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { routeNameRef } from 'CardicApp/src/navigators/Application';
+import { setBillForm } from 'CardicApp/src/store/bill';
 
 
 interface Props {
@@ -220,8 +221,13 @@ const HomeScreen = (props: Props) => {
 
           <CardicCard
             key="1"
-            onPress={() => props.navigation.navigate('Wallet')}
-            text="View Wallet"
+            onPress={() => {
+              dispatch(setBillForm({
+                bill: 'telco'
+              }));
+              props.navigation.navigate('BillsScreenTwo')
+            }}
+            text="Buy Airtime/Data"
             description=""
             icon={
               <BlogIcon
@@ -255,7 +261,7 @@ const HomeScreen = (props: Props) => {
 
               <TouchableOpacity
                 onPress={() => {
-                  // props.navigation.navigate('/learn');
+                  props.navigation.push('CategoriesScreen');
                 }}>
                 <AppText
                   style={{
