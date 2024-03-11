@@ -25,17 +25,17 @@ import { Wallet } from 'CardicApp/src/types/wallet';
 import axiosExtended from 'CardicApp/src/lib/network/axios-extended';
 import routes from 'CardicApp/src/lib/network/routes';
 import { UserRoleEnum } from 'CardicApp/src/types/enums';
-import CardicCardThree from 'CardicApp/src/components/Card/CardicCardThree';
+import WalletCard from 'CardicApp/src/components/Card/WalletCard';
 import { Category } from 'CardicApp/src/types/category';
 import queryString from 'query-string';
 import { setTradeForm } from 'CardicApp/src/store/trade';
 import messaging from '@react-native-firebase/messaging';
 import { requestNotificationPermission } from 'CardicApp/src/services/notifications/permission';
 import Toast from 'react-native-toast-message';
-import { useNavigation, useRoute } from '@react-navigation/native';
 import { routeNameRef } from 'CardicApp/src/navigators/Application';
 import { setBillForm } from 'CardicApp/src/store/bill';
-
+import Fontisto from 'react-native-vector-icons/Fontisto';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 
 interface Props {
   navigation: StackNavigationProp<ApplicationStackParamList, keyof ApplicationStackParamList, undefined>;
@@ -45,7 +45,6 @@ const HomeScreen = (props: Props) => {
 
   const dispatch = useDispatch();
   const authState = useSelector(selectAuthState);
-  const [user, setUser] = useState<User>();
   const [wallet, setWallet] = useState<Wallet>();
   const [popularCards, setPopularCards] = useState<Category[]>([]);
 
@@ -170,7 +169,10 @@ const HomeScreen = (props: Props) => {
       >
 
         {
-          wallet?.balances.map(w => <CardicCardThree
+          wallet?.balances.map(w => <WalletCard
+            containerStyle={{
+              backgroundColor: Colors.PrimaryBGLight,
+            }}
             onPress={() => {
               props.navigation.navigate("Wallet");
             }}
@@ -205,22 +207,35 @@ const HomeScreen = (props: Props) => {
           }}>
           <CardicCard
             key="0"
+            containerStyle={{
+              backgroundColor: Colors.PrimaryBGLight,
+              elevation: 0,
+            }}
             onPress={() => {
               props.navigation.push('CategoriesScreen');
             }}
-            text="Trade Gift Cards"
+            text="Sell Gift Cards"
+            textStyle={{
+              color: Colors.Primary,
+            }}
             icon={
-              <BlogIcon
-                pathProps={{
-                  fill: Colors.Primary,
-                  scale: 1.1,
-                }}
+              <Fontisto
+                name={"credit-card"}
+                size={RFPercentage(2)}
+                color={Colors.White}
               />
             }
+            iconContainerStyle={{
+              backgroundColor: Colors.Primary,
+            }}
           />
 
           <CardicCard
             key="1"
+            containerStyle={{
+              backgroundColor: Colors.BlueLight,
+              elevation: 0,
+            }}
             onPress={() => {
               dispatch(setBillForm({
                 bill: 'telco'
@@ -228,15 +243,20 @@ const HomeScreen = (props: Props) => {
               props.navigation.navigate('BillsScreenTwo')
             }}
             text="Buy Airtime/Data"
+            textStyle={{
+              color: Colors.Blue,
+            }}
             description=""
             icon={
-              <BlogIcon
-                pathProps={{
-                  fill: Colors.Primary,
-                  scale: 1.1,
-                }}
+              <FontAwesome5
+                color={Colors.White}
+                name={"clipboard-list"}
+                size={RFPercentage(3)}
               />
             }
+            iconContainerStyle={{
+              backgroundColor: Colors.Blue,
+            }}
           />
 
         </View>
@@ -286,6 +306,9 @@ const HomeScreen = (props: Props) => {
               onPress={() => {
                 dispatch(setTradeForm({ category: c }))
                 props.navigation.push("CreateTradeScreen")
+              }}
+              containerStyle={{
+                backgroundColor: Colors.PrimaryBGLight,
               }}
             />) :
             loading ?

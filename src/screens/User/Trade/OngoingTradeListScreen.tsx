@@ -130,6 +130,9 @@ const OngoingTradeListScreen = (props: Props) => {
               props.navigation.push('TradeDetailScreen');
             }}
             selected={item.id === tradeState.form?.subCategory?.id}
+            containerStyle={{
+              backgroundColor: Colors.PrimaryBGLight,
+            }}
           />}
         ListHeaderComponent={
           <SimpleBackHeader

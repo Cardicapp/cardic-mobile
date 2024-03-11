@@ -1,27 +1,29 @@
 import Colors from 'CardicApp/src/theme/Colors';
-import React from 'react';
-import { TouchableOpacity, View } from 'react-native';
+import React, { useState } from 'react';
+import { StyleProp, TouchableOpacity, View, ViewStyle } from 'react-native';
 import { heightPercentageToDP } from 'react-native-responsive-screen';
 import AppText, { AppBoldText } from '../AppText/AppText';
 import { RFPercentage } from 'react-native-responsive-fontsize';
 import { Values } from 'CardicApp/src/lib';
-import AntDesign from 'react-native-vector-icons/AntDesign';
+import Entypo from 'react-native-vector-icons/Entypo';
 
 
 
 interface CardicCardThreeProps {
   top?: string;
   bottom?: string;
-  image?: any;
   showIcon?: boolean;
   onPress?: () => void;
+  containerStyle?: StyleProp<ViewStyle>,
+  icon?: React.ReactNode,
 }
-const CardicCardThree: (props: CardicCardThreeProps) => React.ReactNode = ({
-  top, bottom, image, showIcon = true, onPress
+const WalletCard: (props: CardicCardThreeProps) => React.ReactNode = ({
+  top, bottom, showIcon = true, onPress, containerStyle
 }) => {
+  const [open, setOpen] = useState(false);
   return <TouchableOpacity
     onPress={onPress}
-    style={{
+    style={[{
       marginTop: heightPercentageToDP(2),
       // height: 96,
       width: '90%',
@@ -31,20 +33,7 @@ const CardicCardThree: (props: CardicCardThreeProps) => React.ReactNode = ({
       paddingHorizontal: 15,
       paddingVertical: heightPercentageToDP(3.5),
       borderRadius: 4,
-    }}>
-    <View
-      style={{
-        height: heightPercentageToDP(4),
-        aspectRatio: 1,
-        borderRadius: 100,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: image ? 'transparent' : Colors.Primary,
-        // shadowColor: 'grey',
-        // elevation: 5,
-      }}>
-      {image}
-    </View>
+    }, containerStyle]}>
     <View
       style={{
         marginLeft: 16,
@@ -61,24 +50,26 @@ const CardicCardThree: (props: CardicCardThreeProps) => React.ReactNode = ({
           fontSize: RFPercentage(3),
           marginTop: 3,
         }}>
-        {bottom}
+        {open ? bottom : '*******'}
       </AppBoldText>
     </View>
     {
-      showIcon ? (
-        <AntDesign
-          name="right"
-          size={RFPercentage(2.5)}
+      showIcon ?
+        <Entypo
+          onPress={() => {
+            setOpen(!open)
+          }}
+          name={open ? 'eye' : 'eye-with-line'}
+          size={RFPercentage(2.8)}
           color={Colors.Primary}
           style={{
             marginLeft: 'auto',
             alignSelf: 'center',
-          }} />
-      ) : undefined
+          }} /> : undefined
     }
 
   </TouchableOpacity>;
 }
 
 
-export default CardicCardThree;
+export default WalletCard;

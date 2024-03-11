@@ -72,7 +72,7 @@ const CompletedTradeListScreen = (props: Props) => {
       limit: 20,
       status: 2, // 1 = ongoing/pending trades. 2 = completed trades
     }, trades => {
-      if (trades.length){
+      if (trades.length) {
         setCompletedTrades(trades)
         pageIndex.current = pageIndex.current + 1;
       }
@@ -106,9 +106,9 @@ const CompletedTradeListScreen = (props: Props) => {
         backgroundColor: Colors.White,
       }}>
       <FlatList
-      contentContainerStyle={{
-        paddingBottom: 20,
-      }}
+        contentContainerStyle={{
+          paddingBottom: 20,
+        }}
         refreshControl={
           <RefreshControl
             refreshing={loading}
@@ -135,6 +135,9 @@ const CompletedTradeListScreen = (props: Props) => {
               }}
               ctaStyle={{
                 color: rejected ? Colors.Red : Colors.Primary,
+              }}
+              containerStyle={{
+                backgroundColor: Colors.PrimaryBGLight,
               }}
             />
           )

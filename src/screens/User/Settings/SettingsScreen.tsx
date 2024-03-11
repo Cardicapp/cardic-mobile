@@ -4,6 +4,8 @@ import {
   Alert,
   SafeAreaView,
   ScrollView,
+  StyleProp,
+  TextStyle,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -15,7 +17,7 @@ import { ApplicationStackParamList } from 'CardicApp/@types/navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectAuthState, setAuthToken, setUserInfo } from 'CardicApp/src/store/auth';
 import { useNavigation } from '@react-navigation/native';
-import { AppBoldText } from 'CardicApp/src/components/AppText/AppText';
+import AppText, { AppBoldText, BoldFontFamily } from 'CardicApp/src/components/AppText/AppText';
 import SimpleBackHeader from 'CardicApp/src/components/SimpleBackHeader';
 import { heightPercentageToDP } from 'react-native-responsive-screen';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -363,13 +365,17 @@ const SettingsScreen = (props: Props) => {
 
         <SettingItem
           text="Sign Out"
+          textStyle={{
+            fontFamily: BoldFontFamily,
+            color: Colors.Red,
+          }}
           onPress={() => {
             logout();
           }}
           rightItem={
             <AntDesign
               name="logout"
-              color={Colors.Primary}
+              color={Colors.Red}
               size={RFPercentage(2.8)}
               style={{
                 marginRight: '1%',
@@ -412,13 +418,14 @@ const SettingsScreen = (props: Props) => {
 
 export interface SettingItemProps {
   text: string;
+  textStyle?: StyleProp<TextStyle>,
   rightItem?: React.ReactNode;
   onPress: () => void;
   disabled?: boolean;
 }
 
 export const SettingItem = (props: SettingItemProps) => {
-  const { disabled } = props;
+  const { disabled, textStyle } = props;
   return (
     <TouchableOpacity
       activeOpacity={0.6}
@@ -431,13 +438,15 @@ export const SettingItem = (props: SettingItemProps) => {
         paddingHorizontal: '5%',
         marginTop: heightPercentageToDP(0.6),
         height: heightPercentageToDP(5),
+        elevation: 1,
+        backgroundColor: Colors.White,
       }}>
-      <AppBoldText
-        style={{
+      <AppText
+        style={[{
           fontSize: RFPercentage(2.1),
-        }}>
+        }, textStyle]}>
         {props.text}
-      </AppBoldText>
+      </AppText>
       {props.rightItem ? props.rightItem : undefined}
     </TouchableOpacity>
   );

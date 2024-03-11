@@ -68,4 +68,11 @@ export default {
     Primary: '#1DA18A',
     BorderColor: "#C4C4C4",
     ChatBg: "#F8F9FF",
+    PrimaryLightBg: 'rgba(29, 161, 138, .1)',
+    Orange: 'rgba(253, 126, 94, 1)',
+    OrangeLight: 'rgba(253, 126, 94, .1)',
+    Purple: 'rgb(116, 128, 238)',
+    PurpleLight: 'rgba(116, 128, 238, .1)',
+    Blue: 'rgb(73, 165, 245)',
+    BlueLight: 'rgba(73, 165, 245, .1)'
 }

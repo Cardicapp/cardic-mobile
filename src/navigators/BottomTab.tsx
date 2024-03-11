@@ -1,19 +1,14 @@
 import * as React from 'react';
-import { StyleProp, Text, TextStyle, View } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { StyleProp, TextStyle } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import HomeScreen from '../screens/User/Home/HomeScreen';
-import CategoriesScreen from '../screens/User/Categories/CategoriesScreen';
 import Colors from '../theme/Colors';
-import SubCategoriesScreen from '../screens/User/Categories/SubCategoriesScreen';
-import TradeSummaryScreen from '../screens/User/Trade/TradeSummaryScreen';
-import CreateTradeScreen from '../screens/User/Trade/CreateTradeScreen';
-import TradeDetailScreen from '../screens/User/Trade/TradeDetailScreen';
 import { createStackNavigator } from '@react-navigation/stack';
 import TradeHomePageScreen from '../screens/User/Trade/TradeHomePage/TradeHomePageScreen';
 import WalletScreen from '../screens/User/Wallet/WalletScreen';
 import SettingsScreen from '../screens/User/Settings/SettingsScreen';
+import { RegularFontFamily } from '../components/AppText/AppText';
 
 
 
@@ -44,7 +39,7 @@ export default function BottomTab() {
           } else if (route.name === 'Settings') {
             iconName = focused ? 'settings' : 'settings-outline';
           } else if (route.name === 'Trades') {
-            iconName = focused ? 'trending-up' : 'trending-up-outline';
+            iconName = focused ? 'pie-chart' : 'pie-chart-outline';
           } else if (route.name === 'Wallet') {
             iconName = focused ? 'wallet' : 'wallet-outline';
           }
@@ -59,20 +54,37 @@ export default function BottomTab() {
       })}
     >
       <Tab.Screen name="Home" component={HomeNavigator}
-        // options={{ tabBarBadge: 3, tabBarBadgeStyle: tabBarStyle }}
+        options={{
+          tabBarLabelStyle: tabBarStyle
+        }}
       />
-      <Tab.Screen name="Wallet" component={WalletScreen} />
+      <Tab.Screen name="Wallet" component={WalletScreen} 
+      options={{
+        tabBarLabelStyle: tabBarStyle
+      }}
+      />
 
-      <Tab.Screen name="Trades" component={TradeHomePageScreen} />
-      <Tab.Screen name="Settings" component={SettingsScreen} />
+      <Tab.Screen name="Trades" component={TradeHomePageScreen} 
+      options={{
+        tabBarLabelStyle: tabBarStyle
+      }}
+      />
+      <Tab.Screen name="Settings" component={SettingsScreen} 
+      options={{
+        tabBarLabelStyle: tabBarStyle
+      }}
+      />
 
     </Tab.Navigator>
   );
 }
 
 const tabBarStyle: StyleProp<TextStyle> = {
-  backgroundColor: Colors.Primary,
-  color: Colors.White,
-  borderWidth: 1,
-  borderColor: Colors.White,
+  // backgroundColor: Colors.Primary,
+  // color: Colors.White,
+  // borderWidth: 1,
+  // borderColor: Colors.White,
+  fontFamily: RegularFontFamily
 }
+
+const tabBarOptions =  { tabBarBadgeStyle: tabBarStyle }

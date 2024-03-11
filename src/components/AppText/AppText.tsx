@@ -3,8 +3,8 @@ import React from 'react';
 import {Text, StyleSheet, StyleProp, TextStyle} from 'react-native';
 import { RFPercentage } from 'react-native-responsive-fontsize';
 
-export const RegularFontFamily = "CerebriSansPro-Regular";
-export const BoldFontFamily = "CerebriSansPro-SemiBold";
+export const RegularFontFamily = "Raleway-Regular";
+export const BoldFontFamily = "Raleway-Bold";
 interface Props {
     children: any,
     style?: StyleProp<TextStyle>,

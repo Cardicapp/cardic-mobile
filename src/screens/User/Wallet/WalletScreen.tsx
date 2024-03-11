@@ -276,6 +276,9 @@ const WalletScreen = (props: Props) => {
                 // Debit style
                 color: Colors.Red
               }}
+              containerStyle={{
+                backgroundColor: isCredit ? Colors.PrimaryBGLight : Colors.OrangeLight,
+              }}
             />
           )
         }}
@@ -304,11 +307,16 @@ const WalletScreen = (props: Props) => {
                 }}
                 text="Withdraw"
                 icon={
-                  <MaterialCommunityIcons name={'cash'} size={RFPercentage(3.5)} color={Colors.Primary} />
+                  <MaterialCommunityIcons name={'cash'} size={RFPercentage(3.5)} color={Colors.White} />
                 }
                 containerStyle={{
                   width: widthPercentageToDP(30),
                   aspectRatio: 1,
+                  backgroundColor: Colors.PrimaryBGLight,
+                  elevation: 0,
+                }}
+                iconContainerStyle={{
+                  backgroundColor: Colors.Primary,
                 }}
               />
             </View>

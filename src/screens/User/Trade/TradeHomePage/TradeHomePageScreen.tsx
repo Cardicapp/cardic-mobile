@@ -1,21 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   RefreshControl,
   SafeAreaView,
   ScrollView,
-  StyleSheet,
   TouchableOpacity,
   View,
+  // Animated
 } from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
-// import AppText, {AppBoldText} from '../../components/AppText';
-// import SaveIcon from '../../icons/SaveIcon';
-// import LoanIcon from '../../icons/LoanIcon';
-// import CommunityIcon from '../../icons/CommunityIcon';
-// import BlogIcon from '../../icons/BlogIcon';
-// import SheCard from '../../components/SheCard';
-import { connect, useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { RFPercentage } from 'react-native-responsive-fontsize';
 import { heightPercentageToDP } from 'react-native-responsive-screen';
 import Colors from 'CardicApp/src/theme/Colors';
@@ -23,23 +16,20 @@ import { Values } from 'CardicApp/src/lib';
 import Utils from 'CardicApp/src/lib/utils/Utils';
 import AppText, { AppBoldText } from 'CardicApp/src/components/AppText/AppText';
 import CardicCard from 'CardicApp/src/components/Card/CardicCard';
-import BlogIcon from 'CardicApp/src/components/Icons/BlogIcon';
 import GCCardOne from 'CardicApp/src/components/Card/GCCardOne';
-import { AuthState, selectAuthState } from 'CardicApp/src/store/auth';
+import { selectAuthState } from 'CardicApp/src/store/auth';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { ApplicationStackParamList } from 'CardicApp/@types/navigation';
-import { User } from 'CardicApp/src/types/user';
-import { Wallet } from 'CardicApp/src/types/wallet';
 import axiosExtended from 'CardicApp/src/lib/network/axios-extended';
 import routes from 'CardicApp/src/lib/network/routes';
-import { UserRoleEnum } from 'CardicApp/src/types/enums';
-import CardicCardThree from 'CardicApp/src/components/Card/CardicCardThree';
 import { Trade } from 'CardicApp/src/types/trade';
 import queryString from 'query-string';
 import { setSelectedTrade } from 'CardicApp/src/store/trade';
-import { useFocusEffect } from '@react-navigation/native';
-// import SimpleBackHeader from '../../components/SimpleBackHeader';
-// import PushNotification from 'react-native-push-notification';
+import Fontisto from 'react-native-vector-icons/Fontisto';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+// @ts-ignore
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
+import * as Animatable from 'react-native-animatable';
 
 interface Props {
   navigation: StackNavigationProp<ApplicationStackParamList, keyof ApplicationStackParamList, undefined>;
@@ -131,7 +121,7 @@ const TradeHomePageScreen = (props: Props) => {
             flexDirection: 'row',
             justifyContent: 'space-between'
           }}>
-          <CardicCard
+          {/* <CardicCard
             key="0"
             onPress={() => {
               props.navigation.push('CategoriesScreen');
@@ -145,23 +135,58 @@ const TradeHomePageScreen = (props: Props) => {
                 }}
               />
             }
+          /> */}
+          <CardicCard
+            key="0"
+            containerStyle={{
+              backgroundColor: Colors.PrimaryLightBg,
+              elevation: 0,
+            }}
+            onPress={() => {
+              props.navigation.push('CategoriesScreen');
+            }}
+            text="Sell Gift Cards"
+            textStyle={{
+              color: Colors.Primary,
+            }}
+            icon={
+              <Fontisto
+                name={"credit-card"}
+                size={RFPercentage(2)}
+                color={Colors.White}
+              />
+            }
+            iconContainerStyle={{
+              backgroundColor: Colors.Primary,
+            }}
           />
 
           <CardicCard
             key="1"
-            onPress={() => props.navigation.push('TradeHistoryScreen')}
+            containerStyle={{
+              backgroundColor: Colors.PurpleLight,
+              elevation: 0,
+            }}
+            onPress={() => {
+              props.navigation.push('TradeHistoryScreen');
+            }}
             text="View Trade History"
-            description=""
+            textStyle={{
+              color: Colors.Purple,
+            }}
             icon={
-              <BlogIcon
-                pathProps={{
-                  fill: Colors.Primary,
-                  scale: 1.1,
-                }}
+              <FontAwesome5
+                name={"chart-bar"}
+                size={RFPercentage(3)}
+                color={Colors.White}
               />
             }
-          />
+            iconContainerStyle={{
+              backgroundColor: Colors.Purple,
+              elevation: 0,
 
+            }}
+          />
         </View>
         <View
           style={{
@@ -173,33 +198,72 @@ const TradeHomePageScreen = (props: Props) => {
           }}>
           <CardicCard
             key="2"
+            text="Ongoing Trades"
+            containerStyle={{
+              backgroundColor: Colors.OrangeLight,
+              elevation: 0,
+            }}
             onPress={() => {
               props.navigation.push('OngoingTradeListScreen');
             }}
-            text="Ongoing Trades"
+            textStyle={{
+              color: Colors.Orange,
+            }}
             icon={
-              <BlogIcon
-                pathProps={{
-                  fill: Colors.Primary,
-                  scale: 1.1,
-                }}
-              />
+              <Animatable.View
+              iterationCount={'infinite'}
+              duration={1000}
+              easing={'linear'}
+              animation={{
+                from: {
+                  transform: [{ rotate: '00deg'}]
+                },
+                to: {
+                  transform: [{ rotate: '360deg'}]
+                }
+              }}>
+                <AntDesign
+                  name={"loading1"}
+                  size={RFPercentage(3)}
+                  color={Colors.White}
+                  style={{
+
+                  }}
+                />
+              </Animatable.View>
             }
+            iconContainerStyle={{
+              backgroundColor: Colors.Orange,
+              elevation: 0,
+
+            }}
           />
 
           <CardicCard
             key="3"
-            onPress={() => props.navigation.push('CompletedTradeListScreen')}
+            containerStyle={{
+              backgroundColor: Colors.BlueLight,
+              elevation: 0,
+            }}
+            onPress={() => {
+              props.navigation.push('CompletedTradeListScreen');
+            }}
             text="Completed Trades"
-            description=""
+            textStyle={{
+              color: Colors.Blue,
+            }}
             icon={
-              <BlogIcon
-                pathProps={{
-                  fill: Colors.Primary,
-                  scale: 1.1,
-                }}
+              <FontAwesome6
+                name={"handshake-simple"}
+                size={RFPercentage(3)}
+                color={Colors.White}
               />
             }
+            iconContainerStyle={{
+              backgroundColor: Colors.Blue,
+              elevation: 0,
+
+            }}
           />
 
         </View>
@@ -245,6 +309,9 @@ const TradeHomePageScreen = (props: Props) => {
               onPress={() => {
                 dispatch(setSelectedTrade(t));
                 props.navigation.push('TradeDetailScreen');
+              }}
+              containerStyle={{
+                backgroundColor: Colors.PrimaryBGLight,
               }}
             />) :
             <AppText
@@ -297,6 +364,9 @@ const TradeHomePageScreen = (props: Props) => {
               onPress={() => {
                 dispatch(setSelectedTrade(t));
                 props.navigation.push('TradeDetailScreen');
+              }}
+              containerStyle={{
+                backgroundColor: Colors.PrimaryBGLight,
               }}
             />) :
             <AppText

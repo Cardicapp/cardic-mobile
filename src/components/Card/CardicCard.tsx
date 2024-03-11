@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleProp, TouchableWithoutFeedback, View, ViewStyle } from 'react-native';
+import { StyleProp, TextStyle, TouchableWithoutFeedback, View, ViewStyle } from 'react-native';
 import { RFPercentage } from 'react-native-responsive-fontsize';
 import { heightPercentageToDP, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import Colors from 'CardicApp/src/theme/Colors';
@@ -14,13 +14,17 @@ interface CardicCardProps {
     onPress?: () => void;
     centered?: boolean;
     containerStyle?: StyleProp<ViewStyle>;
+    iconContainerStyle?: StyleProp<ViewStyle>;
+    textStyle?: StyleProp<TextStyle>;
 }
 const CardicCard = (props: CardicCardProps) => {
     const {
         text,
         icon,
         centered = false,
-        containerStyle
+        containerStyle,
+        iconContainerStyle,
+        textStyle
     } = props;
     return (
         <TouchableWithoutFeedback
@@ -44,7 +48,7 @@ const CardicCard = (props: CardicCardProps) => {
                     alignItems: centered ? 'center' : 'flex-start',
                 }, containerStyle]}>
                 <View
-                    style={{
+                    style={[{
                         height: heightPercentageToDP(6),
                         aspectRatio: 1,
                         borderRadius: 100,
@@ -56,7 +60,7 @@ const CardicCard = (props: CardicCardProps) => {
                         shadowRadius: 3,
                         elevation: 2,
                         marginTop: 20,
-                    }}>
+                    }, iconContainerStyle]}>
                     {
                         icon && icon
                     }
@@ -64,13 +68,13 @@ const CardicCard = (props: CardicCardProps) => {
                 {
                     text && (
                         <AppBoldText
-                            style={{
+                            style={[{
                                 marginTop: 20,
                                 fontSize: RFPercentage(2),
                                 marginLeft: centered ? 0 : 5,
                                 color: Colors.Primary,
                                 textAlign: centered ? 'center' : 'left',
-                            }}>{text}</AppBoldText>
+                            }, textStyle]}>{text}</AppBoldText>
                     )
                 }
 

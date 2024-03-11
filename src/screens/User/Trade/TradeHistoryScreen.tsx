@@ -136,6 +136,9 @@ const TradeHistoryScreen = (props: Props) => {
               ctaStyle={{
                 color: rejected ? Colors.Red : ongoing ? Colors.GreyText : Colors.Primary,
               }}
+              containerStyle={{
+                backgroundColor: Colors.PrimaryBGLight,
+              }}
             />
           )
         }}
