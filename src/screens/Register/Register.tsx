@@ -69,6 +69,7 @@ const Register = (props: Props) => {
         userName,
       }
       try {
+        console.log(formdata)
         const res = await axiosExtended.post(routes.userRegisterEmail, formdata)
         if (res.status === 201) {
           setPageState({
@@ -78,7 +79,7 @@ const Register = (props: Props) => {
         }
       } catch (err) {
         console.error(err)
-        console.error(JSON.stringify(err, null, 6))
+        // console.error(JSON.stringify(err, null, 6))
       } finally {
         setLoading(false)
       }

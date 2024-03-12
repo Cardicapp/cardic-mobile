@@ -444,6 +444,8 @@ PODS:
   - react-native-mmkv (2.10.0):
     - MMKV (>= 1.2.13)
     - React-Core
+  - react-native-notifications (5.1.0):
+    - React-Core
   - react-native-safe-area-context (4.6.3):
     - RCT-Folly
     - RCTRequired
@@ -664,6 +666,7 @@ DEPENDENCIES:
   - react-native-flipper (from `../node_modules/react-native-flipper`)
   - react-native-image-picker (from `../node_modules/react-native-image-picker`)
   - react-native-mmkv (from `../node_modules/react-native-mmkv`)
+  - react-native-notifications (from `../node_modules/react-native-notifications`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - React-NativeModulesApple (from `../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
   - React-perflogger (from `../node_modules/react-native/ReactCommon/reactperflogger`)
@@ -775,6 +778,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-image-picker"
   react-native-mmkv:
     :path: "../node_modules/react-native-mmkv"
+  react-native-notifications:
+    :path: "../node_modules/react-native-notifications"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
   React-NativeModulesApple:
@@ -881,6 +886,7 @@ SPEC CHECKSUMS:
   react-native-flipper: 54df9001d6236e4048d941043b41a9ef47f85981
   react-native-image-picker: db60857e03d63721f19b6f4027de20429ddd9cba
   react-native-mmkv: 725623a679fec884bf18a37400e753afb8a1b924
+  react-native-notifications: 4601a5a8db4ced6ae7cfc43b44d35fe437ac50c4
   react-native-safe-area-context: 36cc67648134e89465663b8172336a19eeda493d
   React-NativeModulesApple: 4f31a812364443cee6ef768d256c594ad3b20f53
   React-perflogger: 3d501f34c8d4b10cb75f348e43591765788525ad
@@ -913,4 +919,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 4ddc4e69a63bd227f8f6fe86e333d3ed974c1e34
 
-COCOAPODS: 1.11.3
+COCOAPODS: 1.15.2
