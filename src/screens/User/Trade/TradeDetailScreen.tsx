@@ -7,10 +7,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  Modal,
   Platform,
   SafeAreaView,
   TouchableOpacity,
   View,
+  PermissionsAndroid
 } from 'react-native';
 import { RFPercentage } from 'react-native-responsive-fontsize';
 import Feather from 'react-native-vector-icons/Feather';
@@ -31,10 +33,14 @@ import Config from "react-native-config";
 import { selectAuthState } from 'CardicApp/src/store/auth';
 import { Asset, ImagePickerResponse, launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import CustomModal from 'CardicApp/src/components/Modal/CustomModal';
-import { heightPercentageToDP } from 'react-native-responsive-screen';
+import { heightPercentageToDP, widthPercentageToDP } from 'react-native-responsive-screen';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { Trade } from 'CardicApp/src/types/trade';
-import { useRoute } from '@react-navigation/native';
+// import ImageViewer from 'react-native-image-zoom-viewer';
+import { CameraRoll } from "@react-native-camera-roll/camera-roll";
+import * as RNFS from 'react-native-fs';
+import SimpleToast from 'react-native-simple-toast';
+import ImageView from "react-native-image-viewing";
 
 const baseURL = Config.API_URL;
 
@@ -62,7 +68,18 @@ const TradeDetailScreen
     const [showTradeSuccessModal, setShowTradeSuccessModal] = useState(false);
     const [showTradeFailedModal, setShowTradeFailedModal] = useState(false);
 
+    const [showImageOptions, setShowImageOptions] = useState(false)
+    const [currentImage, setCurrentImage] = useState(0);
+    const [images, setImages] = useState<any[]>([]);
+    const [isViewerOpen, setIsViewerOpen] = useState(false);
+
     const dispatch = useDispatch();
+
+
+    const closeImageViewer = () => {
+      setCurrentImage(0);
+      setIsViewerOpen(false);
+    };
 
     const fetchMessages = async (fn: any = undefined, optionalParams?: any) => {
       setLoadingMessages(true)
@@ -104,9 +121,6 @@ const TradeDetailScreen
       }
     }, [])
 
-    const refresh = () => {
-
-    };
     const openCamera = async () => {
       const result = await launchCamera({
         mediaType: 'photo',
@@ -207,6 +221,74 @@ const TradeDetailScreen
       setShowTradeFailedModal(true);
     }
 
+
+    async function hasAndroidPermission() {
+      const getCheckPermissionPromise = () => {
+        // @ts-ignore
+        if (Platform.Version >= 33) {
+          return Promise.all([
+            PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES),
+            PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.READ_MEDIA_VIDEO),
+          ]).then(
+            ([hasReadMediaImagesPermission, hasReadMediaVideoPermission]) =>
+              hasReadMediaImagesPermission && hasReadMediaVideoPermission,
+          );
+        } else {
+          return PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE);
+        }
+      };
+
+      const hasPermission = await getCheckPermissionPromise();
+      if (hasPermission) {
+        return true;
+      }
+      const getRequestPermissionPromise = () => {
+        // @ts-ignore
+        if (Platform.Version >= 33) {
+          return PermissionsAndroid.requestMultiple([
+            PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES,
+            PermissionsAndroid.PERMISSIONS.READ_MEDIA_VIDEO,
+          ]).then(
+            (statuses) =>
+              statuses[PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES] ===
+              PermissionsAndroid.RESULTS.GRANTED &&
+              statuses[PermissionsAndroid.PERMISSIONS.READ_MEDIA_VIDEO] ===
+              PermissionsAndroid.RESULTS.GRANTED,
+          );
+        } else {
+          return PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE).then((status) => status === PermissionsAndroid.RESULTS.GRANTED);
+        }
+      };
+
+      return await getRequestPermissionPromise();
+    }
+
+    async function savePicture(uri: any) {
+      if (Platform.OS === "android" && !(await hasAndroidPermission())) {
+        return;
+      }
+      let imagePath = `${RNFS.DocumentDirectoryPath}/${new Date().toISOString()}.jpg`.replace(/:/g, '-');
+      try {
+        const res = await RNFS.downloadFile({
+          fromUrl: uri,
+          toFile: imagePath,
+        }).promise
+        // console.log('The file downloaded to ', res.statusCode)
+        try {
+          await CameraRoll.saveAsset(imagePath)
+          SimpleToast.show('Image saved successfully', 3000)
+        } catch (err) {
+          // console.error("CameraRoll", err)
+          SimpleToast.show('Failed to save image', 3000)
+        }
+      } catch (err: any) {
+        console.log('ERROR: image file write failed!!!');
+        console.log(err.message, err.code);
+        SimpleToast.show('Failed to download image', 3000)
+        return
+      }
+    };
+
     return (
       <SafeAreaView
         style={{
@@ -226,6 +308,16 @@ const TradeDetailScreen
             <ChatMessage
               key={item.id}
               chat={item}
+              onClickImage={(chat, index) => {
+                setCurrentImage(index)
+                setImages(chat.images?.map(i => {
+                  return {
+                    uri: i.path,
+                  }
+                }) ?? [])
+                setShowImageOptions(true);
+                // setIsViewerOpen(true)
+              }}
             />
           }
           ListHeaderComponentStyle={{
@@ -565,6 +657,70 @@ const TradeDetailScreen
           ]}
         />
 
+        <ImageViewerModal
+          currentIndex={currentImage}
+          visible={isViewerOpen}
+          images={images}
+          transparent={true}
+          onClose={closeImageViewer}
+          onSave={(uri) => {
+            savePicture(uri)
+          }}
+          onChange={(index) => setCurrentImage(index)}
+        />
+
+        <CustomModal
+          isVisible={showImageOptions}
+          onClose={() => setShowImageOptions(false)}
+          // content=""
+          // contentStyle={{
+          //   fontWeight: '400',
+          //   fontSize: 13,
+          //   marginTop: heightPercentageToDP(0.8),
+          //   lineHeight: 18,
+          //   marginVertical: 0,
+          // }}
+
+          actions={[
+            {
+              text: 'Open',
+              onPress: () => {
+                // setShowImageOptions(false)
+                // setTimeout(() => 
+                setIsViewerOpen(true)
+                // , 5000)
+                
+              },
+              containerStyle: {
+                backgroundColor: Colors.Primary,
+                marginTop: 10
+              },
+            },
+            {
+              text: 'Save Image',
+              onPress: () => {
+                savePicture(images[currentImage].uri)
+              },
+              containerStyle: {
+                backgroundColor: Colors.Primary,
+                marginTop: 10
+              },
+            },
+            {
+              text: 'Cancel',
+              onPress: () => setShowImageOptions(false),
+              containerStyle: {
+                backgroundColor: Colors.White,
+              },
+              textStyle: {
+                color: Colors.Black,
+              },
+            },
+
+          ]}
+        />
+
+
       </SafeAreaView >
     );
   };
@@ -582,6 +738,164 @@ const renderStatus = (status: TradeStatusEnum) => {
     default:
       break;
   }
+}
+
+interface ImageViewerModalProps {
+  visible: boolean;
+  currentIndex: number;
+  images: any[];
+  transparent: boolean;
+  onClose: () => void;
+  onSave?: (uri: string) => void;
+  onChange: (index: number) => void;
+}
+
+const ImageViewerModal = (props: ImageViewerModalProps) => {
+  const {
+    currentIndex,
+    images,
+    visible,
+    transparent,
+    onClose,
+    onSave,
+    onChange
+  } = props;
+  return (
+    <ImageView
+      images={images}
+      imageIndex={currentIndex}
+      visible={visible}
+      onRequestClose={() => onClose()}
+      onImageIndexChange={onChange}
+      HeaderComponent={() => {
+        return (
+          <View
+            style={{
+              flexDirection: 'row',
+              paddingTop: 10,
+              paddingRight: '3%',
+              alignItems: 'center',
+              justifyContent:'flex-end'
+            }}>
+            <TouchableOpacity
+              onPress={() => {
+                onSave && onSave(images[currentIndex].uri)
+              }}
+              accessibilityHint='Save'
+              style={{
+                marginRight: '2%',
+              }}>
+              <AntDesign
+                name="save"
+                size={RFPercentage(3)}
+                color={Colors.White}
+                style={{
+                  // backgroundColor: Colors.Primary,
+                  padding: 5,
+                  borderRadius: 50,
+                }}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity
+              accessibilityHint='Close'
+              onPress={() => {
+                onClose()
+              }}
+              style={{
+
+              }}
+            >
+              <AntDesign
+                name="close"
+                size={RFPercentage(3)}
+                color={Colors.White}
+                style={{
+                  // backgroundColor: Colors.Primary,
+                  padding: 5,
+                  borderRadius: 50,
+                }}
+              />
+            </TouchableOpacity>
+          </View>
+        )
+      }}
+    />
+  )
+  // <Modal visible={visible} transparent={transparent}>
+
+  {/* <ImageViewer
+        index={currentIndex}
+        imageUrls={images}
+        onCancel={onClose}
+        saveToLocalByLongPress={true}
+        onChange={index => onChange(index)}
+        enableSwipeDown={true}
+        backgroundColor='rgba(0,0,0,.4)'
+        onSave={(uri) => {
+          onSave && onSave(uri);
+        }}
+        renderHeader={() => {
+          return (
+            <View
+              style={{
+                flexDirection: 'row',
+                // backgroundColor: 'red',
+                // justifyContent: 'flex-end',
+                // paddingTop: 10,
+                position: 'absolute',
+                right: 10,
+                top: 10,
+                alignItems: 'center',
+                zIndex: 1,
+              }}>
+                 <TouchableOpacity
+                onPress={() => {
+                  // onSave(images[currentIndex].url)
+                }}
+                accessibilityHint='Save'
+                style={{
+                  marginRight: '10%',
+                }}>
+                <AntDesign
+                  name="save"
+                  size={RFPercentage(3)}
+                  color={Colors.White}
+                  style={{
+                    backgroundColor: Colors.Primary,
+                    padding: 5,
+                    borderRadius: 50,
+                  }}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                accessibilityHint='Close'
+                onPress={() => {
+                  onClose()
+                }}
+                style={{
+
+                }}
+              >
+                <AntDesign
+                  name="close"
+                  size={RFPercentage(3)}
+                  color={Colors.White}
+                  style={{
+                    // position: 'absolute',
+                    // left: 50,
+                    // top: 10,
+                    backgroundColor: Colors.Primary,
+                    padding: 5,
+                    borderRadius: 50,
+                  }}
+                />
+              </TouchableOpacity>
+            </View>
+          )
+        }}
+      /> */}
+  {/* </Modal> */ }
+
 }
 
 export default TradeDetailScreen

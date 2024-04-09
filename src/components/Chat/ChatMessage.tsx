@@ -1,6 +1,6 @@
 import Colors from 'CardicApp/src/theme/Colors';
 import React from 'react';
-import { Image, View } from "react-native";
+import { Image, TouchableOpacity, View } from "react-native";
 import AppText from '../AppText/AppText';
 import { RFPercentage } from 'react-native-responsive-fontsize';
 import { TradeChat } from 'CardicApp/src/types/chat';
@@ -12,8 +12,9 @@ import { widthPercentageToDP } from 'react-native-responsive-screen';
 
 interface ChatMessageProps {
     chat: TradeChat;
+    onClickImage?: (chat: TradeChat, index: number) => void;
 }
-const ChatMessage = ({ chat }: ChatMessageProps) => {
+const ChatMessage = ({ chat, onClickImage }: ChatMessageProps) => {
     const { user } = useSelector(selectAuthState);
 
     const isMine = chat?.from?.id == user?.id;
@@ -45,15 +46,22 @@ const ChatMessage = ({ chat }: ChatMessageProps) => {
                         <AppText style={{
                             color: Colors.White,
                         }}>{chat.message}</AppText> :
-                        chat.images?.map(im => <Image
-                            style={{
-                                marginBottom: 10,
-                                width: widthPercentageToDP(50),
-                                aspectRatio: 1,
-                            }}
-                            source={{ uri: im.path }}
-                            resizeMode='contain'
-                        />)
+                        chat.images?.map((im, index) =>
+                            <TouchableOpacity
+                                onPress={() => onClickImage && onClickImage(chat, index)}
+                                style={{
+                                    marginBottom: 10,
+                                }}>
+                                <Image
+                                    style={{
+                                        // marginBottom: 10,
+                                        width: widthPercentageToDP(50),
+                                        aspectRatio: 1,
+                                    }}
+                                    source={{ uri: im.path }}
+                                    resizeMode='contain'
+                                />
+                            </TouchableOpacity>)
 
                 }
             </View>

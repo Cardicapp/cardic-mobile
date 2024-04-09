@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Linking,
   SafeAreaView,
   ScrollView,
   StyleProp,
@@ -25,7 +26,9 @@ import axiosExtended from 'CardicApp/src/lib/network/axios-extended';
 import routes from 'CardicApp/src/lib/network/routes';
 import Toast from 'react-native-toast-message';
 import ConfirmModal from 'CardicApp/src/components/Modal/ConfirmModal';
+import Config from "react-native-config";
 
+const frontendHost = Config.FRONTEND_HOST
 interface Props {
   navigation: StackNavigationProp<ApplicationStackParamList, keyof ApplicationStackParamList, undefined>;
 }
@@ -258,7 +261,7 @@ const SettingsScreen = (props: Props) => {
         <SettingItem
           text="Privacy Policy"
           onPress={() => {
-            // props.navigation.push('/privacy-policy');
+            Linking.openURL(`${frontendHost}/privacypolicy`)
           }}
           rightItem={
             <AntDesign
