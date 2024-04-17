@@ -10,6 +10,8 @@ import { useTheme } from '../hooks';
 import MainNavigator from './Main';
 import { useFlipper } from '@react-navigation/devtools';
 import { ApplicationStackParamList } from '../../@types/navigation';
+import Onboarding from '../screens/Onboarding/Onboarding';
+import SplashScreen from '../screens/SplashScreen/SplashScreen';
 
 const Stack = createStackNavigator<ApplicationStackParamList>();
 
@@ -48,7 +50,9 @@ const ApplicationNavigator = () => {
         <StatusBar barStyle={darkMode ? 'light-content' : 'dark-content'} />
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           {/* <Stack.Screen name="Startup" component={Startup} /> */}
+          <Stack.Screen name="SplashScreen" component={SplashScreen} />
           <Stack.Screen name="Main" component={MainNavigator} />
+          <Stack.Screen name="Onboarding" component={Onboarding} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaView>

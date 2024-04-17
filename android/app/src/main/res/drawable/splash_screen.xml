@@ -3,10 +3,7 @@
 
     <item android:drawable="@color/splashscreen_bg"/>
 
-    <item
-    android:height="10dp"
-    android:width="10dp"
-    >
+    <item>
         <bitmap
             android:gravity="center"
             android:src="@drawable/splash_icon"

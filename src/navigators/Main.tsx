@@ -31,7 +31,6 @@ const MainNavigator = () => {
       <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
       <Stack.Screen name="Register" component={Register} />
       <Stack.Screen name="BottomTab" component={BottomTab} />
-      <Stack.Screen name="Home" component={Example} />
       <Stack.Screen name="CategoriesScreen" component={CategoriesScreen} />
       <Stack.Screen name="TradeDetailScreen" component={TradeDetailScreen} />
       <Stack.Screen name="SubCategoriesScreen" component={SubCategoriesScreen} />

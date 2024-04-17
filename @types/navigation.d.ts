@@ -8,6 +8,8 @@ export type MainParamsList = {
 export type ApplicationStackParamList = {
   Startup: undefined;
   Main: NavigatorScreenParams<MainParamsList>;
+  Onboarding: NavigatorScreenParams<MainParamsList>;
+  SplashScreen: NavigatorScreenParams<any>;
 };
 
 export type ApplicationScreenProps =

@@ -8,7 +8,7 @@ export const BoldFontFamily = "Raleway-Bold";
 interface Props {
     children: any,
     style?: StyleProp<TextStyle>,
-    props?: object
+    props?: any;
 }
 const AppText = ({children, style, props } : Props) => (
     <Text style={[defaultStyle.root, style,]} {...props}>

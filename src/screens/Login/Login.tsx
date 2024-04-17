@@ -3,9 +3,9 @@ import TextInputOne from 'CardicApp/src/components/TextInputOne';
 import Utils from 'CardicApp/src/lib/utils/Utils';
 import Colors from 'CardicApp/src/theme/Colors';
 import React, { MutableRefObject, useRef, useState } from 'react';
-import { Image, SafeAreaView, View, TouchableOpacity, TextInput, } from 'react-native';
+import { Image, SafeAreaView, View, TouchableOpacity, TextInput, ImageBackground, } from 'react-native';
 import { RFPercentage } from 'react-native-responsive-fontsize';
-import { heightPercentageToDP as hp, widthPercentageToDP as wp } from "react-native-responsive-screen";
+import { heightPercentageToDP, heightPercentageToDP as hp, widthPercentageToDP as wp } from "react-native-responsive-screen";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Toast from 'react-native-toast-message';
 
@@ -20,6 +20,7 @@ import axiosExtended from 'CardicApp/src/lib/network/axios-extended';
 import { ApplicationScreenProps, ApplicationStackParamList } from 'CardicApp/@types/navigation';
 import { NavigationProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { useTheme } from 'CardicApp/src/hooks';
 
 
 interface UserData {
@@ -199,258 +200,256 @@ const Login = (props: Props) => {
   // }
   // }
 
-
+  const {
+    Images
+  } = useTheme()
   return (
-    <SafeAreaView
+    <ImageBackground
+      source={Images.cardicBgIcon2}
+      resizeMode='cover'
       style={{
-        backgroundColor: Colors.White,
         flex: 1,
+        justifyContent: 'center',
+        height: heightPercentageToDP(100),
+        backgroundColor: Colors.Primary,
       }}>
-      <KeyboardAwareScrollView
-        keyboardShouldPersistTaps="handled"
-        keyboardDismissMode="interactive"
-        onKeyboardDidShow={() => {
-          setKeyboardVisible(true)
-        }}
-        onKeyboardDidHide={() => {
-          setKeyboardVisible(false)
-        }}
-        contentContainerStyle={{
-          paddingBottom: 20,
-          backgroundColor: Colors.White,
-        }}
-      >
+      <SafeAreaView
+        style={{
+          backgroundColor: undefined, // Colors.White,
+          flex: 1,
+        }}>
+        <KeyboardAwareScrollView
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="interactive"
+          onKeyboardDidShow={() => {
+            setKeyboardVisible(true)
+          }}
+          onKeyboardDidHide={() => {
+            setKeyboardVisible(false)
+          }}
+          contentContainerStyle={{
+            // paddingBottom: 20,
+            // backgroundColor: Colors.White,
+          }}
+        >
 
-        <View
-          style={{
-            marginLeft: wp(2),
-            marginTop: 80,
-          }}>
-          {/* <AppText style={{
+          <View
+            style={{
+              padding: '5%',
+              marginTop: '15%',
+            }}>
+            {/* <AppText style={{
             marginTop: 80,
             color: Colors.Primary,
             fontWeight: '700'
           }}>Sign In</AppText> */}
 
-          <View style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-          }}>
-            <View>
+            <View style={{
+              // flexDirection: 'row',
+              justifyContent: 'space-between',
+            }}>
               <AppBoldText
                 style={{
-                  fontSize: 24,
+                  fontSize: RFPercentage(4.5),
+                  color: Colors.White,
                 }}
               >
-                Sign In
+                Welcome
               </AppBoldText>
-              {/* {
-                                    // @ts-ignore
-                                    props.userData ? (
-                                        <AppBoldText
-                                            style={{
-                                                fontSize: 24,
-                                                textTransform: 'capitalize',
-                                            }}
-                                        >
-                                            {
-                                                // @ts-ignore  -- onChange, value are incompatible
-                                                state.userData && state.userData['first_name'] && state.userData['first_name']
-                                            }
-                                        </AppBoldText>
-                                    ) : (
-                                        <AppBoldText
-                                            style={{
-                                                fontSize: 24,
-                                            }}
-                                        >
-                                            Stranger
-                                        </AppBoldText>
-                                    )
-                                } */}
+              <AppText
+                style={{
+                  fontSize: RFPercentage(2.5),
+                  color: Colors.White,
+                  marginTop: 20,
+                }}
+              >
+                Enter your details
+              </AppText>
 
-            </View>
-
-            <View style={{
-              height: wp(20),
-            }}>
-              {/* <Image
-                                    source={Images.Iffy}
-                                    resizeMode="contain"
-                                    style={{
-                                        height: wp(17),
-                                        aspectRatio: 1,
-                                        alignSelf: 'center',
-                                        borderRadius: 100,
-                                    }}
-                                /> */}
             </View>
           </View>
-        </View>
 
 
-        <View
-          style={{
-            justifyContent: "center",
-            marginTop: 10,
-          }}>
-          {
-            pageState.useExistingEmail && pageState.userData ?
-              (
-                <View
-                  style={{
-                    paddingHorizontal: "5%",
-                  }}>
-                  <AppBoldText
+          <View
+            style={{
+              justifyContent: "center",
+              marginTop: '10%',
+              paddingTop: '15%',
+              paddingBottom: '25%',
+              backgroundColor: Colors.White,
+            }}>
+            {
+              pageState.useExistingEmail && pageState.userData ?
+                (
+                  <View
                     style={{
-                      fontSize: RFPercentage(2.5)
-                    }}>{pageState.userData['email']}</AppBoldText>
-                  <TouchableOpacity
-                    style={{
-                      // marginLeft: wp(4),
-                      marginTop: hp(1),
-
-                    }}
-                    onPress={() => {
-                      setPageState({ ...pageState, useExistingEmail: false })
+                      paddingHorizontal: "5%",
                     }}>
-                    <AppText
+                    <AppBoldText
                       style={{
-                        textAlign: 'right',
-                        fontSize: RFPercentage(2),
-                        color: Colors.Primary,
+                        fontSize: RFPercentage(2.5)
+                      }}>{pageState.userData['email']}</AppBoldText>
+                    <TouchableOpacity
+                      style={{
+                        // marginLeft: wp(4),
+                        marginTop: hp(1),
 
                       }}
-                    >
-                      Change account
-                    </AppText>
-                  </TouchableOpacity>
-                </View>
+                      onPress={() => {
+                        setPageState({ ...pageState, useExistingEmail: false })
+                      }}>
+                      <AppText
+                        style={{
+                          textAlign: 'right',
+                          fontSize: RFPercentage(2),
+                          color: Colors.Primary,
 
-              ) :
-              (
-                <TextInputOne
-                  inputRef={(ref) => {
-                    // @ts-ignore
-                    emailRef.current = ref;
-                  }}
-                  headText="Email Address"
-                  placeholder="Your Email Address here"
-                  value={pageState.email}
-                  labelStyle={{
-                    fontWeight: 'bold',
-                  }}
-                  onChange={(value => setPageState({ ...pageState, email: value }))}
-                  onSubmitEditing={() => login()}
-                  containerStyle={{
-                    marginTop: 0,
-                    paddingHorizontal: 10,
-                  }}
-                />
-              )
-          }
-          <TextInputOne
-            inputRef={(ref) => {
-              // @ts-ignore
-              passwordRef.current = ref;
-            }}
-            headText="Password"
-            placeholder="Your Password here"
-            value={pageState.password}
-            labelStyle={{
-              fontWeight: 'bold',
-            }}
-            onChange={(value => setPageState({ ...pageState, password: value }))}
-            onSubmitEditing={() => login()}
-            secureTextEntry={!pageState.showPassword}
-            icon={(<Ionicons
-              name={pageState.showPassword ? "eye-outline" : "eye-off-outline"}
-              size={22}
-              color={Colors.Black}
-            />)}
-            onPressIcon={() => {
-              setPageState({ ...pageState, showPassword: !pageState.showPassword })
-            }}
-            containerStyle={{
-              paddingHorizontal: 10,
-            }}
-          />
+                        }}
+                      >
+                        Change account
+                      </AppText>
+                    </TouchableOpacity>
+                  </View>
 
-          <TouchableOpacity
-            style={{
-              marginLeft: wp(4),
-              marginTop: hp(1),
+                ) :
+                (
+                  <TextInputOne
+                    inputRef={(ref) => {
+                      // @ts-ignore
+                      emailRef.current = ref;
+                    }}
+                    headText="Email Address"
+                    // placeholder="Your Email Address here"
+                    value={pageState.email}
+                    labelStyle={{
+                      fontWeight: 'bold',
+                    }}
+                    onChange={(value => setPageState({ ...pageState, email: value }))}
+                    onSubmitEditing={() => login()}
+                    containerStyle={{
+                      marginTop: 0,
+                      paddingHorizontal: 10,
+                    }}
+                  />
+                )
+            }
+            <TextInputOne
+              inputRef={(ref) => {
+                // @ts-ignore
+                passwordRef.current = ref;
+              }}
+              headText="Password"
+              // placeholder="Your Password here"
+              value={pageState.password}
+              labelStyle={{
+                fontWeight: 'bold',
+              }}
+              onChange={(value => setPageState({ ...pageState, password: value }))}
+              onSubmitEditing={() => login()}
+              secureTextEntry={!pageState.showPassword}
+              icon={(<Ionicons
+                name={pageState.showPassword ? "eye-outline" : "eye-off-outline"}
+                size={22}
+                color={Colors.Black}
+              />)}
+              onPressIcon={() => {
+                setPageState({ ...pageState, showPassword: !pageState.showPassword })
+              }}
+              containerStyle={{
+                paddingHorizontal: 10,
+              }}
+            />
 
-            }}
-            onPress={() => {
-              props.navigation.push("ForgotPassword")
-            }}>
-            <AppText
+            <TouchableOpacity
               style={{
-                // textAlign: 'center',
-                fontSize: RFPercentage(2),
-                color: Colors.Primary,
+                marginRight: wp(4),
+                width: '40%',
+                // backgroundColor: 'red',
+                alignSelf: 'flex-end'
+              }}
+              onPress={() => {
+                props.navigation.push("ForgotPassword")
+              }}>
+              <AppText
+                style={{
+                  textAlign: 'right',
+                  fontSize: RFPercentage(2),
+                  color: Colors.Primary,
+                }}
+              >
+                I forgot my password
+              </AppText>
+            </TouchableOpacity>
+          </View>
+
+
+
+
+
+
+
+        </KeyboardAwareScrollView>
+
+        <View style={{
+          marginTop: 'auto',
+          paddingBottom: 20,
+          paddingTop: 10,
+          backgroundColor: Colors.White,
+        }}>
+          <AppText
+            style={{
+              textAlign: 'center',
+              marginBottom: '2%',
+            }}>Don't have an account, <AppText
+            props={{
+              onPress: () => {
+                props.navigation.push("Register")
+              }
+            }}
+                style={{
+                  color: Colors.Primary,
+                  alignSelf: 'center',
+                }}>create one</AppText></AppText>
+          <View
+            style={{
+              paddingHorizontal: 20,
+              flexDirection: 'row',
+              width: '100%',
+              // justifyContent: 'space-between',
+            }}>
+            <ButtonOne
+              onPress={() => {
+                login();
+              }}
+              text="Log In"
+              textStyle={{
+                fontSize: RFPercentage(2.2),
+              }}
+              loading={loading}
+              containerStyle={{
+                backgroundColor: Colors.Primary,
+                // backgroundColor: validateForm() == null ? Colors.Primary : Colors.SlightlyShyGrey,
 
               }}
-            >
-              I forgot my password
-            </AppText>
-          </TouchableOpacity>
-        </View>
+              outerStyle={{
+                width: pageState.isSensorAvailable ? '78%' : '100%',
+              }}
+            />
+            {
+              pageState.isSensorAvailable ? (
+                <TouchableOpacity
+                  onPress={() => {
+                    // promptFingerprint();
+                  }}
+                  style={{
+                    backgroundColor: Colors.Primary,
+                    borderRadius: 5,
+                    width: '20%',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}>
 
-
-
-
-
-
-
-      </KeyboardAwareScrollView>
-
-      <View style={{
-        marginTop: 'auto',
-        paddingBottom: 20,
-        paddingTop: 10,
-        backgroundColor: Colors.White,
-      }}>
-        <View
-          style={{
-            paddingHorizontal: 20,
-            flexDirection: 'row',
-            width: '100%',
-            justifyContent: 'space-between',
-          }}>
-          <ButtonOne
-            onPress={() => {
-              login();
-            }}
-            text="Login"
-            textStyle={{
-              fontSize: RFPercentage(2.2),
-            }}
-            loading={loading}
-            containerStyle={{
-              backgroundColor: validateForm() == null ? Colors.Primary : Colors.SlightlyShyGrey,
-
-            }}
-            outerStyle={{
-              width: pageState.isSensorAvailable ? '78%' : '100%',
-            }}
-          />
-          {
-            pageState.isSensorAvailable ? (
-              <TouchableOpacity
-                onPress={() => {
-                  // promptFingerprint();
-                }}
-                style={{
-                  backgroundColor: Colors.Primary,
-                  borderRadius: 5,
-                  width: '20%',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
-
-                {/* {
+                  {/* {
 
                     state.biometryType == ReactNativeBiometrics.TouchID ? (
                             <MaterialCommunityIcons
@@ -473,45 +472,46 @@ const Login = (props: Props) => {
                         ) : undefined
                 } */}
 
-              </TouchableOpacity>
-            ) : undefined
-          }
+                </TouchableOpacity>
+              ) : undefined
+            }
+
+          </View>
+          {/* {
+            keyboardVisible ?
+              undefined
+              : (
+                <TouchableOpacity
+                  style={{
+                    alignItems: 'center',
+                    marginTop: 20,
+                  }}
+                  onPress={() => {
+                    props.
+                      navigation.push("Register")
+                  }}>
+                  <AppBoldText
+                    style={{
+                      textAlign: 'center',
+                      fontSize: RFPercentage(2),
+                      color: Colors.Primary,
+                    }}
+                  >
+                    Register
+                  </AppBoldText>
+                </TouchableOpacity>
+              )
+          } */}
+
+
+
+
 
         </View>
-        {
-          keyboardVisible ?
-            undefined
-            : (
-              <TouchableOpacity
-                style={{
-                  alignItems: 'center',
-                  marginTop: 20,
-                }}
-                onPress={() => {
-                  props.
-                    navigation.push("Register")
-                }}>
-                <AppBoldText
-                  style={{
-                    textAlign: 'center',
-                    fontSize: RFPercentage(2),
-                    color: Colors.Primary,
-                  }}
-                >
-                  Register
-                </AppBoldText>
-              </TouchableOpacity>
-            )
-        }
 
 
-
-
-
-      </View>
-
-
-    </SafeAreaView>
+      </SafeAreaView>
+    </ImageBackground>
   );
 }
 
