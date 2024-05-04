@@ -36,6 +36,7 @@ const SplashScreen = (props: Props) => {
     } else {
       // @ts-ignore
       return navigate("Onboarding");
+
     }
   }
   return (

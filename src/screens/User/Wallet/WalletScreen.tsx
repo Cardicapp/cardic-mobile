@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  Platform,
   RefreshControl,
   SafeAreaView,
   View,
@@ -258,7 +259,7 @@ const WalletScreen = (props: Props) => {
           const isCredit = [TransactionTypeEnum.credit].includes(i.transactionType?.id ?? 0)
           return (
             <GCCardOne
-              name={moment(i.tx_date).format('DD ddd MMM YYYY hh:mma')}
+              name={moment(i.tx_date).format('ddd MMM YYYY hh:mma')}
               rate={`${isCredit ? '+' : '-'}${Values.NairaSymbol}${Utils.currencyFormat(i.amount, 0)}`}
               cta={`Current balance: ${Values.NairaSymbol}${Utils.currencyFormat(i.currentBalance, 0)}`}
               showImage={false}
@@ -267,11 +268,11 @@ const WalletScreen = (props: Props) => {
                 fontSize: RFPercentage(1.6)
               }}
               nameStyle={{
-                fontSize: RFPercentage(1.7)
+                fontSize: RFPercentage(Platform.OS == 'android' ? 1.7 : 1.5)
               }}
               rateStyle={isCredit ? {
                 // Credit style
-                color: Colors.Primary
+                color: Colors.Primary,
               } : {
                 // Debit style
                 color: Colors.Red
@@ -306,17 +307,22 @@ const WalletScreen = (props: Props) => {
                   setShowWithdrawModal(true)
                 }}
                 text="Withdraw"
+                textStyle={{ 
+                  marginTop: '5%'
+                 }}
                 icon={
                   <MaterialCommunityIcons name={'cash'} size={RFPercentage(3.5)} color={Colors.White} />
                 }
                 containerStyle={{
-                  width: widthPercentageToDP(30),
+                  height: heightPercentageToDP(14),
                   aspectRatio: 1,
                   backgroundColor: Colors.PrimaryBGLight,
                   elevation: 0,
+                  // padding: 20
                 }}
                 iconContainerStyle={{
                   backgroundColor: Colors.Primary,
+                  marginTop: '5%'
                 }}
               />
             </View>

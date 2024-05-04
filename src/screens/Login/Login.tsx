@@ -210,189 +210,190 @@ const Login = (props: Props) => {
       style={{
         flex: 1,
         justifyContent: 'center',
-        height: heightPercentageToDP(100),
+        // height: heightPercentageToDP(100),
         backgroundColor: Colors.Primary,
       }}>
-      <SafeAreaView
+      {/* <SafeAreaView
         style={{
-          backgroundColor: undefined, // Colors.White,
+          backgroundColor: Colors.Red,// undefined, // Colors.White,
           flex: 1,
-        }}>
-        <KeyboardAwareScrollView
-          keyboardShouldPersistTaps="handled"
-          keyboardDismissMode="interactive"
-          onKeyboardDidShow={() => {
-            setKeyboardVisible(true)
-          }}
-          onKeyboardDidHide={() => {
-            setKeyboardVisible(false)
-          }}
-          contentContainerStyle={{
-            // paddingBottom: 20,
-            // backgroundColor: Colors.White,
-          }}
-        >
+        }}> */}
+      <KeyboardAwareScrollView
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
+        onKeyboardDidShow={() => {
+          setKeyboardVisible(true)
+        }}
+        onKeyboardDidHide={() => {
+          setKeyboardVisible(false)
+        }}
+        contentContainerStyle={{
+          // paddingBottom: 20,
+          // backgroundColor: Colors.White,
+        }}
+        style={{
+          // flex: 1,
+          // backgroundColor: 'blue'
+        }}
+      >
 
-          <View
-            style={{
-              padding: '5%',
-              marginTop: '15%',
-            }}>
-            {/* <AppText style={{
+        <View
+          style={{
+            padding: '5%',
+            paddingTop: '15%',
+          }}>
+          {/* <AppText style={{
             marginTop: 80,
             color: Colors.Primary,
             fontWeight: '700'
           }}>Sign In</AppText> */}
 
-            <View style={{
-              // flexDirection: 'row',
-              justifyContent: 'space-between',
-            }}>
-              <AppBoldText
-                style={{
-                  fontSize: RFPercentage(4.5),
-                  color: Colors.White,
-                }}
-              >
-                Welcome
-              </AppBoldText>
-              <AppText
-                style={{
-                  fontSize: RFPercentage(2.5),
-                  color: Colors.White,
-                  marginTop: 20,
-                }}
-              >
-                Enter your details
-              </AppText>
+          <View style={{
+            // flexDirection: 'row',
+            justifyContent: 'space-between',
+          }}>
+            <AppBoldText
+              style={{
+                fontSize: RFPercentage(4.5),
+                color: Colors.White,
+              }}
+            >
+              Welcome
+            </AppBoldText>
+            <AppText
+              style={{
+                fontSize: RFPercentage(2.5),
+                color: Colors.White,
+                marginTop: 20,
+              }}
+            >
+              Enter your details
+            </AppText>
 
-            </View>
           </View>
+        </View>
 
 
-          <View
-            style={{
-              justifyContent: "center",
-              marginTop: '10%',
-              paddingTop: '15%',
-              paddingBottom: '25%',
-              backgroundColor: Colors.White,
-            }}>
-            {
-              pageState.useExistingEmail && pageState.userData ?
-                (
-                  <View
+        <View
+          style={{
+            justifyContent: "center",
+            marginTop: '10%',
+            paddingTop: '10%',
+            paddingBottom: '25%',
+            backgroundColor: Colors.White,
+          }}>
+          {
+            pageState.useExistingEmail && pageState.userData ?
+              (
+                <View
+                  style={{
+                    paddingHorizontal: "5%",
+                  }}>
+                  <AppBoldText
                     style={{
-                      paddingHorizontal: "5%",
+                      fontSize: RFPercentage(2.5)
+                    }}>{pageState.userData['email']}</AppBoldText>
+                  <TouchableOpacity
+                    style={{
+                      // marginLeft: wp(4),
+                      marginTop: hp(1),
+
+                    }}
+                    onPress={() => {
+                      setPageState({ ...pageState, useExistingEmail: false })
                     }}>
-                    <AppBoldText
+                    <AppText
                       style={{
-                        fontSize: RFPercentage(2.5)
-                      }}>{pageState.userData['email']}</AppBoldText>
-                    <TouchableOpacity
-                      style={{
-                        // marginLeft: wp(4),
-                        marginTop: hp(1),
+                        textAlign: 'right',
+                        fontSize: RFPercentage(2),
+                        color: Colors.Primary,
 
                       }}
-                      onPress={() => {
-                        setPageState({ ...pageState, useExistingEmail: false })
-                      }}>
-                      <AppText
-                        style={{
-                          textAlign: 'right',
-                          fontSize: RFPercentage(2),
-                          color: Colors.Primary,
+                    >
+                      Change account
+                    </AppText>
+                  </TouchableOpacity>
+                </View>
 
-                        }}
-                      >
-                        Change account
-                      </AppText>
-                    </TouchableOpacity>
-                  </View>
+              ) :
+              (
+                <TextInputOne
+                  inputRef={(ref) => {
+                    // @ts-ignore
+                    emailRef.current = ref;
+                  }}
+                  headText="Email Address"
+                  keyboardType='email-address'
+                  // placeholder="Your Email Address here"
+                  value={pageState.email}
+                  labelStyle={{
+                    fontWeight: 'bold',
+                  }}
+                  onChange={(value => setPageState({ ...pageState, email: value }))}
+                  onSubmitEditing={() => login()}
+                  containerStyle={{
+                    marginTop: 0,
+                    paddingHorizontal: 10,
+                  }}
+                />
+              )
+          }
+          <TextInputOne
+            inputRef={(ref) => {
+              // @ts-ignore
+              passwordRef.current = ref;
+            }}
+            headText="Password"
+            // placeholder="Your Password here"
+            value={pageState.password}
+            labelStyle={{
+              fontWeight: 'bold',
+            }}
+            onChange={(value => setPageState({ ...pageState, password: value }))}
+            onSubmitEditing={() => login()}
+            secureTextEntry={!pageState.showPassword}
+            icon={(<Ionicons
+              name={pageState.showPassword ? "eye-outline" : "eye-off-outline"}
+              size={22}
+              color={Colors.Black}
+            />)}
+            onPressIcon={() => {
+              setPageState({ ...pageState, showPassword: !pageState.showPassword })
+            }}
+            containerStyle={{
+              paddingHorizontal: 10,
+            }}
+          />
 
-                ) :
-                (
-                  <TextInputOne
-                    inputRef={(ref) => {
-                      // @ts-ignore
-                      emailRef.current = ref;
-                    }}
-                    headText="Email Address"
-                    // placeholder="Your Email Address here"
-                    value={pageState.email}
-                    labelStyle={{
-                      fontWeight: 'bold',
-                    }}
-                    onChange={(value => setPageState({ ...pageState, email: value }))}
-                    onSubmitEditing={() => login()}
-                    containerStyle={{
-                      marginTop: 0,
-                      paddingHorizontal: 10,
-                    }}
-                  />
-                )
-            }
-            <TextInputOne
-              inputRef={(ref) => {
-                // @ts-ignore
-                passwordRef.current = ref;
-              }}
-              headText="Password"
-              // placeholder="Your Password here"
-              value={pageState.password}
-              labelStyle={{
-                fontWeight: 'bold',
-              }}
-              onChange={(value => setPageState({ ...pageState, password: value }))}
-              onSubmitEditing={() => login()}
-              secureTextEntry={!pageState.showPassword}
-              icon={(<Ionicons
-                name={pageState.showPassword ? "eye-outline" : "eye-off-outline"}
-                size={22}
-                color={Colors.Black}
-              />)}
-              onPressIcon={() => {
-                setPageState({ ...pageState, showPassword: !pageState.showPassword })
-              }}
-              containerStyle={{
-                paddingHorizontal: 10,
-              }}
-            />
-
-            <TouchableOpacity
+          <TouchableOpacity
+            style={{
+              marginRight: wp(4),
+              width: '60%',
+              // backgroundColor: 'red',
+              alignSelf: 'flex-end'
+            }}
+            onPress={() => {
+              props.navigation.push("ForgotPassword")
+            }}>
+            <AppText
               style={{
-                marginRight: wp(4),
-                width: '40%',
-                // backgroundColor: 'red',
-                alignSelf: 'flex-end'
+                textAlign: 'right',
+                fontSize: RFPercentage(2),
+                color: Colors.Primary,
               }}
-              onPress={() => {
-                props.navigation.push("ForgotPassword")
-              }}>
-              <AppText
-                style={{
-                  textAlign: 'right',
-                  fontSize: RFPercentage(2),
-                  color: Colors.Primary,
-                }}
-              >
-                I forgot my password
-              </AppText>
-            </TouchableOpacity>
-          </View>
+            >
+              I forgot my password
+            </AppText>
+          </TouchableOpacity>
+        </View>
 
 
 
 
 
-
-
-        </KeyboardAwareScrollView>
 
         <View style={{
-          marginTop: 'auto',
-          paddingBottom: 20,
+          paddingBottom: '50%',
           paddingTop: 10,
           backgroundColor: Colors.White,
         }}>
@@ -401,15 +402,15 @@ const Login = (props: Props) => {
               textAlign: 'center',
               marginBottom: '2%',
             }}>Don't have an account, <AppText
-            props={{
-              onPress: () => {
-                props.navigation.push("Register")
-              }
-            }}
-                style={{
-                  color: Colors.Primary,
-                  alignSelf: 'center',
-                }}>create one</AppText></AppText>
+              props={{
+                onPress: () => {
+                  props.navigation.push("Register")
+                }
+              }}
+              style={{
+                color: Colors.Primary,
+                alignSelf: 'center',
+              }}>create one</AppText></AppText>
           <View
             style={{
               paddingHorizontal: 20,
@@ -508,9 +509,12 @@ const Login = (props: Props) => {
 
 
         </View>
+      </KeyboardAwareScrollView>
 
 
-      </SafeAreaView>
+
+
+      {/* </SafeAreaView> */}
     </ImageBackground>
   );
 }

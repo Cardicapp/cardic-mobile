@@ -1,6 +1,6 @@
 import Colors from 'CardicApp/src/theme/Colors';
 import React from 'react';
-import { Image, StyleProp, TextStyle, TouchableOpacity, View, ViewStyle } from 'react-native';
+import { Image, Platform, StyleProp, TextStyle, TouchableOpacity, View, ViewStyle } from 'react-native';
 import { heightPercentageToDP } from 'react-native-responsive-screen';
 import AppText, { AppBoldText } from '../AppText/AppText';
 import { Values } from 'CardicApp/src/lib';
@@ -32,7 +32,7 @@ export default ({ name, rate, cta, image, onPress, selected, containerStyle, nam
         backgroundColor: Colors.CardicGreyBgOne,
         alignSelf: 'center',
         flexDirection: 'row',
-        paddingHorizontal: 15,
+        paddingHorizontal: "2%",
         paddingVertical: heightPercentageToDP(1),
         borderRadius: 4,
         borderWidth: selected ? 2 : 0,
@@ -51,7 +51,8 @@ export default ({ name, rate, cta, image, onPress, selected, containerStyle, nam
               overflow: 'hidden'
             }}>
             <Image
-              source={{ uri: image }}
+            // @ts-ignore
+              source={{ uri: image ? image.replace('http','https') : image }}
               style={{
                 width: '100%',
                 height: '100%',
@@ -79,7 +80,7 @@ export default ({ name, rate, cta, image, onPress, selected, containerStyle, nam
             <AppBoldText
               style={[{
                 color: Colors.HomeBlack,
-                fontSize: RFPercentage(2.8),
+                fontSize: RFPercentage(Platform.OS == 'android' ? 2.8 : 2.5),
                 marginTop: 3,
               }, rateStyle]}>
               {rate}

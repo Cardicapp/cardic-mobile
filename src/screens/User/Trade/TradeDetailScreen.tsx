@@ -276,18 +276,26 @@ const TradeDetailScreen
         // console.log('The file downloaded to ', res.statusCode)
         try {
           await CameraRoll.saveAsset(imagePath)
-          SimpleToast.show('Image saved successfully', 3000)
+          showToast('Image saved successfully')
         } catch (err) {
           // console.error("CameraRoll", err)
-          SimpleToast.show('Failed to save image', 3000)
+          showToast('Failed to save image')
         }
       } catch (err: any) {
         console.log('ERROR: image file write failed!!!');
         console.log(err.message, err.code);
-        SimpleToast.show('Failed to download image', 3000)
+        showToast('Failed to download image')
         return
       }
     };
+
+    function showToast(msg: string) {
+      if(Platform.OS == 'android'){
+        SimpleToast.show(msg, 3000)
+      } else {
+        SimpleToast.showWithGravity(msg, SimpleToast.SHORT, SimpleToast.BOTTOM)
+      }
+    }
 
     return (
       <SafeAreaView
@@ -312,7 +320,7 @@ const TradeDetailScreen
                 setCurrentImage(index)
                 setImages(chat.images?.map(i => {
                   return {
-                    uri: i.path,
+                    uri: i.path.replace('http', 'https'),
                   }
                 }) ?? [])
                 setShowImageOptions(true);
@@ -685,11 +693,14 @@ const TradeDetailScreen
             {
               text: 'Open',
               onPress: () => {
-                // setShowImageOptions(false)
-                // setTimeout(() => 
-                setIsViewerOpen(true)
-                // , 5000)
                 
+                if (Platform.OS == 'ios') {
+                  setShowImageOptions(false)
+                  setTimeout(() => setIsViewerOpen(true), 2000)
+                } else {
+                  setIsViewerOpen(true)
+                }
+
               },
               containerStyle: {
                 backgroundColor: Colors.Primary,
@@ -767,15 +778,16 @@ const ImageViewerModal = (props: ImageViewerModalProps) => {
       visible={visible}
       onRequestClose={() => onClose()}
       onImageIndexChange={onChange}
+      swipeToCloseEnabled={true}
       HeaderComponent={() => {
         return (
-          <View
+          <SafeAreaView
             style={{
               flexDirection: 'row',
               paddingTop: 10,
               paddingRight: '3%',
               alignItems: 'center',
-              justifyContent:'flex-end'
+              justifyContent: 'flex-end'
             }}>
             <TouchableOpacity
               onPress={() => {
@@ -802,7 +814,7 @@ const ImageViewerModal = (props: ImageViewerModalProps) => {
                 onClose()
               }}
               style={{
-
+                // backgroundColor: Colors.Primary,
               }}
             >
               <AntDesign
@@ -816,85 +828,11 @@ const ImageViewerModal = (props: ImageViewerModalProps) => {
                 }}
               />
             </TouchableOpacity>
-          </View>
+          </SafeAreaView>
         )
       }}
     />
   )
-  // <Modal visible={visible} transparent={transparent}>
-
-  {/* <ImageViewer
-        index={currentIndex}
-        imageUrls={images}
-        onCancel={onClose}
-        saveToLocalByLongPress={true}
-        onChange={index => onChange(index)}
-        enableSwipeDown={true}
-        backgroundColor='rgba(0,0,0,.4)'
-        onSave={(uri) => {
-          onSave && onSave(uri);
-        }}
-        renderHeader={() => {
-          return (
-            <View
-              style={{
-                flexDirection: 'row',
-                // backgroundColor: 'red',
-                // justifyContent: 'flex-end',
-                // paddingTop: 10,
-                position: 'absolute',
-                right: 10,
-                top: 10,
-                alignItems: 'center',
-                zIndex: 1,
-              }}>
-                 <TouchableOpacity
-                onPress={() => {
-                  // onSave(images[currentIndex].url)
-                }}
-                accessibilityHint='Save'
-                style={{
-                  marginRight: '10%',
-                }}>
-                <AntDesign
-                  name="save"
-                  size={RFPercentage(3)}
-                  color={Colors.White}
-                  style={{
-                    backgroundColor: Colors.Primary,
-                    padding: 5,
-                    borderRadius: 50,
-                  }}
-                />
-              </TouchableOpacity>
-              <TouchableOpacity
-                accessibilityHint='Close'
-                onPress={() => {
-                  onClose()
-                }}
-                style={{
-
-                }}
-              >
-                <AntDesign
-                  name="close"
-                  size={RFPercentage(3)}
-                  color={Colors.White}
-                  style={{
-                    // position: 'absolute',
-                    // left: 50,
-                    // top: 10,
-                    backgroundColor: Colors.Primary,
-                    padding: 5,
-                    borderRadius: 50,
-                  }}
-                />
-              </TouchableOpacity>
-            </View>
-          )
-        }}
-      /> */}
-  {/* </Modal> */ }
 
 }
 

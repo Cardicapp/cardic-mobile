@@ -18,6 +18,7 @@ import React, { useEffect, useState } from 'react';
 import {
   FlatList,
   Image,
+  Platform,
   RefreshControl,
   SafeAreaView,
   ScrollView,
@@ -64,16 +65,21 @@ const TradeSummaryScreen
         }
         const res = await axiosExtended.post(`${routes.trade}/start`, payload);
         if (res.status === 201) {
-          const trade = res.data;
+          const trade = res.data
           dispatch(setSelectedTrade(trade));
-          setShowTradeStarted(true)
+          if(Platform.OS == "ios") {
+            setShowConfirmStartTrade(false);
+            setTimeout(() => setShowTradeStarted(true) , 2000)
+          } else {
+            setShowTradeStarted(true)
+          }
         }
       } catch (e) {
         console.error(e)
         console.log(JSON.stringify(e, null, 5))
       } finally {
         setLoading(false)
-        setShowConfirmStartTrade(false);
+        // setShowConfirmStartTrade(false);
       }
     };
 
@@ -104,7 +110,7 @@ const TradeSummaryScreen
           >
             <Image
               source={{
-                uri: form?.category.photo.path
+                uri: form?.category.photo.path.replace('http','https')
               }}
               style={{
                 width: '100%',

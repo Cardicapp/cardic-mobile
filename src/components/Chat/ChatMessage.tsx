@@ -58,7 +58,7 @@ const ChatMessage = ({ chat, onClickImage }: ChatMessageProps) => {
                                         width: widthPercentageToDP(50),
                                         aspectRatio: 1,
                                     }}
-                                    source={{ uri: im.path }}
+                                    source={{ uri: im.path.replace('http','https') }}
                                     resizeMode='contain'
                                 />
                             </TouchableOpacity>)

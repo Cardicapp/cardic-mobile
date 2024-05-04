@@ -24,7 +24,7 @@ import { User } from 'CardicApp/src/types/user';
 import { Wallet } from 'CardicApp/src/types/wallet';
 import axiosExtended from 'CardicApp/src/lib/network/axios-extended';
 import routes from 'CardicApp/src/lib/network/routes';
-import { UserRoleEnum } from 'CardicApp/src/types/enums';
+import { StatusEnum, UserRoleEnum } from 'CardicApp/src/types/enums';
 import WalletCard from 'CardicApp/src/components/Card/WalletCard';
 import { Category } from 'CardicApp/src/types/category';
 import queryString from 'query-string';
@@ -54,13 +54,13 @@ const HomeScreen = (props: Props) => {
   useEffect(() => {
     requestNotificationPermission();
     // Get the device token
-    messaging()
-      .getToken()
-      .then(token => {
-        return updateUser({
-          fcmToken: token
-        });
-      });
+    // messaging()
+    //   .getToken()
+    //   .then(token => {
+    //     return updateUser({
+    //       fcmToken: token
+    //     });
+    //   });
     // If using other push notification providers (ie Amazon SNS, etc)
     // you may need to get the APNs token instead for iOS:
     // if(Platform.OS == 'ios') { messaging().getAPNSToken().then(token => { return saveTokenToDatabase(token); }); }
@@ -90,11 +90,11 @@ const HomeScreen = (props: Props) => {
 
   const updateUser = async (payload: any) => {
     if (!authState.user) console.log("User not logged in. Can not register user")
-    console.log("Registering token...")
+    // console.log("Registering token...")
     try {
       const res = await axiosExtended.patch(`${routes.users}/${authState.user?.id}`, payload)
       if (res.status === 200) {
-        console.log("FCM token saved")
+        // console.log("FCM token saved")
       }
     } catch (e) {
       console.log(JSON.stringify(e, null, 5))
@@ -129,6 +129,7 @@ const HomeScreen = (props: Props) => {
       let payload = {
         page: 1,
         limit: 5,
+        status: StatusEnum.active,
       }
       const res = await axiosExtended.get(`${routes.categories}?${queryString.stringify(payload)}`);
       if (res.status === 200) {
@@ -169,7 +170,8 @@ const HomeScreen = (props: Props) => {
       >
 
         {
-          wallet?.balances.map(w => <WalletCard
+          wallet?.balances.map((w, i) => <WalletCard
+            key={i}
             containerStyle={{
               backgroundColor: Colors.PrimaryBGLight,
             }}
@@ -297,8 +299,9 @@ const HomeScreen = (props: Props) => {
         }
 
         {
-          popularCards && popularCards.length ? popularCards.map(c =>
+          popularCards && popularCards.length ? popularCards.map((c, i) =>
             <GCCardOne
+              key={i}
               name={c.name}
               cta='Trade'
               image={c.photo.path}

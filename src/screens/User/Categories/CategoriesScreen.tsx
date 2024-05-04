@@ -5,6 +5,8 @@ import routes from 'CardicApp/src/lib/network/routes';
 import { setTradeForm } from 'CardicApp/src/store/trade';
 import Colors from 'CardicApp/src/theme/Colors';
 import { Category } from 'CardicApp/src/types/category';
+import { StatusEnum } from 'CardicApp/src/types/enums';
+import queryString from 'query-string';
 import React, { useEffect, useState } from 'react';
 import {
   FlatList,
@@ -29,7 +31,10 @@ const CategoriesScreen = (props: Props) => {
   const getCategories = async () => {
     try {
       setLoading(true)
-      const res = await axiosExtended.get(`${routes.categories}`);
+      let payload = {
+        status: StatusEnum.active,
+      }
+      const res = await axiosExtended.get(`${routes.categories}?${queryString.stringify(payload)}`);
       if (res.status === 200) {
         const cats = res.data.data;
         setCategories(cats)

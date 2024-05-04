@@ -8,7 +8,7 @@ import {
 import { Startup } from '../screens';
 import { useTheme } from '../hooks';
 import MainNavigator from './Main';
-import { useFlipper } from '@react-navigation/devtools';
+// import { useFlipper } from '@react-navigation/devtools';
 import { ApplicationStackParamList } from '../../@types/navigation';
 import Onboarding from '../screens/Onboarding/Onboarding';
 import SplashScreen from '../screens/SplashScreen/SplashScreen';
@@ -24,7 +24,7 @@ const ApplicationNavigator = () => {
 
   const navigationRef = useNavigationContainerRef();
 
-  useFlipper(navigationRef);
+  // useFlipper(navigationRef);
 
   return (
     <SafeAreaView style={[Layout.fill, { backgroundColor: colors.card }]}>

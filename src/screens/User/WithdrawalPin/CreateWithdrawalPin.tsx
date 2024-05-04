@@ -154,7 +154,6 @@ const CreateWithdrawalPin = (props: Props) => {
               color: '#1D1D1B',
               fontWeight: '600',
               fontSize: RFPercentage(3.5),
-              lineHeight: 24,
             }}>
             {`Create Withdrawal Pin`}
           </AppText>
@@ -173,7 +172,6 @@ const CreateWithdrawalPin = (props: Props) => {
               color: '#0C1014',
               fontWeight: '400',
               // fontSize: 16,
-              lineHeight: 24,
             }}>
             Enter withdrawal pin
           </AppText>

@@ -40,7 +40,7 @@ const BillsScreenTwo = (props: Props) => {
     name: string;
     sector: string;
   }[]>([])
-  console.log("Operators", operators)
+  // console.log("Operators", operators)
   const [loading, setLoading] = useState(false);
   const billState = useSelector(selectBillState);
   const getOperators = async () => {

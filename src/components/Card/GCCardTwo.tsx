@@ -34,7 +34,8 @@ export default ({ top, bottom, image, onPress }: Props) => {
           backgroundColor: Colors.Primary,
         }}>
           <Image  
-          source={{uri: image}}
+          // @ts-ignore
+          source={{uri: image.replace('http','https'), height: 100, width: 100}}
           style={{
             height: '100%',
             width: '100%',

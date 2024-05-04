@@ -1,6 +1,6 @@
 import Colors from 'CardicApp/src/theme/Colors';
 import React from 'react';
-import {Text, StyleSheet, StyleProp, TextStyle} from 'react-native';
+import {Text, StyleSheet, StyleProp, TextStyle, Platform} from 'react-native';
 import { RFPercentage } from 'react-native-responsive-fontsize';
 
 export const RegularFontFamily = "Raleway-Regular";
@@ -27,7 +27,7 @@ export const AppBoldText = ({children, style, props } : Props) => (
 
 const style: StyleProp<TextStyle> = {
     color: Colors.TextPrimary,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(Platform.OS == 'android' ? 1.8 : 1.6),
     letterSpacing: .3,
 }
 

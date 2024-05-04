@@ -14,6 +14,7 @@ import routes from 'CardicApp/src/lib/network/routes';
 import axiosExtended from 'CardicApp/src/lib/network/axios-extended';
 import { ApplicationStackParamList } from 'CardicApp/@types/navigation';
 import { StackNavigationProp } from '@react-navigation/stack';
+import SimpleBackHeader from 'CardicApp/src/components/SimpleBackHeader';
 
 
 interface Props {
@@ -102,11 +103,15 @@ const ForgotPassword = (props: Props) => {
           backgroundColor: Colors.White,
         }}
       >
+        <SimpleBackHeader
+          showBack={true}
+          showMenu={false}
+        />
 
         <View
           style={{
             marginLeft: wp(2),
-            marginTop: 80,
+            marginTop: 60,
           }}>
           {/* <AppText style={{
             marginTop: 80,

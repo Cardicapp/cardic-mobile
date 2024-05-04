@@ -1,7 +1,7 @@
 
 import Colors from 'CardicApp/src/theme/Colors';
 import React from 'react';
-import { Image, ImageBackground, ImageStyle, SafeAreaView, StyleProp, StyleSheet, TextStyle, View, ViewStyle, } from 'react-native';
+import { Image, ImageBackground, ImageStyle, Platform, SafeAreaView, StyleProp, StyleSheet, TextStyle, View, ViewStyle, } from 'react-native';
 import { ApplicationStackParamList } from 'CardicApp/@types/navigation';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useTheme } from 'CardicApp/src/hooks';
@@ -12,10 +12,6 @@ import ButtonOne from 'CardicApp/src/components/ButtonOne';
 import { useNavigation } from '@react-navigation/native';
 import EncryptedStorage from 'react-native-encrypted-storage';
 
-
-interface State {
-
-}
 
 interface Props {
   navigation: StackNavigationProp<ApplicationStackParamList, keyof ApplicationStackParamList, undefined>;
@@ -45,7 +41,7 @@ const Onboarding = (props: Props) => {
       // autoplay={true}
       >
         <OnboardingPage
-          title='Fast and seamless transaction'
+          titleText='Fast and seamless transaction'
           description='Enjoy fast transactions and seamless whenever you need to.'
           image={Images.onboarding1}
         />
@@ -59,7 +55,7 @@ const Onboarding = (props: Props) => {
             backgroundColor: Colors.Primary,
           }}>
           <OnboardingPage
-            title='Best rates and easy cashouts'
+            titleText='Best rates and easy cashouts'
             description='Buy and sell  at  the best and affordable rates and get instant cash out.'
             titleStyle={{
               color: Colors.White,
@@ -75,7 +71,7 @@ const Onboarding = (props: Props) => {
         </ImageBackground>
 
         <OnboardingPage
-          title='Easily Buy data and airtime'
+          titleText='Easily Buy data and airtime'
           description='Buy data and airtime at any time of the day'
           image={Images.onboarding3}
           showProceedButton={true}
@@ -91,7 +87,7 @@ interface OnboardingPageProps {
   imageStyle?: StyleProp<ImageStyle>;
   backgroundImage?: any;
   backgroundImageStyle?: StyleProp<ImageStyle>;
-  title: string;
+  titleText: string;
   titleStyle?: StyleProp<TextStyle>;
   description: string;
   descriptionStyle?: StyleProp<TextStyle>;
@@ -100,7 +96,7 @@ interface OnboardingPageProps {
 
 const OnboardingPage = (props: OnboardingPageProps) => {
   const {
-    image, imageStyle, backgroundImage, backgroundImageStyle, title, description, pageStyle,
+    image, imageStyle, backgroundImage, backgroundImageStyle, titleText, description, pageStyle,
     titleStyle, descriptionStyle, showProceedButton = false,
   } = props;
   const { navigate, reset } = useNavigation()
@@ -133,7 +129,7 @@ const OnboardingPage = (props: OnboardingPageProps) => {
         color: Colors.Primary,
         marginTop: 5,
         fontSize: 18
-      }, titleStyle]}>{title}</AppBoldText>
+      }, titleStyle]}>{titleText}</AppBoldText>
       <AppText style={[{
         color: Colors.Black,
         marginTop: 15,
@@ -144,7 +140,7 @@ const OnboardingPage = (props: OnboardingPageProps) => {
       {
         showProceedButton ?
           <View style={{
-            paddingHorizontal: widthPercentageToDP(10),
+            paddingHorizontal: Platform.OS == 'android' ? '10%' : 20,
             marginTop: 'auto',
             width: '50%',
             marginBottom: "20%"
@@ -164,7 +160,7 @@ const OnboardingPage = (props: OnboardingPageProps) => {
             />
 
           </View>
-          : undefined
+          : <View />
       }
 
     </View>
