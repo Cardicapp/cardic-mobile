@@ -242,9 +242,9 @@ const HomeScreen = (props: Props) => {
               dispatch(setBillForm({
                 bill: 'telco'
               }));
-              props.navigation.navigate('BillsScreenTwo')
+              props.navigation.navigate('BillsScreenOne')
             }}
-            text="Buy Airtime/Data"
+            text="Pay Bills"
             textStyle={{
               color: Colors.Blue,
             }}

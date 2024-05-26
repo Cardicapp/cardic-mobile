@@ -210,7 +210,7 @@ const SettingsScreen = (props: Props) => {
         />
         {user?.hasWithdrawalPin ? (
           <SettingItem
-            text="Change Withdrawal PIN"
+            text="Change Transaction PIN"
             disabled={changingPin}
             onPress={() => {
               setShowConfirmChangePinModal(true)
@@ -220,9 +220,9 @@ const SettingsScreen = (props: Props) => {
           />
         ) : (
           <SettingItem
-            text="Setup Withdrawal PIN"
+            text="Setup Transaction PIN"
             onPress={() => {
-              props.navigation.push('CreateWithdrawalPin');
+              props.navigation.push('CreateTransactionPin');
             }}
           />
         )}

@@ -536,12 +536,12 @@ const WalletScreen = (props: Props) => {
         onClose={() => {
           setShowSetWithdrawalPinModal(false)
         }}
-        title="No withdrawal PIN"
-        content='Kindly proceed to set up your withdrawal pin'
+        title="No transaction PIN"
+        content='Kindly proceed to set up your transaction pin'
         actions={[
           {
             text: 'Proceed',
-            onPress: () => props.navigation.push("CreateWithdrawalPin"),
+            onPress: () => props.navigation.push("CreateTransactionPin"),
             containerStyle: {
               backgroundColor: Colors.White,
               width: '95%',

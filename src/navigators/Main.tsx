@@ -1,5 +1,4 @@
 import React from 'react';
-import { Example } from '../screens';
 import { createStackNavigator } from '@react-navigation/stack';
 import Login from '../screens/Login/Login';
 import BottomTab from './BottomTab';
@@ -13,13 +12,23 @@ import CompletedTradeListScreen from '../screens/User/Trade/CompletedTradeListSc
 import TradeHistoryScreen from '../screens/User/Trade/TradeHistoryScreen';
 import WalletScreen from '../screens/User/Wallet/WalletScreen';
 import Register from '../screens/Register/Register';
-import CreateWithdrawalPin from '../screens/User/WithdrawalPin/CreateWithdrawalPin';
+import CreateTransactionPin from '../screens/User/WithdrawalPin/CreateTransactionPin';
 import SettingsScreen from '../screens/User/Settings/SettingsScreen';
 import ForgotPassword from '../screens/ForgotPassword/ForgotPassword';
 import BillsScreenOne from '../screens/User/Bills/BillsScreenOne';
 import BillsScreenTwo from '../screens/User/Bills/BillsScreenTwo';
 import BillsScreenThree from '../screens/User/Bills/BillsScreenThree';
 import BillSummaryScreen from '../screens/User/Bills/BillSummaryScreen';
+import ElectricityScreen from '../screens/User/Bills/ElectricityScreen';
+import ElectricityBillSummary from '../screens/User/Bills/ElectricityBillSummaryScreen';
+import TVBillsScreen from '../screens/User/Bills/TVBillsScreen';
+import TVBillsSummaryScreen from '../screens/User/Bills/TVBillsSummaryScreen';
+import AirtimeScreen from '../screens/User/Bills/AirtimeScreen';
+import AirtimeBillsSummaryScreen from '../screens/User/Bills/AirtimeBillsSummaryScreen';
+import DataBillsScreen from '../screens/User/Bills/DataBillsScreen';
+import DataBillsSummaryScreen from '../screens/User/Bills/DataBillsSummaryScreen';
+import SportsBettingScreen from '../screens/User/Bills/SportsBettingScreen';
+import SportsBettingSummaryScreen from '../screens/User/Bills/SportsBettingSummaryScreen';
 
 const Stack = createStackNavigator();
 
@@ -40,11 +49,21 @@ const MainNavigator = () => {
       <Stack.Screen name="CompletedTradeListScreen" component={CompletedTradeListScreen} />
       <Stack.Screen name="TradeHistoryScreen" component={TradeHistoryScreen} />
       <Stack.Screen name="WalletScreen" component={WalletScreen} />
-      <Stack.Screen name="CreateWithdrawalPin" component={CreateWithdrawalPin} />
+      <Stack.Screen name="CreateTransactionPin" component={CreateTransactionPin} />
       <Stack.Screen name="BillsScreenOne" component={BillsScreenOne} />
       <Stack.Screen name="BillsScreenTwo" component={BillsScreenTwo} />
       <Stack.Screen name="BillsScreenThree" component={BillsScreenThree} />
-      <Stack.Screen name="BillSummaryScreen" component={BillSummaryScreen} />  
+      <Stack.Screen name="BillSummaryScreen" component={BillSummaryScreen} />
+      <Stack.Screen name="ElectricityScreen" component={ElectricityScreen} />
+      <Stack.Screen name="ElectricityBillSummary" component={ElectricityBillSummary} />
+      <Stack.Screen name="TVBillsScreen" component={TVBillsScreen} />
+      <Stack.Screen name="TVBillsSummaryScreen" component={TVBillsSummaryScreen} />
+      <Stack.Screen name="AirtimeScreen" component={AirtimeScreen} />
+      <Stack.Screen name="AirtimeBillsSummaryScreen" component={AirtimeBillsSummaryScreen} />
+      <Stack.Screen name="DataBillsScreen" component={DataBillsScreen} />
+      <Stack.Screen name="DataBillsSummaryScreen" component={DataBillsSummaryScreen} />
+      <Stack.Screen name="SportsBettingScreen" component={SportsBettingScreen} />
+      <Stack.Screen name="SportsBettingSummaryScreen" component={SportsBettingSummaryScreen} />
 
 
     </Stack.Navigator>

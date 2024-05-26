@@ -30,32 +30,39 @@ export const billerNameMap = {
 }
 
 const BillsScreenOne = (props: Props) => {
-  const {
-  } = props;
 
-  const dispatch = useDispatch();
-  const [billers, setBillers] = useState<string[]>([])
-  const [loading, setLoading] = useState(false);
-
-  const getBillers = async () => {
-    try {
-      setLoading(true)
-      const res = await axiosExtended.get(`${routes.bills}`);
-      if (res.status === 200) {
-        const data = res.data;
-        setBillers(data)
-      }
-    } catch (e) {
-      console.error(e)
-      console.log(JSON.stringify(e, null, 5))
-    } finally {
-      setLoading(false)
+  const bills = [
+    {
+      name: "Electricity",
+      onTap: () => {
+        props.navigation.push("ElectricityScreen");
+      },
+    },
+    {
+      name: "Cable TV",
+      onTap: () => {
+        props.navigation.push("TVBillsScreen");
+      },
+    },
+    {
+      name: "Airtime",
+      onTap: () => {
+        props.navigation.push("AirtimeScreen");
+      },
+    },
+    {
+      name: "Data Bundle",
+      onTap: () => {
+        props.navigation.push("DataBillsScreen");
+      },
+    },
+    {
+      name: "Sport Betting",
+      onTap: () => {
+        props.navigation.push("SportsBettingScreen");
+      },
     }
-  }
-
-  useEffect(() => {
-    getBillers();
-  }, []);
+  ]
 
   return (
     <SafeAreaView
@@ -64,26 +71,17 @@ const BillsScreenOne = (props: Props) => {
         backgroundColor: Colors.White,
       }}>
       <FlatList
-        refreshControl={
-          <RefreshControl
-            refreshing={loading}
-            onRefresh={getBillers}
-            colors={[Colors.Primary]}
-          />
-        }
-        data={billers}
+        data={bills}
         renderItem={({ item }) =>
           <GCCardOne
             // name={item}
-            rate={billerNameMap[item]}
+            image=''
+            rate={item.name}
             rateStyle={{
               fontSize: RFPercentage(2.1)
             }}
             onPress={() => {
-              dispatch(setBillForm({
-                bill: item
-              }));
-              props.navigation.push("BillsScreenTwo")
+             item.onTap && item.onTap();
             }}
           />}
         ListHeaderComponent={

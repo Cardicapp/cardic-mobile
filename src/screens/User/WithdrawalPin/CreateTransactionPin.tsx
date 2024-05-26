@@ -40,7 +40,7 @@ interface State {
   showSuccessModal: boolean;
   showResendSuccessModal: boolean;
 }
-const CreateWithdrawalPin = (props: Props) => {
+const CreateTransactionPin = (props: Props) => {
   const [state, setState] = useState<State>({
     pin: '',
     confirmPin: '',
@@ -155,7 +155,7 @@ const CreateWithdrawalPin = (props: Props) => {
               fontWeight: '600',
               fontSize: RFPercentage(3.5),
             }}>
-            {`Create Withdrawal Pin`}
+            {`Create Transaction Pin`}
           </AppText>
           <AppText
             style={{
@@ -173,7 +173,7 @@ const CreateWithdrawalPin = (props: Props) => {
               fontWeight: '400',
               // fontSize: 16,
             }}>
-            Enter withdrawal pin
+            Enter transaction pin
           </AppText>
 
           <View
@@ -238,7 +238,7 @@ const CreateWithdrawalPin = (props: Props) => {
           </View>
 
           <AppText>
-            Confirm withdrawal pin
+            Confirm transaction pin
           </AppText>
 
           <View
@@ -307,7 +307,7 @@ const CreateWithdrawalPin = (props: Props) => {
         onPress={() => {
           submit();
         }}
-        text="Create Withdrawal Pin"
+        text="Create Transaction Pin"
         loading={state.loading}
         containerStyle={{
           backgroundColor:
@@ -323,7 +323,7 @@ const CreateWithdrawalPin = (props: Props) => {
       <CustomModal
         isVisible={state.showSuccessModal}
         onClose={onSuccessModalClose}
-        content="Withdrawal pin added successfully"
+        content="Transaction pin added successfully"
         contentStyle={{
           fontWeight: '400',
           fontSize: 13,
@@ -362,4 +362,4 @@ const CreateWithdrawalPin = (props: Props) => {
   );
 }
 
-export default CreateWithdrawalPin;
+export default CreateTransactionPin;

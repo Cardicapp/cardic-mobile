@@ -16,7 +16,7 @@ const InfoRow = ({ title, value, containerStyle }: InfoRowProps) => {
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 paddingHorizontal: 10,
-                marginBottom: 5,
+                marginBottom: 10,
             }, containerStyle]}>
             <AppText>{title}</AppText>
             <AppText>{value}</AppText>
