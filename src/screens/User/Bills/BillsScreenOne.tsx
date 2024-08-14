@@ -57,7 +57,7 @@ const BillsScreenOne = (props: Props) => {
       },
     },
     {
-      name: "Sport Betting",
+      name: "Sports Betting",
       onTap: () => {
         props.navigation.push("SportsBettingScreen");
       },

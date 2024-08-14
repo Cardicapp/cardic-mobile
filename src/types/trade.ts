@@ -5,7 +5,7 @@ import { User } from "./user";
 export interface Trade {
     id: number;
     amount: number;
-    noOfCards: number;
+    cardAmount: number;
     currentRate: number;
     totalPaid: number;
     comment: string;

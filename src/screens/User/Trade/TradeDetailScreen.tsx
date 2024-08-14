@@ -12,7 +12,8 @@ import {
   SafeAreaView,
   TouchableOpacity,
   View,
-  PermissionsAndroid
+  PermissionsAndroid,
+  KeyboardAvoidingView
 } from 'react-native';
 import { RFPercentage } from 'react-native-responsive-fontsize';
 import Feather from 'react-native-vector-icons/Feather';
@@ -41,6 +42,7 @@ import { CameraRoll } from "@react-native-camera-roll/camera-roll";
 import * as RNFS from 'react-native-fs';
 import SimpleToast from 'react-native-simple-toast';
 import ImageView from "react-native-image-viewing";
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 const baseURL = Config.API_URL;
 
@@ -290,11 +292,204 @@ const TradeDetailScreen
     };
 
     function showToast(msg: string) {
-      if(Platform.OS == 'android'){
+      if (Platform.OS == 'android') {
         SimpleToast.show(msg, 3000)
       } else {
         SimpleToast.showWithGravity(msg, SimpleToast.SHORT, SimpleToast.BOTTOM)
       }
+    }
+
+    const renderInput = () => {
+      return (
+        [UserRoleEnum.admin].includes(user?.role.id ?? -1) || [TradeStatusEnum.created, TradeStatusEnum.active].includes(trade?.status.id) ?
+          <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              // marginBottom: 10,
+            }}
+            keyboardVerticalOffset={heightPercentageToDP(7)}
+            >
+            <TouchableOpacity
+              onPress={() => setShowImagePicker(true)}
+              style={{
+                padding: 12,
+                backgroundColor: Colors.Primary,
+                borderRadius: 5,
+                alignSelf: "flex-end",
+              }}>
+              <Entypo
+                name="attachment"
+                color={Colors.White}
+                size={RFPercentage(2.8)}
+              />
+            </TouchableOpacity>
+            <TextInputOne
+              value={message.text}
+              placeholder='Type message here...'
+              containerStyle={{
+                width: '75%',
+                alignSelf: 'center',
+                marginTop: 0,
+                marginBottom: 0,
+              }}
+              onChange={(val) => {
+                setMessage({
+                  ...message,
+                  text: val
+                })
+              }}
+            />
+            <TouchableOpacity
+              style={{
+                padding: 12,
+                backgroundColor: Colors.Primary,
+                borderRadius: 5,
+                alignSelf: "flex-end",
+              }}
+              onPress={() => message.text && !submitting && sendMessage(TradeChatTypeEnum.text)}
+            >
+              {
+                submitting ?
+                  <ActivityIndicator
+                    size={RFPercentage(2.8)}
+                    color={Colors.White}
+                  /> :
+                  <Feather
+                    name="send"
+                    size={RFPercentage(2.8)}
+                    color={Colors.White}
+                  />
+              }
+            </TouchableOpacity>
+          </KeyboardAvoidingView>
+          : undefined
+      );
+    }
+
+    const renderHeader = () => {
+      return (
+        <View>
+          <SimpleBackHeader
+            text={`Trade Status: ${renderStatus(trade?.status.id)}`}
+            showBack={false}
+            showMenu={false}
+            centered={false}
+            actions={[
+              <TouchableOpacity
+                onPress={() => props.navigation.pop()}
+              >
+                <Feather
+                  name="x"
+                  color={Colors.Primary}
+                  size={RFPercentage(2.8)}
+                />
+              </TouchableOpacity>
+
+            ]}
+            style={{
+              // backgroundColor: Colors.Primary
+            }}
+            textStyle={{
+              color: Colors.Black,
+            }}
+            textContainerStyle={{
+              marginLeft: 0,
+            }}
+            iconColor={Colors.White}
+          />
+          <TouchableOpacity
+            onPress={() => setShowDetail(!showDetail)}
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between'
+            }}>
+            <View
+              style={{
+                padding: 10,
+                marginHorizontal: 7,
+                maxWidth: '70%',
+                backgroundColor: Colors.PrimaryBGLight,
+                borderRadius: 20,
+                alignSelf: "flex-start",
+                marginBottom: 5,
+              }}>
+              <AppText style={{
+                color: Colors.Primary,
+              }}>Transaction Details</AppText>
+            </View>
+
+            <View
+              style={{
+                justifyContent: 'center',
+                alignItems: 'center',
+                aspectRatio: 1,
+              }}>
+              <Feather
+                name={showDetail ? "chevron-up" : "chevron-down"}
+                color={Colors.Primary}
+                size={RFPercentage(2.8)}
+              />
+            </View>
+          </TouchableOpacity>
+          {
+            showDetail ? (
+              <View
+                style={{
+                  // height: 200,
+                  width: '100%',
+                  padding: 5,
+                }}>
+                <InfoRow
+                  title='Transaction ID'
+                  value={`#${trade?.id}`}
+                  containerStyle={{
+                    marginBottom: 10
+                  }}
+                />
+                <InfoRow
+                  title='Name of Gift card'
+                  value={trade?.subCategory.category.name ?? ''}
+                  containerStyle={{
+                    marginBottom: 10
+                  }}
+                />
+                <InfoRow
+                  title='Sub Category'
+                  value={trade?.subCategory.name ? `${trade?.subCategory.name} (${trade?.subCategory.minAmount} - ${trade?.subCategory.maxAmount})` : ''}
+                  containerStyle={{
+                    marginBottom: 10
+                  }}
+                />
+                <InfoRow
+                  title='Card Amount'
+                  value={`N${Utils.currencyFormat(trade?.cardAmount ?? 0, 0)}`}
+                  containerStyle={{
+                    marginBottom: 10
+                  }}
+                />
+                <InfoRow
+                  title='Rate'
+                  value={`${Values.NairaSymbol}${Utils.currencyFormat(trade?.currentRate ?? 0, 0)}/${Values.DollarSymbol}`}
+                  containerStyle={{
+                    marginBottom: 10
+                  }}
+                />
+                <InfoRow
+                  title='Est. Amount'
+                  value={`${Values.NairaSymbol} ${Utils.currencyFormat(trade?.amount ?? 0)}`}
+                  containerStyle={{
+                    marginBottom: 10
+                  }}
+                />
+
+              </View>
+            ) : undefined
+          }
+        </View>
+      );
     }
 
     return (
@@ -303,13 +498,51 @@ const TradeDetailScreen
           flex: 1,
           backgroundColor: Colors.White,
         }}>
+        {/* {
+          Platform.OS == 'ios' ?
+            <>
+              {renderHeader()}
+              <KeyboardAwareScrollView
+                keyboardShouldPersistTaps="handled"
+                keyboardDismissMode="interactive"
+                contentContainerStyle={{
+                  paddingBottom: 20,
+                  backgroundColor: Colors.White,
+              }}
+              >
+                {
+                  messages.map((m, index) => {
+                    return (
+                      <ChatMessage
+                        key={m.id}
+                        chat={m}
+                        onClickImage={(chat, index) => {
+                          setCurrentImage(index)
+                          setImages(chat.images?.map(i => {
+                            return {
+                              uri: i.path.replace('http', 'https'),
+                            }
+                          }) ?? [])
+                          setShowImageOptions(true);
+                          // setIsViewerOpen(true)
+                        }}
+                      />
+                    );
+                  })
+                }
+              </KeyboardAwareScrollView>
+            </>
+            : undefined
+        } */}
+        {/* {renderInput()} */}
 
         <FlatList
           // inverted={true}
           keyExtractor={(item) => item.id.toString()}
           ref={chatsRef}
           style={{
-            backgroundColor: Colors.ChatBg,
+            // backgroundColor: Colors.ChatBg,
+            // backgroundColor: 'red'
           }}
           data={messages}
           renderItem={({ item, index }) =>
@@ -332,198 +565,23 @@ const TradeDetailScreen
             marginBottom: 10,
             backgroundColor: Colors.White,
           }}
-          ListHeaderComponent={
-            <View>
-              <SimpleBackHeader
-                text={`Trade Status: ${renderStatus(trade?.status.id)}`}
-                showBack={false}
-                showMenu={false}
-                centered={false}
-                actions={[
-                  <TouchableOpacity
-                    onPress={() => props.navigation.pop()}
-                  >
-                    <Feather
-                      name="x"
-                      color={Colors.Primary}
-                      size={RFPercentage(2.8)}
-                    />
-                  </TouchableOpacity>
-
-                ]}
-                style={{
-                  // backgroundColor: Colors.Primary
-                }}
-                textStyle={{
-                  color: Colors.Black,
-                }}
-                textContainerStyle={{
-                  marginLeft: 0,
-                }}
-                iconColor={Colors.White}
-              />
-              <TouchableOpacity
-                onPress={() => setShowDetail(!showDetail)}
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between'
-                }}>
-                <View
-                  style={{
-                    padding: 10,
-                    marginHorizontal: 7,
-                    maxWidth: '70%',
-                    backgroundColor: Colors.PrimaryBGLight,
-                    borderRadius: 20,
-                    alignSelf: "flex-start",
-                    marginBottom: 5,
-                  }}>
-                  <AppText style={{
-                    color: Colors.Primary,
-                  }}>Transaction Details</AppText>
-                </View>
-
-                <View
-                  style={{
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    aspectRatio: 1,
-                  }}>
-                  <Feather
-                    name={showDetail ? "chevron-up" : "chevron-down"}
-                    color={Colors.Primary}
-                    size={RFPercentage(2.8)}
-                  />
-                </View>
-              </TouchableOpacity>
-              {
-                showDetail ? (
-                  <View
-                    style={{
-                      // height: 200,
-                      width: '100%',
-                      padding: 5,
-                    }}>
-                    <InfoRow
-                      title='Transaction ID'
-                      value={`#${trade?.id}`}
-                      containerStyle={{
-                        marginBottom: 10
-                      }}
-                    />
-                    <InfoRow
-                      title='Name of Gift card'
-                      value={trade?.subCategory.category.name ?? ''}
-                      containerStyle={{
-                        marginBottom: 10
-                      }}
-                    />
-                    <InfoRow
-                      title='Sub Category'
-                      value={trade?.subCategory.name ?? ''}
-                      containerStyle={{
-                        marginBottom: 10
-                      }}
-                    />
-                    <InfoRow
-                      title='No. of Gift Cards'
-                      value={`${trade?.noOfCards}`}
-                      containerStyle={{
-                        marginBottom: 10
-                      }}
-                    />
-                    <InfoRow
-                      title='Rate'
-                      value={`${Values.NairaSymbol}${Utils.currencyFormat(trade?.currentRate ?? 0, 0)}/${Values.DollarSymbol}`}
-                      containerStyle={{
-                        marginBottom: 10
-                      }}
-                    />
-                    <InfoRow
-                      title='Est. Amount'
-                      value={`${Values.NairaSymbol} ${Utils.currencyFormat(trade?.amount ?? 0)}`}
-                      containerStyle={{
-                        marginBottom: 10
-                      }}
-                    />
-
-                  </View>
-                ) : undefined
-              }
-            </View>
-
-          }
+          ListHeaderComponent={renderHeader()}
           stickyHeaderIndices={[0]}
+        // ListFooterComponent={Platform.OS == 'ios' ? renderInput() : undefined}
+        // ListFooterComponentStyle={{
+        //   backgroundColor: 'red',
+        //   // marginTop: heightPercentageToDP(75),
+        //   position: 'absolute',
+        //   bottom: 0,
+        //   // height: 300
+        // }}
         />
         {
-          [UserRoleEnum.admin].includes(user?.role.id ?? -1) || [TradeStatusEnum.created, TradeStatusEnum.active].includes(trade?.status.id) ?
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                paddingHorizontal: 5,
-                marginBottom: 10,
-              }}>
-              <TouchableOpacity
-                onPress={() => setShowImagePicker(true)}
-                style={{
-                  padding: 12,
-                  // marginHorizontal: 7,
-                  backgroundColor: Colors.Primary,
-                  borderRadius: 5,
-                  alignSelf: "flex-end",
-                  // marginBottom: 5,
-
-                }}>
-                <Entypo
-                  name="attachment"
-                  color={Colors.White}
-                  size={RFPercentage(2.8)}
-                />
-              </TouchableOpacity>
-              <TextInputOne
-                value={message.text}
-                placeholder='Type message here...'
-                containerStyle={{
-                  width: '75%',
-                  alignSelf: 'center',
-                  marginTop: 0,
-                  marginBottom: 0,
-                }}
-                onChange={(val) => {
-                  setMessage({
-                    ...message,
-                    text: val
-                  })
-                }}
-              />
-              <TouchableOpacity
-                style={{
-                  padding: 12,
-                  backgroundColor: Colors.Primary,
-                  borderRadius: 5,
-                  alignSelf: "flex-end",
-                }}
-                onPress={() => message.text && !submitting && sendMessage(TradeChatTypeEnum.text)}
-              >
-                {
-                  submitting ?
-                    <ActivityIndicator
-                      size={RFPercentage(2.8)}
-                      color={Colors.White}
-                    /> :
-                    <Feather
-                      name="send"
-                      size={RFPercentage(2.8)}
-                      color={Colors.White}
-                    />
-                }
-
-
-              </TouchableOpacity>
-            </View>
-            : undefined
+          // Platform.OS == 'android' 
+          // true
+          // ? 
+          renderInput() 
+          // : undefined
         }
 
         <CustomModal
@@ -693,7 +751,7 @@ const TradeDetailScreen
             {
               text: 'Open',
               onPress: () => {
-                
+
                 if (Platform.OS == 'ios') {
                   setShowImageOptions(false)
                   setTimeout(() => setIsViewerOpen(true), 2000)

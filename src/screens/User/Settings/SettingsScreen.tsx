@@ -274,6 +274,22 @@ const SettingsScreen = (props: Props) => {
             />
           }
         />
+        <SettingItem
+          text="Contact Us"
+          onPress={() => {
+            Linking.openURL(`mailto:mycardicapp.com`)
+          }}
+          rightItem={
+            <AntDesign
+              name="right"
+              color={'#999999'}
+              size={RFPercentage(2.8)}
+              style={{
+                marginRight: '1%',
+              }}
+            />
+          }
+        />
         {/* <SettingItem
           text="FAQ & Support"
           onPress={() => {

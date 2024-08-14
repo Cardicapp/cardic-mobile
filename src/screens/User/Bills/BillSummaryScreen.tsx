@@ -45,9 +45,6 @@ const BillSummaryScreen
     const [deviceNumber, setDeviceNumber] = useState('');
     const dispatch = useDispatch();
     const { form } = useSelector(selectBillState);
-    const calculatedAmount = Utils.calculateRate(form.subCategory?.nairaRate, parseInt(form?.noOfCards ?? 0), form?.subCategory?.amount ?? 0)
-    const isValidForm = form?.noOfCards && parseInt(form?.noOfCards) > 0 && form?.subCategory;
-
     const [loading, setLoading] = useState(false);
 
     const makePurchase = async () => {

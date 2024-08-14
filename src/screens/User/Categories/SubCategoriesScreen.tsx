@@ -67,7 +67,7 @@ const SubCategoriesScreen = (props: Props) => {
         data={subCategories}
         renderItem={({ item }) =>
           <GCCardOne
-            name={item.name}
+            name={`${item.name} ${item.minAmount} - ${item.maxAmount}`}
             cta='Trade'
             rate={`${Values.NairaSymbol}${item.nairaRate}/${Values.DollarSymbol}`}
             image={item.category.photo.path}

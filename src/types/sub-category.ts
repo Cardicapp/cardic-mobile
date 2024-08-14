@@ -4,6 +4,8 @@ export interface SubCategory {
   id: number;
   name: string;
   nairaRate: number;
+  minAmount: number;
+  maxAmount: number;
   category: Category;
   status: any;
   deletedAt: string | null;

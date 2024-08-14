@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { RFPercentage } from 'react-native-responsive-fontsize';
 import { heightPercentageToDP } from 'react-native-responsive-screen';
+import Toast from 'react-native-toast-message';
 import { useDispatch, useSelector } from 'react-redux';
 
 interface Props {
@@ -33,9 +34,10 @@ const CreateTradeScreen
       noOfCards: 0,
       potentialReturn: 0
     })
-    
-    const calculatedAmount = Utils.calculateRate(tradeState.form.subCategory?.nairaRate, parseInt(tradeState.form?.noOfCards ?? 0), tradeState.form?.subCategory?.amount ?? 0)
-    const isValidForm = tradeState.form?.noOfCards && parseInt(tradeState.form?.noOfCards) > 0  && tradeState.form?.subCategory;
+
+    const calculatedAmount = Utils.calculateRate(tradeState.form.subCategory?.nairaRate, parseInt(tradeState.form?.cardAmount ?? 0))
+    const isValidForm = tradeState.form?.cardAmount && parseInt(tradeState.form?.cardAmount) >= tradeState.form.subCategory?.minAmount && parseInt(tradeState.form?.cardAmount) <= tradeState.form.subCategory?.maxAmount
+
     return (
       <SafeAreaView
         style={{
@@ -79,14 +81,17 @@ const CreateTradeScreen
             }}
           />
           <TextInputOne
-            value={tradeState.form?.noOfCards}
-            placeholder='No. of Gift Cards'
+            value={tradeState.form?.cardAmount}
+            placeholder={`Card Amount ${tradeState.form.subCategory?.minAmount ?? 100} - ${tradeState.form.subCategory?.maxAmount ?? 5000}`}
             containerStyle={{
               width: '95%',
               alignSelf: 'center',
               marginBottom: 10,
             }}
-            onChange={(val) => dispatch(setTradeForm({ ...tradeState.form, noOfCards: val }))}
+            onChange={(val) => {
+                dispatch(setTradeForm({ ...tradeState.form, cardAmount: val }))
+            }
+            }
           />
           <TextContainer
             rightChild={
@@ -116,8 +121,17 @@ const CreateTradeScreen
         <ButtonOne
           text="Start Trade"
           onPress={() => {
-            if(isValidForm){
+            if (isValidForm) {
               props.navigation.push("TradeSummaryScreen")
+            } else {
+              Toast.show({
+                type: 'error',
+                text1: 'Invalid card amount',
+                text2: `Card amount should be within N${tradeState.form.subCategory?.minAmount} - N${tradeState.form.subCategory?.maxAmount}`,
+                props: {
+                  
+                }
+              });
             }
           }}
           outerStyle={{

@@ -195,7 +195,7 @@ class Utils {
     }
   };
 
-  static handleError = (res) => {
+  static handleError = (res: any) => {
     let message;
     if(res.response && res.response.data && res.response.data.message)
       message = res.response.data.message;
@@ -366,7 +366,7 @@ class Utils {
     return 0;
   }
 
-  static calculateRate = (a: number, b: number, c: number) => a * (b * c)
+  static calculateRate = (a: number, b: number) => a * b;
 }
 
 export default Utils;

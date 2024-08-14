@@ -25,12 +25,6 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import {
-  // @ts-ignore
-  PlaceholderContainer,
-  // @ts-ignore
-  Placeholder,
-} from 'react-native-loading-placeholder';
 import { heightPercentageToDP } from 'react-native-responsive-screen';
 import { useDispatch, useSelector } from 'react-redux';
 import { RFPercentage } from 'react-native-responsive-fontsize';
@@ -48,8 +42,7 @@ const TradeSummaryScreen
 
     const dispatch = useDispatch();
     const { form } = useSelector(selectTradeState);
-    const calculatedAmount = Utils.calculateRate(form.subCategory?.nairaRate, parseInt(form?.noOfCards ?? 0), form?.subCategory?.amount ?? 0)
-    const isValidForm = form?.noOfCards && parseInt(form?.noOfCards) > 0 && form?.subCategory;
+    const calculatedAmount = Utils.calculateRate(form.subCategory?.nairaRate, parseInt(form?.cardAmount ?? 0))
 
     const [loading, setLoading] = useState(false);
 
@@ -61,7 +54,7 @@ const TradeSummaryScreen
             "id": form.subCategory.id,
           },
           // "comment": "With E-Code",
-          "noOfCards": form.noOfCards,
+          "cardAmount": form.cardAmount,
         }
         const res = await axiosExtended.post(`${routes.trade}/start`, payload);
         if (res.status === 201) {
@@ -124,15 +117,15 @@ const TradeSummaryScreen
           />
           <InfoRow
             title='Sub Category:'
-            value={form?.subCategory.name}
+            value={`${form?.subCategory.name} ${form.subCategory?.minAmount ?? 100} - ${form.subCategory?.maxAmount ?? 5000}`}
           />
           <InfoRow
             title='Rate:'
             value={`N${Utils.currencyFormat(form?.subCategory.nairaRate, 0)}/$`}
           />
           <InfoRow
-            title='No of Cards:'
-            value={form?.noOfCards}
+            title='Card Amount:'
+            value={`$${Utils.currencyFormat(parseFloat(form?.cardAmount), 0)}`}
           />
           <InfoRow
             title='Total Return:'
@@ -152,9 +145,9 @@ const TradeSummaryScreen
             paddingTop: 10,
             marginBottom: 20,
           }}
-          // loading={loading}
+          loading={loading}
           containerStyle={{
-            backgroundColor: loading || !isValidForm ? Colors.SlightlyShyGrey : Colors.Primary,
+            backgroundColor: loading ? Colors.SlightlyShyGrey : Colors.Primary,
           }}
         />
         <ConfirmModal

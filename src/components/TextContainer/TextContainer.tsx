@@ -12,7 +12,7 @@ interface Props {
     onPressRightChild?: () => void,
     child?: ReactNode,
     rightChild?: ReactNode,
-    onPress: () => void,
+    onPress?: () => void,
 }
 
 const TextContainer = (props: Props) => {
