@@ -3,7 +3,7 @@ import TextInputOne from 'CardicApp/src/components/TextInputOne';
 import Utils from 'CardicApp/src/lib/utils/Utils';
 import Colors from 'CardicApp/src/theme/Colors';
 import React, { MutableRefObject, useRef, useState } from 'react';
-import { Image, SafeAreaView, View, TextInput, ScrollView } from 'react-native';
+import { Image, SafeAreaView, View, TextInput, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { RFPercentage } from 'react-native-responsive-fontsize';
 import { heightPercentageToDP, heightPercentageToDP as hp, widthPercentageToDP as wp } from "react-native-responsive-screen";
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -150,25 +150,25 @@ const Register = (props: Props) => {
       return "Password is too short";
     }
 
-    if(!Utils.containsUpperCase(password)){
+    if (!Utils.containsUpperCase(password)) {
       if (react) setTimeout(() => {
         passwordRef?.current?.focus();
       }, 100);
       return "Password should contain at least one uppercase character";
     }
 
-    if(!Utils.containsSpecialChar(password)){
+    if (!Utils.containsSpecialChar(password)) {
       if (react) setTimeout(() => {
         passwordRef?.current?.focus();
       }, 100);
-      return`Password should contain at least one special character. eg. !@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]`;
+      return `Password should contain at least one special character. eg. !@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]`;
     }
 
-    if(!Utils.checkForNumber(password)){
+    if (!Utils.checkForNumber(password)) {
       if (react) setTimeout(() => {
         passwordRef?.current?.focus();
       }, 100);
-      return`Password should contain at least one numeric character`;
+      return `Password should contain at least one numeric character`;
     }
 
     if (password != confirmPassword) {
@@ -310,24 +310,28 @@ const Register = (props: Props) => {
               paddingHorizontal: 10,
             }}
           />
+          <KeyboardAvoidingView
+            behavior={Platform.OS == 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={heightPercentageToDP(15)}>
+            <TextInputOne
+              inputRef={(ref) => {
+                // @ts-ignore
+                confirmPasswordRef.current = ref;
+              }}
+              headText="Confirm Password"
+              value={pageState.confirmPassword}
+              labelStyle={{
+                fontWeight: 'bold',
+              }}
+              onChange={(value => setPageState({ ...pageState, confirmPassword: value }))}
+              onSubmitEditing={() => signup()}
+              secureTextEntry={true}
+              containerStyle={{
+                paddingHorizontal: 10,
+              }}
+            />
+          </KeyboardAvoidingView>
 
-          <TextInputOne
-            inputRef={(ref) => {
-              // @ts-ignore
-              confirmPasswordRef.current = ref;
-            }}
-            headText="Confirm Password"
-            value={pageState.confirmPassword}
-            labelStyle={{
-              fontWeight: 'bold',
-            }}
-            onChange={(value => setPageState({ ...pageState, confirmPassword: value }))}
-            onSubmitEditing={() => signup()}
-            secureTextEntry={true}
-            containerStyle={{
-              paddingHorizontal: 10,
-            }}
-          />
         </View>
       </ScrollView>
 

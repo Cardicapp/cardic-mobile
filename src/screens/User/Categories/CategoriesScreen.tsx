@@ -7,7 +7,7 @@ import Colors from 'CardicApp/src/theme/Colors';
 import { Category } from 'CardicApp/src/types/category';
 import { StatusEnum } from 'CardicApp/src/types/enums';
 import queryString from 'query-string';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   FlatList,
   RefreshControl,
@@ -25,19 +25,22 @@ const CategoriesScreen = (props: Props) => {
   } = props;
 
   const dispatch = useDispatch();
-  const [categories, setCategories] = useState<Category[]>([])
+  const pageIndex = useRef(1);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const getCategories = async () => {
+  const getCategories = async (data: any = {}, fn?: (cats: Category[]) => void) => {
     try {
       setLoading(true)
       let payload = {
+        ...data,
         status: StatusEnum.active,
       }
       const res = await axiosExtended.get(`${routes.categories}?${queryString.stringify(payload)}`);
       if (res.status === 200) {
         const cats = res.data.data;
-        setCategories(cats)
+        // setCategories(cats)
+        fn && fn(cats);
       }
     } catch (e) {
       console.error(e)
@@ -48,8 +51,28 @@ const CategoriesScreen = (props: Props) => {
   }
 
   useEffect(() => {
-    getCategories();
+    loadCategories();
   }, []);
+
+  const [scrolling, setScrolling] = useState<boolean>(false);
+
+  const onEndReached = () => {
+    if (categories.length) {
+      loadCategories();
+    }
+  };
+
+  const loadCategories = () => {
+    getCategories({
+      page: pageIndex.current,
+      limit: 20,
+    }, cats => {
+      if (cats.length) {
+        setCategories([...categories, ...cats])
+        pageIndex.current = pageIndex.current + 1;
+      }
+    });
+  }
 
   return (
     <SafeAreaView
@@ -59,6 +82,10 @@ const CategoriesScreen = (props: Props) => {
       }}>
       <FlatList
         numColumns={2}
+        onEndReached={onEndReached}
+        onEndReachedThreshold={0.5}
+        onMomentumScrollBegin={() => setScrolling(true)}
+        onMomentumScrollEnd={() => setScrolling(false)}
         refreshControl={
           <RefreshControl
             refreshing={loading}
@@ -73,7 +100,7 @@ const CategoriesScreen = (props: Props) => {
             top={item.name}
             image={item.photo.path}
             onPress={() => {
-              dispatch(setTradeForm({category: item}))
+              dispatch(setTradeForm({ category: item }))
               props.navigation.push("CreateTradeScreen")
             }}
           />}

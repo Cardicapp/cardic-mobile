@@ -5,6 +5,7 @@ import {
   Platform,
   RefreshControl,
   SafeAreaView,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import { useSelector } from 'react-redux';
@@ -103,7 +104,7 @@ const WalletScreen = (props: Props) => {
   const withdraw = async () => {
     if (validateForm() != null || withdrawing) return;
     try {
-      setForm({...form, errorMessage: ''})
+      setForm({ ...form, errorMessage: '' })
       setWithdrawing(true)
       const reference = `${Date.now()}-${authState.user?.id}`;
       if (!form.didFail) {
@@ -300,16 +301,72 @@ const WalletScreen = (props: Props) => {
                 paddingHorizontal: 10,
                 alignItems: 'center',
               }}>
-              <CardicCard
+              <TouchableOpacity
+              style={{
+                backgroundColor: Colors.PrimaryBGLight,
+              }}
+                onPress={() => {
+                  if (!authState.user?.hasWithdrawalPin) return setShowSetWithdrawalPinModal(true);
+                  setShowWithdrawModal(true)
+                }}
+              >
+                <View
+                  style={[{
+                    // width: widthPercentageToDP(45),
+                    marginHorizontal: 5,
+                    borderRadius: 5,
+                    // backgroundColor: Colors.White,
+                    backgroundColor: Colors.PrimaryBGLight,
+                    shadowColor: 'grey',
+                    shadowOffset: {
+                      height: 0,
+                      width: 0,
+                    },
+                    elevation: 3,
+                    shadowOpacity: .3,
+                    shadowRadius: 4,
+                    padding: 10,
+                    alignItems: 'center',
+                    flexDirection: 'row',
+                  }]}>
+                    <AppBoldText
+                        style={[{
+                          // marginTop: 20,
+                          fontSize: RFPercentage(2),
+                          fontWeight: '700',
+                          marginLeft: 0,
+                          color: Colors.Primary,
+                          textAlign: 'center',
+                        }]}>Withdraw</AppBoldText>
+                  <View
+                    style={[{
+                      height: heightPercentageToDP(4),
+                      aspectRatio: 1,
+                      borderRadius: 100,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      backgroundColor: Colors.Primary,
+                      shadowColor: 'grey',
+                      shadowOpacity: .3,
+                      shadowRadius: 3,
+                      elevation: 2,
+                      // marginTop: 20,
+                      marginLeft: 10,
+                    }]}>
+                    <MaterialCommunityIcons name={'cash'} size={RFPercentage(3)} color={Colors.White} />
+                  </View>
+                </View>
+              </TouchableOpacity>
+              {/* <CardicCard
                 centered={true}
                 onPress={() => {
                   if (!authState.user?.hasWithdrawalPin) return setShowSetWithdrawalPinModal(true);
                   setShowWithdrawModal(true)
                 }}
                 text="Withdraw"
-                textStyle={{ 
+                textStyle={{
                   marginTop: '5%'
-                 }}
+                }}
                 icon={
                   <MaterialCommunityIcons name={'cash'} size={RFPercentage(3.5)} color={Colors.White} />
                 }
@@ -324,7 +381,7 @@ const WalletScreen = (props: Props) => {
                   backgroundColor: Colors.Primary,
                   marginTop: '5%'
                 }}
-              />
+              /> */}
             </View>
             <View
               style={{
@@ -354,7 +411,7 @@ const WalletScreen = (props: Props) => {
       />
 
       <CustomModal
-        autoClose={false}
+        autoClose={true}
         isVisible={showWithdrawModal}
         onClose={() => {
           setShowWithdrawModal(false)

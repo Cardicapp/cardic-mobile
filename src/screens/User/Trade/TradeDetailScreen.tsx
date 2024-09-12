@@ -303,7 +303,7 @@ const TradeDetailScreen
       return (
         [UserRoleEnum.admin].includes(user?.role.id ?? -1) || [TradeStatusEnum.created, TradeStatusEnum.active].includes(trade?.status.id) ?
           <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             style={{
               flexDirection: 'row',
               justifyContent: 'space-between',
@@ -311,7 +311,7 @@ const TradeDetailScreen
               // marginBottom: 10,
             }}
             keyboardVerticalOffset={heightPercentageToDP(7)}
-            >
+          >
             <TouchableOpacity
               onPress={() => setShowImagePicker(true)}
               style={{
@@ -580,13 +580,14 @@ const TradeDetailScreen
           // Platform.OS == 'android' 
           // true
           // ? 
-          renderInput() 
+          renderInput()
           // : undefined
         }
 
         <CustomModal
           isVisible={showImagePicker}
           onClose={() => setShowImagePicker(false)}
+          autoClose={true}
           title="Share Gift Card"
           titleStyle={{
             marginTop: 5,

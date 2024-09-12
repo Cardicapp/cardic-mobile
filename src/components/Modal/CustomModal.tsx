@@ -1,6 +1,6 @@
 import Colors from 'CardicApp/src/theme/Colors';
 import React, { useState } from 'react';
-import { Image, StyleProp, TextStyle, View, ViewStyle } from 'react-native';
+import { Image, Platform, StyleProp, TextStyle, View, ViewStyle } from 'react-native';
 import Modal from 'react-native-modal';
 import { widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import AppText, { AppBoldText } from '../AppText/AppText';
@@ -48,7 +48,7 @@ const CustomModal = (props: Props) => {
         >
 
             <View style={{
-                flex: 1,
+                // flex: 1,
                 justifyContent: 'center',
                 alignItems: 'center',
             }}>
@@ -127,10 +127,15 @@ const CustomModal = (props: Props) => {
                                 {
                                     action.element ? action.element
                                         : <ButtonOne
+                                        // @ts-ignore
                                             text={action ? action.text : "Submit"}
                                             onPress={() => {
                                                 autoClose && onClose && onClose();
-                                                action.onPress && action.onPress();
+                                                if(Platform.OS == 'android'){
+                                                    action.onPress && action.onPress();
+                                                } else {
+                                                    setTimeout(() => action.onPress && action.onPress(), 500)
+                                                }
                                             }}
                                             containerStyle={[{ width: horizontal ? "90%" : '80%', }, action.containerStyle]}
                                             textStyle={action.textStyle}

@@ -6,6 +6,7 @@ import {
   SafeAreaView,
   ScrollView,
   StyleProp,
+  Switch,
   TextStyle,
   TouchableOpacity,
   View,
@@ -36,7 +37,6 @@ interface Props {
 const SettingsScreen = (props: Props) => {
   const dispatch = useDispatch();
   const { user } = useSelector(selectAuthState)
-
   const logout = () => {
     Alert.alert('Logout?', 'Are you sure to leave Cardic?', [
       {
@@ -62,6 +62,7 @@ const SettingsScreen = (props: Props) => {
       index: 0,
       routes: [
         {
+          // @ts-ignore
           name: 'Login',
         }
       ]
@@ -98,6 +99,20 @@ const SettingsScreen = (props: Props) => {
 
     } finally {
       setChangingPassword(false)
+    }
+  }
+  const updateUser = async (payload: any, fn: (res: boolean) => void) => {
+    try {
+      const res = await axiosExtended.patch(`${routes.users}/${user?.id}`, payload)
+      if (res.status === 200) {
+        const data = res.data;
+        fn && fn(data)
+      } else {
+        fn && fn(false)
+      }
+    } catch (e) {
+      console.log(JSON.stringify(e, null, 5));
+      fn && fn(false)
     }
   }
 
@@ -194,6 +209,45 @@ const SettingsScreen = (props: Props) => {
           }}>
           Profile Settings
         </AppBoldText>
+        <SettingItem
+          text="Edit Profile"
+          onPress={() => {
+            // props.navigation.push('/profile-page');
+          }}
+        />
+        <SettingItem
+          text="Push Notifications"
+          onPress={() => {
+
+          }}
+          rightItem={
+            <Switch
+              value={user?.isNotificationEnabled}
+              onChange={() => {
+                dispatch(setUserInfo({
+                  ...user,
+                  isNotificationEnabled: !user?.isNotificationEnabled
+                }))
+                updateUser({
+                  isNotificationEnabled: !user?.isNotificationEnabled
+                }, (res) => {
+                  if (res != false) {
+                    dispatch(setUserInfo(res))
+                  }
+                })
+              }}
+            />
+          }
+        />
+        <AppBoldText
+          style={{
+            marginLeft: '5%',
+            marginTop: heightPercentageToDP(2),
+            fontSize: RFPercentage(2.5),
+            color: Colors.Primary,
+          }}>
+          Security Settings
+        </AppBoldText>
         {/* <SettingItem
           text="Edit Profile"
           onPress={() => {
@@ -222,16 +276,35 @@ const SettingsScreen = (props: Props) => {
           <SettingItem
             text="Setup Transaction PIN"
             onPress={() => {
+              // @ts-ignore
               props.navigation.push('CreateTransactionPin');
             }}
           />
         )}
-        {/* <SettingItem
-          text="Notifications"
+        <SettingItem
+          text="Biometrics"
           onPress={() => {
-            props.navigation.push('/notification-settings');
+
           }}
-        /> */}
+          rightItem={
+            <Switch
+              value={user?.isBiometricsEnabled}
+              onChange={() => {
+                dispatch(setUserInfo({
+                  ...user,
+                  isBiometricsEnabled: !user?.isBiometricsEnabled
+                }))
+                updateUser({
+                  isBiometricsEnabled: !user?.isBiometricsEnabled
+                }, (res) => {
+                  if (res != false) {
+                    dispatch(setUserInfo(res))
+                  }
+                })
+              }}
+            />
+          }
+        />
 
         <AppBoldText
           style={{

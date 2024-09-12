@@ -2,7 +2,7 @@ import AppText, { AppBoldText } from 'CardicApp/src/components/AppText/AppText';
 import TextInputOne from 'CardicApp/src/components/TextInputOne';
 import Utils from 'CardicApp/src/lib/utils/Utils';
 import Colors from 'CardicApp/src/theme/Colors';
-import React, { MutableRefObject, useRef, useState } from 'react';
+import React, { MutableRefObject, useEffect, useRef, useState } from 'react';
 import { Image, SafeAreaView, View, TouchableOpacity, TextInput, ImageBackground, } from 'react-native';
 import { RFPercentage } from 'react-native-responsive-fontsize';
 import { heightPercentageToDP, heightPercentageToDP as hp, widthPercentageToDP as wp } from "react-native-responsive-screen";
@@ -21,6 +21,8 @@ import { ApplicationScreenProps, ApplicationStackParamList } from 'CardicApp/@ty
 import { NavigationProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useTheme } from 'CardicApp/src/hooks';
+import EncryptedStorage from 'react-native-encrypted-storage';
+import ReactNativeBiometrics, { BiometryTypes } from 'react-native-biometrics'
 
 
 interface UserData {
@@ -68,40 +70,58 @@ const Login = (props: Props) => {
   const [loading, setLoading] = useState(false)
   const emailRef: MutableRefObject<TextInput | null> | null = useRef(null);
   const passwordRef: MutableRefObject<TextInput | null> | null = useRef(null);
+  const [biometrics, setBiometrics] = useState<{
+    email?: string;
+    password?: string;
+    isSensorAvailable: boolean;
+    biometryType?: string;
+    userEnabled?: boolean;
+  }>({
+    email: '',
+    password: '',
+    isSensorAvailable: false,
+    biometryType: '',
+    userEnabled: false,
+  });
 
-  // componentDidMount() {
-  // EncryptedStorage.getItem("user_data").then(val => {
-  //     if (val) {
-  //         const data = JSON.parse(val);
-  //         setState({ userData: data, useExistingEmail: true, });
-  //     }
-  // });
+  useEffect(() => {
+    checkBiometrics();
+  }, []);
+  const checkBiometrics = async () => {
+    const rnBiometrics = new ReactNativeBiometrics({
+      allowDeviceCredentials: true
+    })
 
-  // ReactNativeBiometrics.isSensorAvailable()
-  //     .then((resultObject) => {
-  //         const { available, biometryType } = resultObject;
-  //         if (available) {
-  //             EncryptedStorage.getItem("user_password").then(val => {
-  //                 if (val) {
-  //                     setState({ 
-  //                         biometricPassword: val, 
-  //                         isSensorAvailable: true, 
-  //                         biometryType: biometryType,
-
-  //                     }, () => {
-  //                         promptFingerprint();
-  //                     });
-  //                 }
-  //             });
-  //         }
-  //         // setState({ isSensorAvailable: available, biometryType: biometryType })
-  //     });
-
-  // }
-
-  // onSuccessModalClose = () => {
-  //     setState({ showSuccessModal: false });
-  // }
+    const { biometryType, available, error } = await rnBiometrics.isSensorAvailable();
+    console.log(biometryType, available, error);
+    console.log(biometrics);
+    if (available) {
+      setBiometrics({
+        isSensorAvailable: available, biometryType: biometryType,
+      });
+      const enabled = await EncryptedStorage.getItem('isBiometricsEnabled');
+      if(enabled == 'true'){
+        setBiometrics({
+          ...biometrics,
+          userEnabled: true,
+        })
+      }
+      const password = await EncryptedStorage.getItem("userPassword");
+      if (password) {
+        setBiometrics({
+          ...biometrics,
+          password: password,
+        })
+      }
+      const email = await EncryptedStorage.getItem("userEmail");
+      if (email) {
+        setBiometrics({
+          ...biometrics,
+          email: email,
+        })
+      }
+    }
+  }
 
   const login = async () => {
     const result = validateForm(true);
@@ -117,15 +137,21 @@ const Login = (props: Props) => {
         const res = await axiosExtended.post(routes.userLoginEmail, formdata)
         if (res.status === 200) {
           dispatch(setUserInfo(res.data.user));
-          dispatch(setAuthToken(res.data.token))
+          dispatch(setAuthToken(res.data.token));
+          if (res.data.isBiometricsEnabled) {
+            await EncryptedStorage.setItem('userEmail', email);
+            await EncryptedStorage.setItem('userPassword', password);
+            await EncryptedStorage.setItem('isBiometricsEnabled', 'true');
+          }
           props.navigation.reset({
             index: 0,
             routes: [{
+              // @ts-ignore
               name: 'BottomTab',
             }],
           });
         }
-      } catch (err) {
+      } catch (err: any) {
         console.log(err)
         console.log(JSON.stringify(err, null, 6))
         if (err.response && err.response.status == 417) {
@@ -182,23 +208,25 @@ const Login = (props: Props) => {
       text1: msg,
     });
   }
-  // promptFingerprint = async () => {
-  // const res = await ReactNativeBiometrics.simplePrompt({
-  //     promptMessage: "Login to shecluded with your biometrics",
-  // });
-  // if(res.success){
-  //     const userData = state.userData;
-  //     if(userData){
-  //         let formdata = {
-  //             email: userData['email'], 
-  //             password: state.biometricPassword
-  //         }
-  //         props.login(formdata);
-  //     }
-  // } else {
+  const promptFingerprint = async () => {
+    const rnBiometrics = new ReactNativeBiometrics({
+      allowDeviceCredentials: true
+    })
+    const res = await rnBiometrics.simplePrompt({
+      promptMessage: "Login to Cardic with your biometrics",
+    });
+    if (res.success) {
+      if (biometrics.isSensorAvailable) {
+        let formdata = {
+          email: biometrics.email,
+          password: biometrics.password
+        }
+        props.login(formdata);
+      }
+    } else {
 
-  // }
-  // }
+    }
+  }
 
   const {
     Images
@@ -210,14 +238,8 @@ const Login = (props: Props) => {
       style={{
         flex: 1,
         justifyContent: 'center',
-        // height: heightPercentageToDP(100),
         backgroundColor: Colors.Primary,
       }}>
-      {/* <SafeAreaView
-        style={{
-          backgroundColor: Colors.Red,// undefined, // Colors.White,
-          flex: 1,
-        }}> */}
       <KeyboardAwareScrollView
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="interactive"
@@ -227,14 +249,6 @@ const Login = (props: Props) => {
         onKeyboardDidHide={() => {
           setKeyboardVisible(false)
         }}
-        contentContainerStyle={{
-          // paddingBottom: 20,
-          // backgroundColor: Colors.White,
-        }}
-        style={{
-          // flex: 1,
-          // backgroundColor: 'blue'
-        }}
       >
 
         <View
@@ -242,19 +256,12 @@ const Login = (props: Props) => {
             padding: '5%',
             paddingTop: '15%',
           }}>
-          {/* <AppText style={{
-            marginTop: 80,
-            color: Colors.Primary,
-            fontWeight: '700'
-          }}>Sign In</AppText> */}
-
           <View style={{
-            // flexDirection: 'row',
             justifyContent: 'space-between',
           }}>
             <AppBoldText
               style={{
-                fontSize: RFPercentage(4.5),
+                fontSize: RFPercentage(3.5),
                 color: Colors.White,
               }}
             >
@@ -292,12 +299,11 @@ const Login = (props: Props) => {
                   <AppBoldText
                     style={{
                       fontSize: RFPercentage(2.5)
+                      // @ts-ignore
                     }}>{pageState.userData['email']}</AppBoldText>
                   <TouchableOpacity
                     style={{
-                      // marginLeft: wp(4),
                       marginTop: hp(1),
-
                     }}
                     onPress={() => {
                       setPageState({ ...pageState, useExistingEmail: false })
@@ -307,7 +313,6 @@ const Login = (props: Props) => {
                         textAlign: 'right',
                         fontSize: RFPercentage(2),
                         color: Colors.Primary,
-
                       }}
                     >
                       Change account
@@ -324,7 +329,6 @@ const Login = (props: Props) => {
                   }}
                   headText="Email Address"
                   keyboardType='email-address'
-                  // placeholder="Your Email Address here"
                   value={pageState.email}
                   labelStyle={{
                     fontWeight: 'bold',
@@ -344,7 +348,6 @@ const Login = (props: Props) => {
               passwordRef.current = ref;
             }}
             headText="Password"
-            // placeholder="Your Password here"
             value={pageState.password}
             labelStyle={{
               fontWeight: 'bold',
@@ -369,10 +372,10 @@ const Login = (props: Props) => {
             style={{
               marginRight: wp(4),
               width: '60%',
-              // backgroundColor: 'red',
               alignSelf: 'flex-end'
             }}
             onPress={() => {
+              // @ts-ignore
               props.navigation.push("ForgotPassword")
             }}>
             <AppText
@@ -386,12 +389,6 @@ const Login = (props: Props) => {
             </AppText>
           </TouchableOpacity>
         </View>
-
-
-
-
-
-
         <View style={{
           paddingBottom: '50%',
           paddingTop: 10,
@@ -404,6 +401,7 @@ const Login = (props: Props) => {
             }}>Don't have an account, <AppText
               props={{
                 onPress: () => {
+                  // @ts-ignore
                   props.navigation.push("Register")
                 }
               }}
@@ -416,7 +414,6 @@ const Login = (props: Props) => {
               paddingHorizontal: 20,
               flexDirection: 'row',
               width: '100%',
-              // justifyContent: 'space-between',
             }}>
             <ButtonOne
               onPress={() => {
@@ -429,92 +426,55 @@ const Login = (props: Props) => {
               loading={loading}
               containerStyle={{
                 backgroundColor: Colors.Primary,
-                // backgroundColor: validateForm() == null ? Colors.Primary : Colors.SlightlyShyGrey,
-
               }}
               outerStyle={{
-                width: pageState.isSensorAvailable ? '78%' : '100%',
+                width: biometrics.isSensorAvailable && biometrics.userEnabled ? '85%' : '100%',
               }}
             />
             {
-              pageState.isSensorAvailable ? (
+              biometrics.isSensorAvailable && biometrics.userEnabled ? (
                 <TouchableOpacity
                   onPress={() => {
-                    // promptFingerprint();
+                    promptFingerprint();
                   }}
                   style={{
                     backgroundColor: Colors.Primary,
                     borderRadius: 5,
-                    width: '20%',
+                    width: '15%',
                     justifyContent: 'center',
                     alignItems: 'center',
+                    marginLeft: 5
                   }}>
 
-                  {/* {
+                  {
 
-                    state.biometryType == ReactNativeBiometrics.TouchID ? (
-                            <MaterialCommunityIcons
-                                name="fingerprint"
-                                color={Colors.White}
-                                size={RFPercentage(4)}
-                            />
-                        ) : state.biometryType == ReactNativeBiometrics.FaceID ? (
-                            <Ionicons
-                                name="ios-scan-circle"
-                                color={Colors.White}
-                                size={RFPercentage(4)}
-                            />
-                        ) : state.biometryType == ReactNativeBiometrics.Biometrics ? (
-                            <MaterialCommunityIcons
-                                name="fingerprint"
-                                color={Colors.White}
-                                size={RFPercentage(3.7)}
-                            />
-                        ) : undefined
-                } */}
+                    biometrics.biometryType == BiometryTypes.TouchID ? (
+                      <MaterialCommunityIcons
+                        name="fingerprint"
+                        color={Colors.White}
+                        size={RFPercentage(3.5)}
+                      />
+                    ) : biometrics.biometryType == BiometryTypes.FaceID ? (
+                      <Ionicons
+                        name="scan-circle"
+                        color={Colors.White}
+                        size={RFPercentage(3.5)}
+                      />
+                    ) : biometrics.biometryType == BiometryTypes.Biometrics ? (
+                      <MaterialCommunityIcons
+                        name="fingerprint"
+                        color={Colors.White}
+                        size={RFPercentage(3.5)}
+                      />
+                    ) : undefined
+                  }
 
                 </TouchableOpacity>
               ) : undefined
             }
-
           </View>
-          {/* {
-            keyboardVisible ?
-              undefined
-              : (
-                <TouchableOpacity
-                  style={{
-                    alignItems: 'center',
-                    marginTop: 20,
-                  }}
-                  onPress={() => {
-                    props.
-                      navigation.push("Register")
-                  }}>
-                  <AppBoldText
-                    style={{
-                      textAlign: 'center',
-                      fontSize: RFPercentage(2),
-                      color: Colors.Primary,
-                    }}
-                  >
-                    Register
-                  </AppBoldText>
-                </TouchableOpacity>
-              )
-          } */}
-
-
-
-
-
         </View>
       </KeyboardAwareScrollView>
-
-
-
-
-      {/* </SafeAreaView> */}
     </ImageBackground>
   );
 }

@@ -136,7 +136,7 @@ const OngoingTradeListScreen = (props: Props) => {
           />}
         ListHeaderComponent={
           <SimpleBackHeader
-            text="Ongoing Trades"
+            text="Live Trades"
             showBack={true}
             showMenu={false}
           />}

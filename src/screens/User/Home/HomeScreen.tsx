@@ -239,12 +239,12 @@ const HomeScreen = (props: Props) => {
               elevation: 0,
             }}
             onPress={() => {
-              dispatch(setBillForm({
-                bill: 'telco'
-              }));
-              props.navigation.navigate('BillsScreenOne')
+              // dispatch(setBillForm({
+              //   bill: 'telco'
+              // }));
+              props.navigation.navigate('TradeHistoryScreen')
             }}
-            text="Pay Bills"
+            text="Trade History"
             textStyle={{
               color: Colors.Blue,
             }}

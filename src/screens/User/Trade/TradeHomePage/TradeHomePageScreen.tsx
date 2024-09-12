@@ -143,6 +143,7 @@ const TradeHomePageScreen = (props: Props) => {
               elevation: 0,
             }}
             onPress={() => {
+              // @ts-ignore
               props.navigation.push('CategoriesScreen');
             }}
             text="Sell Gift Cards"
@@ -168,6 +169,7 @@ const TradeHomePageScreen = (props: Props) => {
               elevation: 0,
             }}
             onPress={() => {
+              // @ts-ignore
               props.navigation.push('TradeHistoryScreen');
             }}
             text="View Trade History"
@@ -198,12 +200,13 @@ const TradeHomePageScreen = (props: Props) => {
           }}>
           <CardicCard
             key="2"
-            text="Ongoing Trades"
+            text="Live Trades"
             containerStyle={{
               backgroundColor: Colors.OrangeLight,
               elevation: 0,
             }}
             onPress={() => {
+              // @ts-ignore
               props.navigation.push('OngoingTradeListScreen');
             }}
             textStyle={{
@@ -246,6 +249,7 @@ const TradeHomePageScreen = (props: Props) => {
               elevation: 0,
             }}
             onPress={() => {
+              // @ts-ignore
               props.navigation.push('CompletedTradeListScreen');
             }}
             text="Completed Trades"
@@ -282,11 +286,12 @@ const TradeHomePageScreen = (props: Props) => {
               fontSize: RFPercentage(1.9),
               color: Colors.HomeBlack,
             }}>
-            Ongoing trades
+            Live trades
           </AppBoldText>
 
           <TouchableOpacity
             onPress={() => {
+              // @ts-ignore
               props.navigation.push('OngoingTradeListScreen');
             }}>
             <AppText
@@ -308,6 +313,7 @@ const TradeHomePageScreen = (props: Props) => {
               rate={`${Values.NairaSymbol} ${Utils.currencyFormat(t.amount, 0)}`}
               onPress={() => {
                 dispatch(setSelectedTrade(t));
+                // @ts-ignore
                 props.navigation.push('TradeDetailScreen');
               }}
               containerStyle={{
@@ -320,7 +326,7 @@ const TradeHomePageScreen = (props: Props) => {
                 letterSpacing: 0,
                 marginTop: '1%',
               }}>
-              {loading ? 'Loading...' : 'No Ongoing Trades'}
+              {loading ? 'Loading...' : 'No Live Trades'}
             </AppText>
         }
         <View
@@ -342,6 +348,7 @@ const TradeHomePageScreen = (props: Props) => {
 
           <TouchableOpacity
             onPress={() => {
+              // @ts-ignore
               props.navigation.push('CompletedTradeListScreen');
             }}>
             <AppText
@@ -363,6 +370,7 @@ const TradeHomePageScreen = (props: Props) => {
               rate={`${Values.NairaSymbol} ${Utils.currencyFormat(t.amount, 0)}`}
               onPress={() => {
                 dispatch(setSelectedTrade(t));
+                // @ts-ignore
                 props.navigation.push('TradeDetailScreen');
               }}
               containerStyle={{
