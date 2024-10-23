@@ -16,6 +16,8 @@ interface Props {
     isVisible: boolean;
     onSelect: (val: Bank) => void;
     onClose: () => void;
+    onClosePure: () => void;
+    onOpen: () => void;
 }
 
 const SelectBankModal = (props: Props) => {
@@ -23,10 +25,13 @@ const SelectBankModal = (props: Props) => {
         isVisible,
         banks,
         onSelect,
-        onClose
+        onClose,
+        onClosePure,
+        onOpen
     } = props;
 
     const [showAddBankModal, setShowAddBankModal] = useState(false);
+    const [willShowSelectBank, setWillShowSelectBank] = useState(false);
     const [searchValue, setSearchValue] = useState("");
     const [searchItems, setSearchItems] = useState<Bank[]>([]);
     const search = (str: string) => {
@@ -38,7 +43,7 @@ const SelectBankModal = (props: Props) => {
         <>
             <CustomModal
                 isVisible={isVisible}
-                onClose={() => onClose()}
+                onClose={() => onClosePure()}
                 title="Select Bank"
                 titleStyle={{
                     marginTop: 5,
@@ -127,7 +132,13 @@ const SelectBankModal = (props: Props) => {
                     {
                         text: 'Add Bank',
                         onPress: () => {
-                            setShowAddBankModal(true)
+                            if (Platform.OS == 'android')
+                                setShowAddBankModal(true)
+                            else {
+                                setWillShowSelectBank(true);
+                                onClosePure()
+                                setTimeout(() => setShowAddBankModal(true), 600)
+                            }
                         },
                         containerStyle: {
                             backgroundColor: Colors.Primary,
@@ -155,6 +166,12 @@ const SelectBankModal = (props: Props) => {
             <AddBankModal
                 isVisible={showAddBankModal}
                 onClose={() => setShowAddBankModal(false)}
+                onOpen={() => setShowAddBankModal(true)}
+                onDone={() => {
+                    if(willShowSelectBank){
+                        setTimeout(() => onOpen(), 600)
+                    }
+                }}
             />
         </>
 

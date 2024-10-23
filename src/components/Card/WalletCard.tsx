@@ -32,7 +32,7 @@ const WalletCard: (props: CardicCardThreeProps) => React.ReactNode = ({
       flexDirection: 'row',
       paddingHorizontal: 15,
       paddingVertical: heightPercentageToDP(3.5),
-      borderRadius: 4,
+      borderRadius: 10,
     }, containerStyle]}>
     <View
       style={{
@@ -40,13 +40,13 @@ const WalletCard: (props: CardicCardThreeProps) => React.ReactNode = ({
       }}>
       <AppText
         style={{
-          color: Colors.HomeBlack,
+          color: Colors.White,
         }}>
         {top}
       </AppText>
       <AppBoldText
         style={{
-          color: Colors.HomeBlack,
+          color: Colors.White,
           fontSize: RFPercentage(3),
           marginTop: 3,
         }}>
@@ -61,7 +61,7 @@ const WalletCard: (props: CardicCardThreeProps) => React.ReactNode = ({
           }}
           name={open ? 'eye' : 'eye-with-line'}
           size={RFPercentage(2.8)}
-          color={Colors.Primary}
+          color={Colors.White}
           style={{
             marginLeft: 'auto',
             alignSelf: 'center',

@@ -17,7 +17,7 @@ import Utils from 'CardicApp/src/lib/utils/Utils';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { ApplicationStackParamList } from 'CardicApp/@types/navigation';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectAuthState, setAuthToken, setUserInfo } from 'CardicApp/src/store/auth';
+import { selectAuthState, setAuthToken, setUserInfo, userLogout } from 'CardicApp/src/store/auth';
 import { useNavigation } from '@react-navigation/native';
 import AppText, { AppBoldText, BoldFontFamily } from 'CardicApp/src/components/AppText/AppText';
 import SimpleBackHeader from 'CardicApp/src/components/SimpleBackHeader';
@@ -28,6 +28,9 @@ import routes from 'CardicApp/src/lib/network/routes';
 import Toast from 'react-native-toast-message';
 import ConfirmModal from 'CardicApp/src/components/Modal/ConfirmModal';
 import Config from "react-native-config";
+import EncryptedStorage from 'react-native-encrypted-storage';
+
+import ReactNativeBiometrics, { BiometryTypes } from 'react-native-biometrics'
 
 const frontendHost = Config.FRONTEND_HOST
 interface Props {
@@ -55,9 +58,10 @@ const SettingsScreen = (props: Props) => {
   };
 
   const proceed = async () => {
-    await serverLogout();
+    // await serverLogout();
     dispatch(setUserInfo(null));
     dispatch(setAuthToken(null));
+    dispatch(userLogout());
     props.navigation.reset({
       index: 0,
       routes: [
@@ -68,15 +72,15 @@ const SettingsScreen = (props: Props) => {
       ]
     })
   }
-  const serverLogout = async () => {
-    try {
-      const res = await axiosExtended.post(`${routes.auth}/logout`)
-      if (res.status === 200) return true;
-    } catch (e) {
-      console.error(e);
-      return false;
-    }
-  }
+  // const serverLogout = async () => {
+  //   try {
+  //     const res = await axiosExtended.post(`${routes.auth}/logout`)
+  //     if (res.status === 200) return true;
+  //   } catch (e) {
+  //     console.error(e);
+  //     return false;
+  //   }
+  // }
 
   const [changingPassword, setChangingPassword] = useState(false);
   const forgotPassword = async () => {
@@ -101,7 +105,7 @@ const SettingsScreen = (props: Props) => {
       setChangingPassword(false)
     }
   }
-  const updateUser = async (payload: any, fn: (res: boolean) => void) => {
+  const updateUser = async (payload: any, fn: (res: any) => void) => {
     try {
       const res = await axiosExtended.patch(`${routes.users}/${user?.id}`, payload)
       if (res.status === 200) {
@@ -182,6 +186,20 @@ const SettingsScreen = (props: Props) => {
   //   });
   // };
 
+  const promptFingerprint = async () => {
+    const rnBiometrics = new ReactNativeBiometrics({
+      allowDeviceCredentials: false
+    })
+    const res = await rnBiometrics.simplePrompt({
+      promptMessage: "Login to Cardic with your biometrics",
+    });
+    if (res.success) {
+      return null;
+    } else {
+      return res.error;
+    }
+  }
+
   return (
     <SafeAreaView
       style={{
@@ -200,19 +218,27 @@ const SettingsScreen = (props: Props) => {
         contentContainerStyle={{
           paddingBottom: 10,
         }}>
-        <AppBoldText
+        <View
           style={{
-            marginLeft: '5%',
+            backgroundColor: 'rgba(240,240,240,1)',
+            paddingVertical: 10,
             marginTop: heightPercentageToDP(2),
-            fontSize: RFPercentage(2.5),
-            color: Colors.Primary,
           }}>
-          Profile Settings
-        </AppBoldText>
+          <AppBoldText
+            style={{
+              marginLeft: '5%',
+              fontSize: RFPercentage(2.5),
+              color: Colors.Primary,
+            }}>
+            Profile Settings
+          </AppBoldText>
+        </View>
+
         <SettingItem
-          text="Edit Profile"
+          text="Profile Information"
           onPress={() => {
-            // props.navigation.push('/profile-page');
+            // @ts-ignore
+            props.navigation.push('PersonalInformationScreen');
           }}
         />
         <SettingItem
@@ -239,21 +265,22 @@ const SettingsScreen = (props: Props) => {
             />
           }
         />
-        <AppBoldText
+
+        <View
           style={{
-            marginLeft: '5%',
+            backgroundColor: 'rgba(240,240,240,1)',
+            paddingVertical: 10,
             marginTop: heightPercentageToDP(2),
-            fontSize: RFPercentage(2.5),
-            color: Colors.Primary,
           }}>
-          Security Settings
-        </AppBoldText>
-        {/* <SettingItem
-          text="Edit Profile"
-          onPress={() => {
-            props.navigation.push('/profile-page');
-          }}
-        /> */}
+          <AppBoldText
+            style={{
+              marginLeft: '5%',
+              fontSize: RFPercentage(2.5),
+              color: Colors.Primary,
+            }}>
+            Security Settings
+          </AppBoldText>
+        </View>
         <SettingItem
           text="Change Password"
           onPress={() => {
@@ -289,32 +316,54 @@ const SettingsScreen = (props: Props) => {
           rightItem={
             <Switch
               value={user?.isBiometricsEnabled}
-              onChange={() => {
+              onChange={async () => {
+                if (!user?.isBiometricsEnabled) {
+                  const res = await promptFingerprint();
+                  if (res != null) {
+                    Toast.show({
+                      text1: res,
+                      type: 'error'
+                    });
+                    return;
+                  }
+                }
                 dispatch(setUserInfo({
                   ...user,
                   isBiometricsEnabled: !user?.isBiometricsEnabled
                 }))
                 updateUser({
                   isBiometricsEnabled: !user?.isBiometricsEnabled
-                }, (res) => {
+                }, async (res) => {
                   if (res != false) {
                     dispatch(setUserInfo(res))
+                    try {
+                      await EncryptedStorage.setItem('isBiometricsEnabled', res.isBiometricsEnabled.toString());
+                    } catch (e) {
+                      console.error(e)
+                    }
                   }
                 })
+
+
               }}
             />
           }
         />
-
-        <AppBoldText
+        <View
           style={{
-            marginLeft: '5%',
-            marginTop: heightPercentageToDP(4),
-            fontSize: RFPercentage(2.5),
-            color: Colors.Primary,
+            backgroundColor: 'rgba(240,240,240,1)',
+            paddingVertical: 10,
+            marginTop: heightPercentageToDP(2),
           }}>
-          Preferences
-        </AppBoldText>
+          <AppBoldText
+            style={{
+              marginLeft: '5%',
+              fontSize: RFPercentage(2.5),
+              color: Colors.Primary,
+            }}>
+            Cardic
+          </AppBoldText>
+        </View>
         {/* <SettingItem
           text="Our Story"
           onPress={() => {
@@ -350,7 +399,7 @@ const SettingsScreen = (props: Props) => {
         <SettingItem
           text="Contact Us"
           onPress={() => {
-            Linking.openURL(`mailto:mycardicapp.com`)
+            Linking.openURL(`https://cardicapp.com/contact`)
           }}
           rightItem={
             <AntDesign

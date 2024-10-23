@@ -35,6 +35,7 @@ import AntDesign from 'react-native-vector-icons/AntDesign'
 import ConfirmModal from 'CardicApp/src/components/Modal/ConfirmModal';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Toast from 'react-native-toast-message';
+import WalletCard from 'CardicApp/src/components/Card/WalletCard';
 
 interface Props {
   navigation: StackNavigationProp<ApplicationStackParamList, keyof ApplicationStackParamList, undefined>;
@@ -54,6 +55,7 @@ const WalletScreen = (props: Props) => {
   const [banks, setBanks] = useState<Bank[]>([])
   const [showWithdrawModal, setShowWithdrawModal] = useState(false)
   const [showBanksModal, setShowBanksModal] = useState(false)
+  const [willShowWithdrawModal, setWillShowWithdrawModal] = useState(false)
   const [showSetWithdrawalPinModal, setShowSetWithdrawalPinModal] = useState(false)
   const pageIndexRef = useRef(1);
   const [form, setForm] = useState<{
@@ -76,8 +78,10 @@ const WalletScreen = (props: Props) => {
     try {
       setLoadingBanks(true)
       const res = await axiosExtended.get(`${routes.banks}/user/${authState.user?.id}`);
+      console.log("REs: ", res.status)
       if (res.status === 200) {
         const banks: Bank[] = res.data;
+
         if (banks && banks.length) {
           setBanks(banks);
         }
@@ -124,8 +128,8 @@ const WalletScreen = (props: Props) => {
       const res = await axiosExtended.post(`${routes.wallet}/withdraw`, payload);
       if (res.status === 200) {
         resetForm()
-        setShowWithdrawalSuccessModal(true)
         setShowWithdrawModal(false)
+        setTimeout(() => setShowWithdrawalSuccessModal(true), 600)
         refresh();
       }
     } catch (e) {
@@ -292,8 +296,22 @@ const WalletScreen = (props: Props) => {
             }}>
             {/* <AppText style={{ textAlign: 'center', fontSize: RFPercentage(4), marginTop: '5%' }}>
               {balance?.currency.currencyCode}</AppText> */}
-            <AppBoldText style={{ textAlign: 'center', fontSize: RFPercentage(4), marginTop: '8%' }}>{balance?.currency.currencyCode == "USD" ? Values.DollarSymbol : Values.NairaSymbol}{Utils.currencyFormat(balance?.amount ?? 0, 0)}</AppBoldText>
+            {/* <AppBoldText style={{ textAlign: 'center', fontSize: RFPercentage(4), marginTop: '8%' }}>{balance?.currency.currencyCode == "USD" ? Values.DollarSymbol : Values.NairaSymbol}{Utils.currencyFormat(balance?.amount ?? 0, 0)}</AppBoldText> */}
+            {
+              wallet?.balances.map((w, i) => <WalletCard
+                key={i}
+                containerStyle={{
+                  backgroundColor: Colors.Primary,
+                }}
+                onPress={() => {
+                  // @ts-ignore
+                  props.navigation.navigate("Wallet");
+                }}
+                top={`Wallet (${w.currency.currencyCode})`}
+                bottom={`${w.currency.currencyCode == "USD" ? Values.DollarSymbol : Values.NairaSymbol} ${Utils.currencyFormat(w.amount, 0)}`}
 
+              />)
+            }
             <View
               style={{
                 marginTop: 25,
@@ -302,9 +320,9 @@ const WalletScreen = (props: Props) => {
                 alignItems: 'center',
               }}>
               <TouchableOpacity
-              style={{
-                backgroundColor: Colors.PrimaryBGLight,
-              }}
+                style={{
+                  backgroundColor: Colors.PrimaryBGLight,
+                }}
                 onPress={() => {
                   if (!authState.user?.hasWithdrawalPin) return setShowSetWithdrawalPinModal(true);
                   setShowWithdrawModal(true)
@@ -329,15 +347,15 @@ const WalletScreen = (props: Props) => {
                     alignItems: 'center',
                     flexDirection: 'row',
                   }]}>
-                    <AppBoldText
-                        style={[{
-                          // marginTop: 20,
-                          fontSize: RFPercentage(2),
-                          fontWeight: '700',
-                          marginLeft: 0,
-                          color: Colors.Primary,
-                          textAlign: 'center',
-                        }]}>Withdraw</AppBoldText>
+                  <AppBoldText
+                    style={[{
+                      // marginTop: 20,
+                      fontSize: RFPercentage(2),
+                      fontWeight: '700',
+                      marginLeft: 0,
+                      color: Colors.Primary,
+                      textAlign: 'center',
+                    }]}>Withdraw</AppBoldText>
                   <View
                     style={[{
                       height: heightPercentageToDP(4),
@@ -411,7 +429,7 @@ const WalletScreen = (props: Props) => {
       />
 
       <CustomModal
-        autoClose={true}
+        autoClose={false}
         isVisible={showWithdrawModal}
         onClose={() => {
           setShowWithdrawModal(false)
@@ -480,8 +498,18 @@ const WalletScreen = (props: Props) => {
                   }}>{form.bank ? `${form.bank.accountNo} - ${Utils.shortenText(form.bank.bankName, 25, '')}` : "Select Bank"}</AppText>}
                 onPress={() => {
                   if (!loadingBanks) {
-                    setShowBanksModal(true)
-                    getBanks();
+                    if (Platform.OS == 'android') {
+                      setShowBanksModal(true)
+                      getBanks();
+                    } else {
+                      setWillShowWithdrawModal(true);
+                      setShowWithdrawModal(false);
+                      setTimeout(() => {
+                        setShowBanksModal(true);
+                        getBanks();
+                      }, 600)
+                    }
+
                   }
 
                 }}
@@ -541,7 +569,18 @@ const WalletScreen = (props: Props) => {
       <SelectBankModal
         isVisible={showBanksModal}
         banks={banks}
-        onClose={() => setShowBanksModal(false)}
+        onClose={() => {
+          // console.log("onClose")
+          setShowBanksModal(false)
+          if (willShowWithdrawModal) {
+            setTimeout(() => setShowWithdrawModal(true), 600)
+          }
+        }}
+        onOpen={() => setShowBanksModal(true)}
+        onClosePure={() => {
+          // console.log("onClosePure")
+          setShowBanksModal(false)
+        }}
         onSelect={val => {
           setForm({
             ...form,

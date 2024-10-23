@@ -173,13 +173,14 @@ const HomeScreen = (props: Props) => {
           wallet?.balances.map((w, i) => <WalletCard
             key={i}
             containerStyle={{
-              backgroundColor: Colors.PrimaryBGLight,
+              backgroundColor: Colors.Primary,
             }}
             onPress={() => {
               props.navigation.navigate("Wallet");
             }}
             top={`Wallet (${w.currency.currencyCode})`}
             bottom={`${w.currency.currencyCode == "USD" ? Values.DollarSymbol : Values.NairaSymbol} ${Utils.currencyFormat(w.amount, 0)}`}
+            
           />)
         }
 

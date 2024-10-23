@@ -39,7 +39,7 @@ const TradeHomePageScreen = (props: Props) => {
   const dispatch = useDispatch();
   const authState = useSelector(selectAuthState);
   const user = authState.user;
-
+  const [tab, setTab] = useState('live');
   const [ongoingTrades, setOngoingTrades] = useState<Trade[]>([]);
   const [completedTrades, setCompletedTrades] = useState<Trade[]>([]);
 
@@ -77,14 +77,14 @@ const TradeHomePageScreen = (props: Props) => {
   const loadTrades = () => {
     getTrades({
       page: 1,
-      limit: 4,
+      limit: 99999999999,
       status: 1, // 1 = ongoing/pending trades. 2 = completed trades
     }, trades => {
       setOngoingTrades(trades)
     });
     getTrades({
       page: 1,
-      limit: 4,
+      limit: 99999999999,
       status: 2, // 1 = ongoing/pending trades. 2 = completed trades
     }, trades => {
       setCompletedTrades(trades)
@@ -190,7 +190,7 @@ const TradeHomePageScreen = (props: Props) => {
             }}
           />
         </View>
-        <View
+        {/* <View
           style={{
             marginTop: 25,
             marginBottom: 10,
@@ -270,9 +270,44 @@ const TradeHomePageScreen = (props: Props) => {
             }}
           />
 
-        </View>
+        </View> */}
 
         <View
+        style={{
+          justifyContent: 'space-evenly',
+          flexDirection: 'row',
+          alignItems: 'center',
+          marginTop: 20,
+        }}>
+          <TouchableOpacity
+            onPress={() => {
+              setTab('live')
+            }}>
+            <AppText
+              style={{
+                color: tab == 'live' ? Colors.Primary : Colors.Black,
+                fontSize: RFPercentage(1.8),
+                fontWeight: tab == 'live' ? '600' : '400',
+              }}>
+              Live Trades
+            </AppText>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              setTab('completed')
+            }}>
+            <AppText
+              style={{
+                color: tab == 'completed' ? Colors.Primary : Colors.Black,
+                fontSize: RFPercentage(1.8),
+                fontWeight: tab == 'completed' ? '600' : '400',
+              }}>
+              Completed Trades
+            </AppText>
+          </TouchableOpacity>
+        </View>
+
+        {/* <View
           style={{
             flexDirection: 'row',
             justifyContent: 'space-between',
@@ -303,9 +338,9 @@ const TradeHomePageScreen = (props: Props) => {
               See All
             </AppText>
           </TouchableOpacity>
-        </View>
+        </View> */}
         {
-          ongoingTrades && ongoingTrades.length ? ongoingTrades.map(t =>
+          tab == 'live' && ongoingTrades && ongoingTrades.length ? ongoingTrades.map(t =>
             <GCCardOne
               name={t.subCategory.name}
               cta='Open'
@@ -320,16 +355,16 @@ const TradeHomePageScreen = (props: Props) => {
                 backgroundColor: Colors.PrimaryBGLight,
               }}
             />) :
-            <AppText
+            tab =='live' ? <AppText
               style={{
                 textAlign: 'center',
                 letterSpacing: 0,
-                marginTop: '1%',
+                marginTop: 20,
               }}>
               {loading ? 'Loading...' : 'No Live Trades'}
-            </AppText>
+            </AppText> : undefined
         }
-        <View
+        {/* <View
           style={{
             flexDirection: 'row',
             justifyContent: 'space-between',
@@ -360,9 +395,9 @@ const TradeHomePageScreen = (props: Props) => {
               See All
             </AppText>
           </TouchableOpacity>
-        </View>
+        </View> */}
         {
-          completedTrades && completedTrades.length ? completedTrades.map(t =>
+          tab == 'completed' && completedTrades && completedTrades.length ? completedTrades.map(t =>
             <GCCardOne
               name={t.subCategory.name}
               cta='Open'
@@ -377,14 +412,14 @@ const TradeHomePageScreen = (props: Props) => {
                 backgroundColor: Colors.PrimaryBGLight,
               }}
             />) :
-            <AppText
+            tab =='completed' ? <AppText
               style={{
                 textAlign: 'center',
                 letterSpacing: 0,
-                marginTop: '1%',
+                marginTop: 20,
               }}>
               {loading ? 'Loading...' : 'No Completed Trades'}
-            </AppText>
+            </AppText> : undefined
         }
       </ScrollView>
     </SafeAreaView >

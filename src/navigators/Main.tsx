@@ -29,6 +29,7 @@ import DataBillsScreen from '../screens/User/Bills/DataBillsScreen';
 import DataBillsSummaryScreen from '../screens/User/Bills/DataBillsSummaryScreen';
 import SportsBettingScreen from '../screens/User/Bills/SportsBettingScreen';
 import SportsBettingSummaryScreen from '../screens/User/Bills/SportsBettingSummaryScreen';
+import PersonalInformationScreen from '../screens/User/Settings/PersonalInformationScreen';
 
 const Stack = createStackNavigator();
 
@@ -64,8 +65,7 @@ const MainNavigator = () => {
       <Stack.Screen name="DataBillsSummaryScreen" component={DataBillsSummaryScreen} />
       <Stack.Screen name="SportsBettingScreen" component={SportsBettingScreen} />
       <Stack.Screen name="SportsBettingSummaryScreen" component={SportsBettingSummaryScreen} />
-
-
+      <Stack.Screen name="PersonalInformationScreen" component={PersonalInformationScreen} />
     </Stack.Navigator>
   );
 };

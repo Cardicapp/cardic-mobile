@@ -14,15 +14,15 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import ButtonOne from 'CardicApp/src/components/ButtonOne';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectAuthState, setAuthState, setAuthToken, setUserInfo } from 'CardicApp/src/store/auth';
+import { selectAuthState, setAuthState, setAuthToken, setUserInfo, userLogout } from 'CardicApp/src/store/auth';
 import routes from 'CardicApp/src/lib/network/routes';
 import axiosExtended from 'CardicApp/src/lib/network/axios-extended';
 import { ApplicationScreenProps, ApplicationStackParamList } from 'CardicApp/@types/navigation';
 import { NavigationProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useTheme } from 'CardicApp/src/hooks';
-import EncryptedStorage from 'react-native-encrypted-storage';
 import ReactNativeBiometrics, { BiometryTypes } from 'react-native-biometrics'
+import EncryptedStorage from 'react-native-encrypted-storage';
 
 
 interface UserData {
@@ -30,17 +30,17 @@ interface UserData {
   lastName?: string,
 }
 interface State {
-  email: string,
-  password: string,
-  verifyingPhone: boolean,
-  showSuccessModal: boolean,
-  showPassword: boolean,
-  userData?: UserData,
-  keyboardVisible: boolean,
-  isSensorAvailable: boolean,
-  biometryType?: string,
-  biometricPassword?: string,
-  useExistingEmail: boolean,
+  email: string;
+  password: string;
+  // verifyingPhone: boolean;
+  // showSuccessModal: boolean;
+  showPassword: boolean;
+  // userData?: UserData;
+  // keyboardVisible: boolean;
+  // isSensorAvailable: boolean;
+  // biometryType?: string;
+  // biometricPassword?: string;
+  // useExistingEmail: boolean;
 }
 
 interface Props {
@@ -56,15 +56,15 @@ const Login = (props: Props) => {
   const [pageState, setPageState] = useState<State>({
     email: "",
     password: "",
-    verifyingPhone: false,
-    showSuccessModal: false,
+    // verifyingPhone: false,
+    // showSuccessModal: false,
     showPassword: false,
-    userData: undefined,
-    keyboardVisible: false,
-    isSensorAvailable: false,
-    biometryType: undefined,
-    biometricPassword: "",
-    useExistingEmail: false,
+    // userData: undefined,
+    // keyboardVisible: false,
+    // isSensorAvailable: false,
+    // biometryType: undefined,
+    // biometricPassword: "",
+    // useExistingEmail: false,
   })
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [loading, setLoading] = useState(false)
@@ -93,55 +93,64 @@ const Login = (props: Props) => {
     })
 
     const { biometryType, available, error } = await rnBiometrics.isSensorAvailable();
-    console.log(biometryType, available, error);
-    console.log(biometrics);
-    if (available) {
+
+    let enabled: string | null = 'false';
+    let password = null;
+    let email = null;
+    try {
+      enabled = await EncryptedStorage.getItem('isBiometricsEnabled');
+      password = await EncryptedStorage.getItem("userPassword");
+      email = await EncryptedStorage.getItem("userEmail");
+    } catch (e) {
+      console.error(e);
+    }
+
+    if (email && password) {
       setBiometrics({
         isSensorAvailable: available, biometryType: biometryType,
-      });
-      const enabled = await EncryptedStorage.getItem('isBiometricsEnabled');
-      if(enabled == 'true'){
-        setBiometrics({
-          ...biometrics,
-          userEnabled: true,
-        })
-      }
-      const password = await EncryptedStorage.getItem("userPassword");
-      if (password) {
-        setBiometrics({
-          ...biometrics,
-          password: password,
-        })
-      }
-      const email = await EncryptedStorage.getItem("userEmail");
-      if (email) {
-        setBiometrics({
-          ...biometrics,
-          email: email,
-        })
-      }
+        email: email,
+        password: password,
+        userEnabled: enabled == 'true',
+      })
     }
   }
 
-  const login = async () => {
+  const login = async (payload: any = {}, useBiometrics: boolean = false) => {
     const result = validateForm(true);
-    if (!result) {
+    const hasLoggedIn = biometrics.email && biometrics.password;
+    if ((!result || useBiometrics) || hasLoggedIn) {
+      if (hasLoggedIn && useBiometrics == false) {
+        if (!pageState.password) {
+          return showToast("Password cannot be empty");
+        }
+        if (biometrics.password !== pageState.password) {
+          return showToast("Incorrect password");
+        } else {
+          payload = {
+            email: biometrics.email,
+            password: biometrics.password
+          }
+        }
+
+      }
       setLoading(true)
-      const { email, password, useExistingEmail, userData } = pageState;
+      const { email, password } = pageState;
       let formdata = {
-        // email: useExistingEmail && userData ? userData['email'] : email,
         email,
-        password
+        password,
+        ...payload
       }
       try {
         const res = await axiosExtended.post(routes.userLoginEmail, formdata)
         if (res.status === 200) {
           dispatch(setUserInfo(res.data.user));
           dispatch(setAuthToken(res.data.token));
-          if (res.data.isBiometricsEnabled) {
-            await EncryptedStorage.setItem('userEmail', email);
-            await EncryptedStorage.setItem('userPassword', password);
-            await EncryptedStorage.setItem('isBiometricsEnabled', 'true');
+          try {
+            await EncryptedStorage.setItem('userEmail', formdata.email);
+            await EncryptedStorage.setItem('userPassword', formdata.password);
+            await EncryptedStorage.setItem('isBiometricsEnabled', res.data.user.isBiometricsEnabled.toString());
+          } catch (e) {
+            console.error(e);
           }
           props.navigation.reset({
             index: 0,
@@ -167,16 +176,16 @@ const Login = (props: Props) => {
       } finally {
         setLoading(false)
       }
-    }
-    else showToast(result);
+    } else return showToast(result);
+
   }
 
   const validateForm = (react: boolean = false) => {
     const {
-      email, password, useExistingEmail
+      email, password
     } = pageState;
 
-    if (!email && useExistingEmail == false) {
+    if (!email) {
       if (react) setTimeout(() => {
         emailRef?.current?.focus();
       }, 0)
@@ -221,7 +230,7 @@ const Login = (props: Props) => {
           email: biometrics.email,
           password: biometrics.password
         }
-        props.login(formdata);
+        login(formdata, true);
       }
     } else {
 
@@ -290,23 +299,28 @@ const Login = (props: Props) => {
             backgroundColor: Colors.White,
           }}>
           {
-            pageState.useExistingEmail && pageState.userData ?
+            biometrics.email && biometrics.password ?
               (
                 <View
                   style={{
-                    paddingHorizontal: "5%",
+                    paddingHorizontal: 10,
                   }}>
                   <AppBoldText
                     style={{
-                      fontSize: RFPercentage(2.5)
+                      fontSize: RFPercentage(2)
                       // @ts-ignore
-                    }}>{pageState.userData['email']}</AppBoldText>
+                    }}>{biometrics.email}</AppBoldText>
                   <TouchableOpacity
                     style={{
-                      marginTop: hp(1),
+                      marginTop: 10,
                     }}
                     onPress={() => {
-                      setPageState({ ...pageState, useExistingEmail: false })
+                      dispatch(userLogout());
+                      setBiometrics({
+                        ...biometrics,
+                        email: '',
+                        password: '',
+                      })
                     }}>
                     <AppText
                       style={{
@@ -315,7 +329,7 @@ const Login = (props: Props) => {
                         color: Colors.Primary,
                       }}
                     >
-                      Change account
+                      Sign out
                     </AppText>
                   </TouchableOpacity>
                 </View>

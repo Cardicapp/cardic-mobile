@@ -2,6 +2,8 @@ import { createSlice } from "@reduxjs/toolkit";
 // import { AppState } from "./store";
 import { User } from "CardicApp/src/types/user";
 import { AppState } from "..";
+import EncryptedStorage from 'react-native-encrypted-storage';
+
 
 // Type for our state
 export interface AuthState {
@@ -32,10 +34,13 @@ export const authSlice = createSlice({
     setUserInfo(state, action) {
       state.user = action.payload;
     },
+    userLogout(state) {
+      EncryptedStorage.clear();
+    }
   },
 });
 
-export const { setAuthState, setAuthToken, setUserInfo } = authSlice.actions;
+export const { setAuthState, setAuthToken, setUserInfo, userLogout } = authSlice.actions;
 
 export const selectAuthState = (state: AppState) => state.auth;
 

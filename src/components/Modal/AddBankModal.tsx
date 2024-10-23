@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import CustomModal from "./CustomModal";
 import TextContainer from "../TextContainer/TextContainer";
-import { ActivityIndicator, FlatList, View } from "react-native";
+import { ActivityIndicator, FlatList, Platform, View } from "react-native";
 import { heightPercentageToDP } from "react-native-responsive-screen";
 import Colors from "CardicApp/src/theme/Colors";
 import AppText from "../AppText/AppText";
@@ -17,19 +17,22 @@ import AntDesign from 'react-native-vector-icons/AntDesign'
 interface Props {
     isVisible: boolean;
     onClose: () => void;
+    onOpen: () => void;
+    onDone: () => void;
 }
 
 const AddBankModal = (props: Props) => {
     const {
         isVisible,
-        onClose
+        onClose, onOpen, onDone
     } = props;
 
     const [verifying, setVerifying] = useState(false);
     const [addingBank, setAddingBank] = useState(false);
     const [loadingBankList, setLoadingBankList] = useState(false)
     const [showBankListModal, setShowBankListModal] = useState(false)
-    const [ showAddBankSuccessModal, setShowAddBankSuccessModal] = useState(false)
+    const [showAddBankSuccessModal, setShowAddBankSuccessModal] = useState(false)
+    const [willShowAddBank, setWillShowAddBank] = useState(false);
     const [bankList, setBankList] = useState<LocalBank[]>([])
     const [addBankForm, setAddBankForm] = useState<{
         accountNo: string;
@@ -93,12 +96,11 @@ const AddBankModal = (props: Props) => {
                 accountNo: addBankForm.accountNo,
                 accountName: addBankForm.accountName,
             }
-            console.log(payload)
-            // return;
             const res = await axiosExtended.post(`${routes.banks}`, payload);
             if (res.status === 201) {
-                setShowAddBankSuccessModal(true)
+                onClose();
                 setAddingBank(false)
+                setTimeout(() => setShowAddBankSuccessModal(true), 500)
             }
         } catch (e) {
             console.error(e)
@@ -108,7 +110,12 @@ const AddBankModal = (props: Props) => {
     const closeSelectBankModal = () => {
         setSearchValue("");
         setSearchItems([]);
-        setShowBankListModal(false)
+        setShowBankListModal(false);
+        if(willShowAddBank){
+            setTimeout(() => {
+                onOpen();
+            }, 600)
+        }
     }
     const resolveAccount = async (val: string) => {
         if (!addBankForm.bank || !addBankForm.accountNo) {
@@ -147,6 +154,16 @@ const AddBankModal = (props: Props) => {
         setSearchItems(result);
     }
 
+    const openBankListModal = () => {
+        if(Platform.OS == 'android') {
+            setShowBankListModal(true)
+        } else {
+            onClose();
+            setWillShowAddBank(true);
+            setTimeout(() => setShowBankListModal(true), 600);
+        }
+    }
+
 
 
     return (
@@ -154,7 +171,10 @@ const AddBankModal = (props: Props) => {
             <CustomModal
                 autoClose={false}
                 isVisible={isVisible}
-                onClose={() => onClose()}
+                onClose={() => {
+                    onClose()
+                    onDone();
+                }}
                 title="Add Bank"
                 titleStyle={{
                     marginTop: 5,
@@ -185,9 +205,9 @@ const AddBankModal = (props: Props) => {
                                 onPress={() => {
                                     if (!bankList.length)
                                         getBankList(() => {
-                                            setTimeout(() => setShowBankListModal(true), 300);
+                                            setTimeout(() => openBankListModal(), 300);
                                         });
-                                    else setShowBankListModal(true)
+                                    else openBankListModal();
                                 }}
                             />
                         )
@@ -251,7 +271,10 @@ const AddBankModal = (props: Props) => {
                     },
                     {
                         text: 'Close',
-                        onPress: () => onClose(),
+                        onPress: () => {
+                            onClose();
+                            onDone();
+                        },
                         containerStyle: {
                             backgroundColor: Colors.White,
                             width: '95%',
@@ -379,11 +402,11 @@ const AddBankModal = (props: Props) => {
                 proceedText={`Continue`}
                 onClose={() => {
                     setShowAddBankSuccessModal(false)
-                    onClose();
+                    onDone();
                 }}
                 onProceed={() => {
                     setShowAddBankSuccessModal(false)
-                    onClose();
+                    onDone();
                 }}
                 title="Bank added successfully"
             />

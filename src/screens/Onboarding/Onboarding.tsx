@@ -102,11 +102,11 @@ const OnboardingPage = (props: OnboardingPageProps) => {
   const { navigate, reset } = useNavigation()
   const onProceed = () => {
     EncryptedStorage.setItem("seenOnboarding", 'true');
-    // @ts-ignore
     reset({
       index: 0,
-      routes:[
+      routes: [
         {
+          // @ts-ignore
           name: 'Main',
         }
       ]
