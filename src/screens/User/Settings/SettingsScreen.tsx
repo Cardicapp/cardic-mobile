@@ -412,6 +412,22 @@ const SettingsScreen = (props: Props) => {
             />
           }
         />
+        <SettingItem
+          text="Delete My Account"
+          onPress={() => {
+            Linking.openURL(`https://cardicapp.com/delete-account`)
+          }}
+          rightItem={
+            <AntDesign
+              name="right"
+              color={'#999999'}
+              size={RFPercentage(2.8)}
+              style={{
+                marginRight: '1%',
+              }}
+            />
+          }
+        />
         {/* <SettingItem
           text="FAQ & Support"
           onPress={() => {
