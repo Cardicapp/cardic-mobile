@@ -54,13 +54,13 @@ const HomeScreen = (props: Props) => {
   useEffect(() => {
     requestNotificationPermission();
     // Get the device token
-    // messaging()
-    //   .getToken()
-    //   .then(token => {
-    //     return updateUser({
-    //       fcmToken: token
-    //     });
-    //   });
+    messaging()
+      .getToken()
+      .then(token => {
+        return updateUser({
+          fcmToken: token
+        });
+      });
     // If using other push notification providers (ie Amazon SNS, etc)
     // you may need to get the APNs token instead for iOS:
     // if(Platform.OS == 'ios') { messaging().getAPNSToken().then(token => { return saveTokenToDatabase(token); }); }
@@ -176,6 +176,7 @@ const HomeScreen = (props: Props) => {
               backgroundColor: Colors.Primary,
             }}
             onPress={() => {
+              // @ts-ignore
               props.navigation.navigate("Wallet");
             }}
             top={`Wallet (${w.currency.currencyCode})`}
@@ -215,6 +216,7 @@ const HomeScreen = (props: Props) => {
               elevation: 0,
             }}
             onPress={() => {
+              // @ts-ignore
               props.navigation.push('CategoriesScreen');
             }}
             text="Sell Gift Cards"
@@ -243,6 +245,7 @@ const HomeScreen = (props: Props) => {
               // dispatch(setBillForm({
               //   bill: 'telco'
               // }));
+              // @ts-ignore
               props.navigation.navigate('TradeHistoryScreen')
             }}
             text="Trade History"
@@ -284,6 +287,7 @@ const HomeScreen = (props: Props) => {
 
               <TouchableOpacity
                 onPress={() => {
+                  // @ts-ignore
                   props.navigation.push('CategoriesScreen');
                 }}>
                 <AppText
@@ -308,8 +312,9 @@ const HomeScreen = (props: Props) => {
               image={c.photo.path}
               // rate={`${Values.NairaSymbol} ${Utils.currencyFormat(t.amount, 0)}`}
               onPress={() => {
-                dispatch(setTradeForm({ category: c }))
-                props.navigation.push("CreateTradeScreen")
+                dispatch(setTradeForm({ category: c }));
+                // @ts-ignore
+                props.navigation.push("CreateTradeScreen");
               }}
               containerStyle={{
                 backgroundColor: Colors.PrimaryBGLight,

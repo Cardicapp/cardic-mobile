@@ -713,16 +713,16 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.4;
+				MARKETING_VERSION = 1.0.5;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.cardicapp.cardic;
+				PRODUCT_BUNDLE_IDENTIFIER = com.cardicapp;
 				PRODUCT_NAME = CardicApp;
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = Cardic;
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "Cardic Live";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
