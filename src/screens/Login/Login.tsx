@@ -168,7 +168,7 @@ const Login = (props: Props) => {
           Toast.show({
             type: 'error',
             text1: 'Account not yet activated',
-            text2: 'Please check your mailbox for the activation link.'
+            text2: 'Please check your mailbox for the activation link. (Check spam folder)'
           });
         } else {
           showToast('Unable to login. Confirm credentials and try again')

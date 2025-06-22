@@ -43,7 +43,7 @@ const ForgotPassword = (props: Props) => {
           Toast.show({
             type: 'success',
             text1: "Request successfully.",
-            text2: "Check you mailbox for futher instructions",
+            text2: "Check your mailbox for futher instructions (Check spam folder)",
           });
           props.navigation.pop();
         }
