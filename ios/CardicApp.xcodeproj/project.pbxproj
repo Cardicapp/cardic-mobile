@@ -312,6 +312,7 @@
 				9DB86590CA8DC4B5887D148F /* [CP] Embed Pods Frameworks */,
 				ED8AB7841D079EC67986E525 /* [CP-User] [RNFB] Core Configuration */,
 				1DD79863C90185FD0661E3CC /* [CP] Copy Pods Resources */,
+				040134C82E0813B8008D62B8 /* Fix Privacy Manifest */,
 			);
 			buildRules = (
 			);
@@ -430,6 +431,26 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "set -e\n\nWITH_ENVIRONMENT=\"../node_modules/react-native/scripts/xcode/with-environment.sh\"\nREACT_NATIVE_XCODE=\"../node_modules/react-native/scripts/react-native-xcode.sh\"\n\n/bin/sh -c \"$WITH_ENVIRONMENT $REACT_NATIVE_XCODE\"\n";
+		};
+		040134C82E0813B8008D62B8 /* Fix Privacy Manifest */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Fix Privacy Manifest";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\n\"/Users/macbook/Documents/MyCashier/mycashier_mobile-main/app_privacy_manifest_fixer/fixer.sh\"\n";
+			showEnvVarsInLog = 0;
 		};
 		0A6ADF125E77F9DE02BAE614 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -690,7 +711,7 @@
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 2F2BNDK3H3;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = CardicApp/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Cardic;
+				INFOPLIST_KEY_CFBundleDisplayName = "CardicApp: Gift Cards";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -706,7 +727,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.cardicapp;
 				PRODUCT_NAME = CardicApp;
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "Cardic Live";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "Distirubution Pro";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -727,7 +748,7 @@
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 2F2BNDK3H3;
 				INFOPLIST_FILE = CardicApp/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Cardic;
+				INFOPLIST_KEY_CFBundleDisplayName = "CardicApp: Gift Cards";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -743,7 +764,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.cardicapp;
 				PRODUCT_NAME = CardicApp;
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "Cardic Live";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "Distirubution Pro";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
