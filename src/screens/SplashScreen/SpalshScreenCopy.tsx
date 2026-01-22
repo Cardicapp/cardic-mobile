@@ -32,10 +32,10 @@ const SplashScreen = (props: Props) => {
     const seenOnboarding = await EncryptedStorage.getItem("seenOnboarding");
     if (seenOnboarding == "true") {
       // @ts-ignore
-      return navigate("Onboarding");
+      return navigate("Main");
     } else {
       // @ts-ignore
-      return navigate("Main");
+      return navigate("Onboarding");
 
     }
   }
