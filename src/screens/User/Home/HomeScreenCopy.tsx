@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
   Alert,
-  Image,
   RefreshControl,
   SafeAreaView,
   ScrollView,
@@ -32,17 +31,11 @@ import queryString from 'query-string';
 import { setTradeForm } from 'CardicApp/src/store/trade';
 import messaging from '@react-native-firebase/messaging';
 import { requestNotificationPermission } from 'CardicApp/src/services/notifications/permission';
-import Swiper from 'react-native-swiper';
 import Toast from 'react-native-toast-message';
 import { routeNameRef } from 'CardicApp/src/navigators/Application';
 import { setBillForm } from 'CardicApp/src/store/bill';
 import Fontisto from 'react-native-vector-icons/Fontisto';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
-import { useTheme } from 'CardicApp/src/hooks';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import Coin from 'CardicApp/src/theme/assets/images/coin.png';
-import Banner from 'CardicApp/src/theme/assets/images/banner.png';
-import CompleteKYCNotice from './CompleteKyc';
 
 interface Props {
   navigation: StackNavigationProp<ApplicationStackParamList, keyof ApplicationStackParamList, undefined>;
@@ -159,10 +152,6 @@ const HomeScreen = (props: Props) => {
     getPopularGiftCards();
   };
 
-  const {
-    Images
-  } = useTheme()
-
 
   return (
     <SafeAreaView
@@ -179,114 +168,25 @@ const HomeScreen = (props: Props) => {
           />
         }
       >
+
+        {
+          wallet?.balances.map((w, i) => <WalletCard
+            key={i}
+            containerStyle={{
+              backgroundColor: Colors.Primary,
+            }}
+            onPress={() => {
+              // @ts-ignore
+              props.navigation.navigate("Wallet");
+            }}
+            top={`Wallet (${w.currency.currencyCode})`}
+            bottom={`${w.currency.currencyCode == "USD" ? Values.DollarSymbol : Values.NairaSymbol} ${Utils.currencyFormat(w.amount, 0)}`}
+            
+          />)
+        }
+
+
         <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            paddingHorizontal: 20,
-            marginTop: 10,
-            marginBottom: 15,
-          }}
-        >
-          {/* Avatar */}
-          <TouchableOpacity
-            style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}
-            onPress={() => {
-              // @ts-ignore
-              props.navigation.navigate('ProfileScreen');
-            }}
-          >
-            <View
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: 20,
-                flexDirection: 'row',
-                backgroundColor: Colors.IconGrey,
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              <FontAwesome5 name="user" size={18} color={Colors.Black} />
-
-            </View>
-            <View style={{ flexDirection: 'column', alignItems: 'center', gap: 5 }}>
-              <AppText
-                style={{
-                  fontSize: RFPercentage(2),
-                  color: Colors.Black,
-                }}
-              >Welcome</AppText>
-              <AppBoldText
-                style={{
-                  fontSize: RFPercentage(2.5),
-                  color: Colors.Black,
-                }}
-              >
-                {authState.user?.firstName}
-              </AppBoldText>
-            </View>
-
-          </TouchableOpacity>
-
-
-          {/* Notification */}
-          <TouchableOpacity
-            onPress={() => {
-              // @ts-ignore
-              props.navigation.navigate("NotificationScreen");
-            }}
-          >
-            <View
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: 12,
-                backgroundColor: Colors.IconGrey,
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              <Ionicons name="notifications-outline" size={20} color={Colors.Black} />
-            </View>
-          </TouchableOpacity>
-        </View>
-
-
-        {
-          wallet?.balances
-            ?.filter(w => w.currency.currencyCode === 'NGN')
-            .map((w, i) => (
-              <WalletCard
-                key={i}
-                containerStyle={{
-                  backgroundColor: Colors.Primary,
-                }}
-                // onPress={() => {
-                //   // @ts-ignore
-                //   props.navigation.navigate("Wallet");
-                // }}
-                // top={`Wallet (${w.currency.currencyCode})`}
-                bottom={`${Values.NairaSymbol} ${Utils.currencyFormat(w.amount, 0)}`}
-              />
-            ))
-        }
-
-
-/* ================= KYC NOTICE ================= */
-        {
-          // authState.user?.kycStatus !== StatusEnum.approved && (
-          <CompleteKYCNotice
-            onPress={() => {
-              // @ts-ignore
-              props.navigation.navigate('KycScreen');
-            }}
-          />
-          // )
-        }
-
-        {/* <View
           style={{
             marginTop: 42,
             paddingHorizontal: 20,
@@ -297,7 +197,7 @@ const HomeScreen = (props: Props) => {
             }}>
             What would you like to do today?
           </AppBoldText>
-        </View> */}
+        </View>
 
         <View
           style={{
@@ -312,213 +212,61 @@ const HomeScreen = (props: Props) => {
           <CardicCard
             key="0"
             containerStyle={{
-              backgroundColor: Colors.LemonYellow,
-              borderRadius: 12,
+              backgroundColor: Colors.PrimaryBGLight,
               elevation: 0,
-              alignItems: 'center',
-              justifyContent: 'center',
             }}
             onPress={() => {
               // @ts-ignore
               props.navigation.push('CategoriesScreen');
             }}
-            text="Trade GiftCard"
+            text="Sell Gift Cards"
             textStyle={{
-              color: Colors.Black,
-              textAlign: 'center',
-              marginTop: 8,
-              marginBottom: 8,
-
+              color: Colors.Primary,
             }}
             icon={
-              <Image
-                source={Images.artboard1}
-                style={{
-                  width: 58,
-                  height: 58,
-                  resizeMode: 'contain',
-                }}
+              <Fontisto
+                name={"credit-card"}
+                size={RFPercentage(2)}
+                color={Colors.White}
               />
             }
             iconContainerStyle={{
-              width: 44,
-              height: 44,
-              borderRadius: 22,
-              alignItems: 'center',
-              justifyContent: 'center',
+              backgroundColor: Colors.Primary,
             }}
           />
 
           <CardicCard
             key="1"
             containerStyle={{
-              backgroundColor: Colors.CardGrey,
-              borderRadius: 12,
+              backgroundColor: Colors.BlueLight,
               elevation: 0,
-              alignItems: 'center',
-              justifyContent: 'center',
             }}
             onPress={() => {
+              // dispatch(setBillForm({
+              //   bill: 'telco'
+              // }));
               // @ts-ignore
-              props.navigation.push('CategoriesScreen');
+              props.navigation.navigate('TradeHistoryScreen')
             }}
-            text="Trade Crypto"
+            text="Trade History"
             textStyle={{
-              color: Colors.White,
-              textAlign: 'center',
-              marginTop: 8,
-              marginBottom: 8,
+              color: Colors.Blue,
             }}
+            description=""
             icon={
-              <Image
-                source={Images.artboard2}
-                style={{
-                  width: 58,
-                  height: 58,
-                  resizeMode: 'contain',
-                }}
+              <FontAwesome5
+                color={Colors.White}
+                name={"clipboard-list"}
+                size={RFPercentage(3)}
               />
             }
-          // iconContainerStyle={{
-          //   width: 44,
-          //   height: 44,
-          //   borderRadius: 22,
-          //   alignItems: 'center',
-          //   justifyContent: 'center',
-          // }}
+            iconContainerStyle={{
+              backgroundColor: Colors.Blue,
+            }}
           />
 
-
         </View>
-
-        <Swiper
-          height={160}
-          containerStyle={{
-            marginTop: 30,
-          }}
-          showsPagination
-          // autoplay
-          // autoplayTimeout={4}
-          dotStyle={{
-            width: 30,
-            height: 5,
-            borderRadius: 5,
-            marginHorizontal: 3,
-            backgroundColor: Colors.PrimaryBGLight,
-          }}
-          activeDotStyle={{
-            width: 30,
-            height: 5,
-            borderRadius: 5,
-            marginHorizontal: 3,
-            backgroundColor: Colors.Primary,
-          }}
-          dotColor={Colors.Primary}
-          activeDotColor={Colors.PrimaryBGLight}
-        >
-          {/* Slide 1 */}
-          <View
-            style={{
-              // marginTop: 20,
-              marginHorizontal: 20,
-              backgroundColor: Colors.Black,
-              borderRadius: 20,
-              padding: 20,
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 15,
-            }}
-          >
-            <View
-              style={{
-                width: 50,
-                height: 50,
-                // borderRadius: 25,
-                // backgroundColor: '#FFD700',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              <Image
-                source={Coin}
-                style={{
-                  width: 100,
-                  height: 100,
-                  marginRight: 9,
-                  resizeMode: 'contain',
-                }}
-              />
-            </View>
-
-            <View style={{ flex: 1, gap: 5 }}>
-              <AppBoldText style={{ color: Colors.White }}>
-                Refer and Earn
-              </AppBoldText>
-
-              <AppText style={{ color: Colors.White, fontSize: 10 }}>
-                Refer a friend to earn points once they make a transaction
-              </AppText>
-
-              <TouchableOpacity style={{ marginTop: 8 }}>
-                <AppText style={{ color: Colors.White, fontSize: 12, fontWeight: 'bold' }}>
-                  Learn More →
-                </AppText>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* Slide 2 (example) */}
-          <View
-            style={{
-              marginHorizontal: 20,
-              backgroundColor: Colors.LiveRateCalculator,
-              borderRadius: 20,
-              padding: 20,
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 15,
-            }}
-          >
-
-
-            <View style={{ flex: 1, gap: 5 }}>
-              <AppBoldText style={{ color: Colors.White, fontWeight: 'bold' }}>
-                Live Rate Calculator
-              </AppBoldText>
-
-              <AppText style={{ color: Colors.White, fontSize: 12 }}>
-                Check updated giftcard and crypto rates
-              </AppText>
-
-              <TouchableOpacity style={{ marginTop: 8 }}>
-                <AppText style={{ color: Colors.White, fontSize: 12, fontWeight: 'bold' }}>
-                  Learn More →
-                </AppText>
-              </TouchableOpacity>
-            </View>
-            <View
-              style={{
-                width: 50,
-                height: 50,
-                // borderRadius: 25,
-                // backgroundColor: '#9CFF2E',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              <Image
-                source={Banner}
-                style={{
-                  width: 108,
-                  height: 108,
-                  resizeMode: 'contain',
-                }}
-              />
-            </View>
-          </View>
-        </Swiper>
-
-        {/* {
+        {
           loading || popularCards.length ? (
             <View
               style={{
@@ -583,7 +331,7 @@ const HomeScreen = (props: Props) => {
               </AppText>
               : undefined
 
-        } */}
+        }
       </ScrollView>
     </SafeAreaView>
   );

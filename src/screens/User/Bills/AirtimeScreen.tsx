@@ -6,6 +6,7 @@ import axiosExtended from 'CardicApp/src/lib/network/axios-extended';
 import routes from 'CardicApp/src/lib/network/routes';
 import { setBillForm } from 'CardicApp/src/store/bill';
 import Colors from 'CardicApp/src/theme/Colors';
+import { useGetBillersQuery, useCreateBillPaymentMutation } from '../../../services/modules/bills';
 import React, { useEffect, useState } from 'react';
 import {
   SafeAreaView,
@@ -35,6 +36,14 @@ const AirtimeScreen = (props: Props) => {
   const [network, setNetwork] = useState('');
 
 
+  const { data: billers = [] } = useGetBillersQuery('airtime');
+  const [createPayment, { isLoading: isPaying }] = useCreateBillPaymentMutation();
+
+  const networkOptions = billers.map((b: any) => ({
+    label: b.label || b.name,
+    value: b.value || b.id,
+  }));
+
   const validateForm = () => {
     if (!network) return "Network is required";
     if (!phone) return "Phone number is required"
@@ -45,13 +54,26 @@ const AirtimeScreen = (props: Props) => {
   }
 
   const proceed = async () => {
+    try {
+      await createPayment({
+        recipient: phone,
+        amount,
+        network
+      }).unwrap();
 
-    dispatch(setBillForm({
-      recipient: phone,
-      amount: amount,
-      network: network,
-    }));
-    props.navigation.push("AirtimeBillsSummaryScreen");
+      dispatch(setBillForm({
+        recipient: phone,
+        amount: amount,
+        network: network,
+      }));
+      props.navigation.push("AirtimeBillsSummaryScreen");
+    } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: "Payment Failed",
+        text2: "Please try again later"
+      });
+    }
   }
 
   return (
@@ -75,11 +97,8 @@ const AirtimeScreen = (props: Props) => {
           headText='Network'
           value={network}
           placeholder="Select an option..."
-          options={[
-            { label: 'MTN', value: 'MTN' },
-            { label: 'Glo', value: 'Glo' },
-            { label: 'Airtel', value: 'Airtel' },
-            { label: '9mobile', value: '9mobile' },
+          options={networkOptions.length > 0 ? networkOptions : [
+            { label: 'Loading networks...', value: '' }
           ]}
           onChange={(val) => {
             setNetwork(val)
@@ -170,9 +189,9 @@ const AirtimeScreen = (props: Props) => {
           paddingTop: 10,
           marginBottom: 20,
         }}
-        loading={loading}
+        loading={loading || isPaying}
         containerStyle={{
-          backgroundColor: loading || validateForm() != null ? Colors.SlightlyShyGrey : Colors.Primary,
+          backgroundColor: (loading || isPaying) || validateForm() != null ? Colors.SlightlyShyGrey : Colors.Primary,
         }}
       />
 
