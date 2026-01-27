@@ -35,6 +35,29 @@ const AirtimeScreen = (props: Props) => {
   const [network, setNetwork] = useState('');
 
 
+  const [billers, setBillers] = useState<any[]>([]);
+  const [isPaying, setIsPaying] = useState(false);
+
+  useEffect(() => {
+    fetchBillers();
+  }, []);
+
+  const fetchBillers = async () => {
+    try {
+      const res = await axiosExtended.get(`${routes.bills}/billers/airtime`);
+      if (res.status === 200) {
+        setBillers(res.data.data || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch billers', err);
+    }
+  };
+
+  const networkOptions = billers.map((b: any) => ({
+    label: b.label || b.name,
+    value: b.value || b.id,
+  }));
+
   const validateForm = () => {
     if (!network) return "Network is required";
     if (!phone) return "Phone number is required"
@@ -45,13 +68,38 @@ const AirtimeScreen = (props: Props) => {
   }
 
   const proceed = async () => {
+    try {
+      setIsPaying(true);
+      const res = await axiosExtended.post(`${routes.bills}/payment`, {
+        recipient: phone,
+        amount,
+        network
+      });
 
-    dispatch(setBillForm({
-      recipient: phone,
-      amount: amount,
-      network: network,
-    }));
-    props.navigation.push("AirtimeBillsSummaryScreen");
+      if (res.status === 200 || res.status === 201) {
+        Toast.show({
+          type: 'success',
+          text1: 'Payment Successful',
+          text2: `You have successfully purchased N${amount} airtime for ${phone}.`,
+        });
+
+        dispatch(setBillForm({
+          recipient: phone,
+          amount: amount,
+          network: network,
+        }));
+        props.navigation.push("AirtimeBillsSummaryScreen");
+      }
+    } catch (error: any) {
+      console.log(error);
+      Toast.show({
+        type: 'error',
+        text1: "Payment Failed",
+        text2: error?.response?.data?.message || "Please try again later"
+      });
+    } finally {
+      setIsPaying(false);
+    }
   }
 
   return (
@@ -75,11 +123,8 @@ const AirtimeScreen = (props: Props) => {
           headText='Network'
           value={network}
           placeholder="Select an option..."
-          options={[
-            { label: 'MTN', value: 'MTN' },
-            { label: 'Glo', value: 'Glo' },
-            { label: 'Airtel', value: 'Airtel' },
-            { label: '9mobile', value: '9mobile' },
+          options={networkOptions.length > 0 ? networkOptions : [
+            { label: 'Loading networks...', value: '' }
           ]}
           onChange={(val) => {
             setNetwork(val)
@@ -170,9 +215,9 @@ const AirtimeScreen = (props: Props) => {
           paddingTop: 10,
           marginBottom: 20,
         }}
-        loading={loading}
+        loading={loading || isPaying}
         containerStyle={{
-          backgroundColor: loading || validateForm() != null ? Colors.SlightlyShyGrey : Colors.Primary,
+          backgroundColor: (loading || isPaying) || validateForm() != null ? Colors.SlightlyShyGrey : Colors.Primary,
         }}
       />
 

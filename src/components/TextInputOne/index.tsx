@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
         fontSize: RFPercentage(2),
         width: '100%',
         minHeight: Platform.OS == 'ios' ? hp(6) : undefined,
-        borderRadius: 2,
+        borderRadius: 10,
         borderWidth: 1,
         borderColor: Colors.BorderColor,
         color: Colors.Black,

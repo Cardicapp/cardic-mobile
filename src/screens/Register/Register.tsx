@@ -25,7 +25,10 @@ interface State {
   lastName: string;
   userName: string;
   email: string;
+  phoneNumber: string;
   password: string;
+  referralCode: string;
+  countryCode: string;
   showSuccessModal: boolean;
   showPassword: boolean;
   confirmPassword: string;
@@ -43,7 +46,10 @@ const Register = (props: Props) => {
     lastName: "",
     userName: "",
     email: "",
+    phoneNumber: "",
     password: "",
+    countryCode: "",
+    referralCode: "",
     confirmPassword: "",
     showSuccessModal: false,
     showPassword: false,
@@ -196,16 +202,26 @@ const Register = (props: Props) => {
         }}
       >
         <SimpleBackHeader
-          text="Register"
+          text="register"
           showBack={true}
           showMenu={false}
         />
 
         <AppText style={{
-          color: Colors.Primary,
+          color: Colors.Black,
+          fontSize: RFPercentage(2.5),
           fontWeight: '700',
           marginLeft: 10,
-        }}>Sign Up</AppText>
+          marginTop: 10,
+          marginBottom: 10,
+        }}>Let’s Get Started!</AppText>
+
+        <AppText style={{
+          color: Colors.Black,
+          fontSize: RFPercentage(2),
+          fontWeight: '500',
+          marginLeft: 10,
+        }}>Complete the form below, to begin.</AppText>
 
 
         <View
@@ -217,62 +233,10 @@ const Register = (props: Props) => {
           <TextInputOne
             inputRef={(ref) => {
               // @ts-ignore
-              emailRef.current = ref;
-            }}
-            headText="Email Address"
-            placeholder="Your Email Address here"
-            value={pageState.email}
-            labelStyle={{
-              fontWeight: 'bold',
-            }}
-            onChange={(value => setPageState({ ...pageState, email: value }))}
-            onSubmitEditing={() => signup()}
-            containerStyle={{
-              marginTop: 0,
-              paddingHorizontal: 10,
-            }}
-          />
-          <TextInputOne
-            inputRef={(ref) => {
-              // @ts-ignore
-              firstNameRef.current = ref;
-            }}
-            headText="First Name"
-            value={pageState.firstName}
-            labelStyle={{
-              fontWeight: 'bold',
-            }}
-            onChange={(value => setPageState({ ...pageState, firstName: value }))}
-            onSubmitEditing={() => signup()}
-            containerStyle={{
-              marginTop: 0,
-              paddingHorizontal: 10,
-            }}
-          />
-          <TextInputOne
-            inputRef={(ref) => {
-              // @ts-ignore
-              lastNameRef.current = ref;
-            }}
-            headText="Last Name"
-            value={pageState.lastName}
-            labelStyle={{
-              fontWeight: 'bold',
-            }}
-            onChange={(value => setPageState({ ...pageState, lastName: value }))}
-            onSubmitEditing={() => signup()}
-            containerStyle={{
-              marginTop: 0,
-              paddingHorizontal: 10,
-            }}
-          />
-          <TextInputOne
-            inputRef={(ref) => {
-              // @ts-ignore
               userNameRef.current = ref;
             }}
             headText="Username"
-            placeholder="eg cardic_user"
+            placeholder="Enter Your username"
             value={pageState.userName}
             labelStyle={{
               fontWeight: 'bold',
@@ -284,6 +248,95 @@ const Register = (props: Props) => {
               paddingHorizontal: 10,
             }}
           />
+
+          <TextInputOne
+            inputRef={(ref) => {
+              // @ts-ignore
+              emailRef.current = ref;
+            }}
+            headText="Email Address"
+            placeholder="email@here.com"
+            value={pageState.email}
+            labelStyle={{
+              fontWeight: 'bold',
+            }}
+            onChange={(value => setPageState({ ...pageState, email: value }))}
+            onSubmitEditing={() => signup()}
+            containerStyle={{
+              marginTop: 0,
+              paddingHorizontal: 10,
+            }}
+          />
+          {/* Phone number field */}
+          <View
+            style={{
+              flexDirection: 'row',
+              paddingHorizontal: 10,
+              gap: 10,
+              marginTop: 10,
+            }}
+          >
+            {/* Country / Flag input */}
+            <TextInputOne
+              headText="Country"
+              value={pageState.countryCode}
+              editable={false}
+              icon={
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 8,
+                  }}
+                >
+                  {/* Circular flag */}
+                  <View
+                    style={{
+                      width: 26,
+                      height: 26,
+                      borderRadius: 13,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      backgroundColor: Colors.SlightlyShyGrey,
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <AppText style={{ fontSize: 16 }}>🇳🇬</AppText>
+                  </View>
+
+                  <Ionicons
+                    name="chevron-down"
+                    size={18}
+                    color={Colors.GreyDark}
+                  />
+                </View>
+              }
+              onPressIcon={() => {
+                // open country picker later
+              }}
+              containerStyle={{
+                flex: 0.2,
+                marginTop: 0,
+              }}
+            />
+
+            {/* Phone number input */}
+            <TextInputOne
+              headText="Phone Number"
+              placeholder="Enter Your Phone Number"
+              keyboardType="phone-pad"
+              value={pageState.phoneNumber}
+              onChange={(value) =>
+                setPageState({ ...pageState, phoneNumber: value })
+              }
+              containerStyle={{
+                flex: 0.8,
+                marginTop: 0,
+              }}
+            />
+          </View>
+
+
           <TextInputOne
             inputRef={(ref) => {
               // @ts-ignore
@@ -332,7 +385,47 @@ const Register = (props: Props) => {
             />
           </KeyboardAvoidingView>
 
+          <TextInputOne
+            inputRef={(ref) => {
+              // @ts-ignore
+              // referralCodeRef.current = ref;    
+            }}
+            headText="Referral Code (Optional)"
+            placeholder="Enter referral code"
+            value={pageState.referralCode}
+            labelStyle={{
+              fontWeight: 'bold',
+            }}
+            onChange={(value =>
+              setPageState({ ...pageState, referralCode: value })
+            )}
+            containerStyle={{
+              paddingHorizontal: 10,
+              marginTop: 10,
+            }}
+          />
+
         </View>
+
+        <AppText
+          style={{
+            textAlign: 'center',
+            fontSize: RFPercentage(1.7),
+            color: Colors.GreyDark,
+            paddingHorizontal: 20,
+            marginBottom: 10,
+          }}
+        >
+          By continuing, you're agreeing to our{' '}
+          <AppText style={{ color: Colors.Primary, fontWeight: '600' }}>
+            terms of service
+          </AppText>{' '}
+          and{' '}
+          <AppText style={{ color: Colors.Primary, fontWeight: '600' }}>
+            privacy policy
+          </AppText>.
+        </AppText>
+
       </ScrollView>
 
       <View style={{

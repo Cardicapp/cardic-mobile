@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@react-native-camera-roll/camera-roll": "^7.5.2",
+    "@react-native-community/datetimepicker": "^8.5.1",
     "@react-native-firebase/app": "^18.5.0",
     "@react-native-firebase/messaging": "^18.5.0",
     "@react-native-masked-view/masked-view": "^0.2.9",
@@ -26,6 +27,7 @@
     "@react-navigation/stack": "^6.3.17",
     "@reduxjs/toolkit": "^1.9.5",
     "axios": "^1.4.0",
+    "formik": "^2.4.9",
     "i18next": "^23.2.3",
     "moment": "^2.29.4",
     "query-string": "^8.1.0",
@@ -47,6 +49,7 @@
     "react-native-loading-placeholder": "^0.0.6",
     "react-native-mmkv": "^2.10.0",
     "react-native-modal": "^13.0.1",
+    "react-native-modal-datetime-picker": "^18.0.0",
     "react-native-notifications": "^5.1.0",
     "react-native-reanimated": "^3.3.0",
     "react-native-responsive-fontsize": "^0.5.1",
@@ -61,7 +64,8 @@
     "react-native-vector-icons": "10.0.0",
     "react-redux": "^8.1.1",
     "redux-persist": "^6.0.0",
-    "socket.io-client": "^4.7.1"
+    "socket.io-client": "^4.7.1",
+    "yup": "^1.7.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

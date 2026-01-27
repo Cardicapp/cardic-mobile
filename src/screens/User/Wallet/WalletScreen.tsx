@@ -1,658 +1,594 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  ActivityIndicator,
   FlatList,
-  Platform,
   RefreshControl,
   SafeAreaView,
+  StyleSheet,
   TouchableOpacity,
   View,
 } from 'react-native';
 import { useSelector } from 'react-redux';
+import moment from 'moment';
+import Toast from 'react-native-toast-message';
+import Entypo from 'react-native-vector-icons/Entypo';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { RFPercentage } from 'react-native-responsive-fontsize';
-import { heightPercentageToDP, widthPercentageToDP } from 'react-native-responsive-screen';
-import Colors from 'CardicApp/src/theme/Colors';
-import { Values } from 'CardicApp/src/lib';
-import Utils from 'CardicApp/src/lib/utils/Utils';
-import AppText, { AppBoldText } from 'CardicApp/src/components/AppText/AppText';
-import CardicCard from 'CardicApp/src/components/Card/CardicCard';
-import GCCardOne from 'CardicApp/src/components/Card/GCCardOne';
-import { selectAuthState } from 'CardicApp/src/store/auth';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { ApplicationStackParamList } from 'CardicApp/@types/navigation';
-import { Balance, Bank, LocalBank, Transaction, Wallet } from 'CardicApp/src/types/wallet';
-import axiosExtended from 'CardicApp/src/lib/network/axios-extended';
-import routes from 'CardicApp/src/lib/network/routes';
-import { TransactionTypeEnum, UserRoleEnum } from 'CardicApp/src/types/enums';
-import queryString from 'query-string';
-import moment from 'moment';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
-import CustomModal from 'CardicApp/src/components/Modal/CustomModal';
-import TextInputOne from 'CardicApp/src/components/TextInputOne';
-import TextContainer from 'CardicApp/src/components/TextContainer/TextContainer';
-import SelectBankModal from 'CardicApp/src/components/Modal/SelectBankModal';
-import AntDesign from 'react-native-vector-icons/AntDesign'
-import ConfirmModal from 'CardicApp/src/components/Modal/ConfirmModal';
-import Entypo from 'react-native-vector-icons/Entypo';
-import Toast from 'react-native-toast-message';
-import WalletCard from 'CardicApp/src/components/Card/WalletCard';
+import Colors from '@/theme/Colors';
+import AppText, { AppBoldText } from '@/components/AppText/AppText';
+import GCCardOne from '@/components/Card/GCCardOne';
+import CustomModal from '@/components/Modal/CustomModal';
+import ConfirmModal from '@/components/Modal/ConfirmModal';
+import SelectBankModal from '@/components/Modal/SelectBankModal';
+import TextInputOne from '@/components/TextInputOne';
+import TextContainer from '@/components/TextContainer/TextContainer';
+
+import { selectAuthState } from '@/store/auth';
+import axiosExtended from '@/lib/network/axios-extended';
+import routes from '@/lib/network/routes';
+import Utils from '@/lib/utils/Utils';
+import { TransactionTypeEnum } from '@/types/enums';
+import { Balance, Bank, Transaction, Wallet } from '@/types/wallet';
+import { useNavigation } from '@react-navigation/native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+
 
 interface Props {
   navigation: StackNavigationProp<ApplicationStackParamList, keyof ApplicationStackParamList, undefined>;
 }
 
 const WalletScreen = (props: Props) => {
-
   const authState = useSelector(selectAuthState);
+  const navigation = useNavigation();
+
+  const cryptoBalances = {
+    usd: '$0.00',
+    btc: '0.00000',
+    change: '+$0(0%)',
+  };
+
+
   const [wallet, setWallet] = useState<Wallet>();
-  const balance: Balance | undefined = wallet?.balances.length ? wallet.balances[0] : undefined;
+  const balance: Balance | undefined = wallet?.balances?.[0];
+
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(false);
-  const [withdrawing, setWithdrawing] = useState(false);
   const [loadingTranx, setLoadingTranx] = useState(false);
-  const [loadingBanks, setLoadingBanks] = useState(false);
-  const [showWithdrawalSuccessModal, setShowWithdrawalSuccessModal] = useState(false)
-  const [banks, setBanks] = useState<Bank[]>([])
-  const [showWithdrawModal, setShowWithdrawModal] = useState(false)
-  const [showBanksModal, setShowBanksModal] = useState(false)
-  const [willShowWithdrawModal, setWillShowWithdrawModal] = useState(false)
-  const [showSetWithdrawalPinModal, setShowSetWithdrawalPinModal] = useState(false)
+
+  const [activeTab, setActiveTab] = useState<'fiat' | 'crypto'>('fiat');
+  const [activeFilter, setActiveFilter] =
+    useState<'all' | 'success' | 'pending' | 'failed'>('all');
+
+  const [showBalance, setShowBalance] = useState(true);
+
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  const [showBanksModal, setShowBanksModal] = useState(false);
+  const [showWithdrawalSuccessModal, setShowWithdrawalSuccessModal] = useState(false);
+
+  const [banks, setBanks] = useState<Bank[]>([]);
   const pageIndexRef = useRef(1);
-  const [form, setForm] = useState<{
-    amount: string;
-    bank?: Bank;
-    pin: string;
-    tx_ref: string;
-    didFail: boolean;
-    errorMessage: string | null;
-  }>({
+
+  const [form, setForm] = useState({
     amount: '',
-    bank: undefined,
+    bank: undefined as Bank | undefined,
     pin: '',
-    tx_ref: '',
-    didFail: false,
-    errorMessage: null
-  })
+  });
 
-  const getBanks = async () => {
-    try {
-      setLoadingBanks(true)
-      const res = await axiosExtended.get(`${routes.banks}/user/${authState.user?.id}`);
-      console.log("REs: ", res.status)
-      if (res.status === 200) {
-        const banks: Bank[] = res.data;
-
-        if (banks && banks.length) {
-          setBanks(banks);
-        }
-      }
-    } catch (e) {
-      console.error(e)
-    } finally {
-      setLoadingBanks(false)
-    }
-  }
-
-  const validateForm = () => {
-    if (!(parseFloat(form.amount) > 0)) {
-      return "Amount is required"
-    }
-    if (!form.bank) {
-      return "Select Bank"
-    }
-    return null;
-  }
-
-
-
-  const withdraw = async () => {
-    if (validateForm() != null || withdrawing) return;
-    try {
-      setForm({ ...form, errorMessage: '' })
-      setWithdrawing(true)
-      const reference = `${Date.now()}-${authState.user?.id}`;
-      if (!form.didFail) {
-        setForm({
-          ...form,
-          tx_ref: reference
-        })
-      }
-      let payload = {
-        bank: {
-          id: form.bank?.id,
-        },
-        amount: parseFloat(form.amount),
-        tx_ref: form.didFail ? form.tx_ref : reference,
-        pin: form.pin,
-      }
-      const res = await axiosExtended.post(`${routes.wallet}/withdraw`, payload);
-      if (res.status === 200) {
-        resetForm()
-        setShowWithdrawModal(false)
-        setTimeout(() => setShowWithdrawalSuccessModal(true), 600)
-        refresh();
-      }
-    } catch (e) {
-      console.log(e)
-      console.log(JSON.stringify(e, null, 5))
-      setForm({
-        ...form,
-        didFail: true,
-        errorMessage: Utils.handleError(e),
-      })
-    } finally {
-      setWithdrawing(false)
-      setLoadingBanks(false)
-    }
-  }
-
-  const resetForm = () => {
-    setForm({
-      amount: '',
-      bank: undefined,
-      tx_ref: '',
-      didFail: false,
-      pin: '',
-      errorMessage: '',
-    })
-  }
+  /* ---------------- API ---------------- */
 
   const getWalletInfo = async () => {
     try {
-      setLoading(true)
-      const walletRes = await axiosExtended.get(`${routes.wallet}/info/${authState.user?.id}`);
-      if (walletRes.status === 200) {
-        setWallet(walletRes.data);
-      }
-    } catch (e) {
-      console.error(e)
-      console.log(JSON.stringify(e, null, 5))
+      setLoading(true);
+      const res = await axiosExtended.get(`${routes.wallet}/info/${authState.user?.id}`);
+      if (res.status === 200) setWallet(res.data);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
-  const getBalanceTransactions = async (cb?: any) => {
-    try {
-      setLoadingTranx(true)
-      const query = {
-        page: pageIndexRef.current,
-        limit: 10
-      }
-      const tranxRes = await axiosExtended.get(`${routes.wallet}/balance/transactions/${balance?.id}?${queryString.stringify(query)}`);
-      if (tranxRes.status === 200) {
-        const trx: Transaction[] = tranxRes.data.data;
-        if (trx.length) {
-          let newTrx: Transaction[] = [...transactions, ...trx].map<Transaction>(t => ({ ...t, timestamp: new Date(t.createdAt).valueOf() }))
-          newTrx = Utils.uniqueBy<Transaction>(newTrx, (tx) => tx.id.toString());
-          newTrx = newTrx.sort((a, b) => Utils.compare<Transaction>(a, b, "timestamp")).reverse();
-          setTransactions(newTrx);
-        }
-        cb & cb(trx)
-      }
-    } catch (e) {
-      console.error(e)
-    } finally {
-      setLoadingTranx(false)
-    }
-  }
+  };
+
+  const getBanks = async () => {
+    const res = await axiosExtended.get(`${routes.banks}/user/${authState.user?.id}`);
+    if (res.status === 200) setBanks(res.data);
+  };
+
+  const getTransactions = async () => {
+    if (!balance) return;
+    setLoadingTranx(true);
+    const res = await axiosExtended.get(
+      `${routes.wallet}/balance/transactions/${balance.id}?page=${pageIndexRef.current}&limit=10`
+    );
+    if (res.status === 200) setTransactions(res.data.data);
+    setLoadingTranx(false);
+  };
+
   useEffect(() => {
     getWalletInfo();
     getBanks();
-  }, [])
+  }, []);
 
   useEffect(() => {
-    if (wallet) {
-      loadTranx();
-    }
-  }, [wallet])
+    if (wallet && activeTab === 'fiat') getTransactions();
+  }, [wallet, activeTab]);
 
-  const refresh = () => {
-    pageIndexRef.current = 1;
-    getWalletInfo();
-    if (balance)
-      loadTranx();
+  /* ---------------- WITHDRAW ---------------- */
+
+  const withdraw = async () => {
+    if (!form.amount || !form.bank || !form.pin) return;
+    try {
+      await axiosExtended.post(`${routes.wallet}/withdraw`, {
+        amount: Number(form.amount),
+        bank: { id: form.bank.id },
+        pin: form.pin,
+        tx_ref: `${Date.now()}`,
+      });
+      setShowWithdrawModal(false);
+      setShowWithdrawalSuccessModal(true);
+      setForm({ amount: '', bank: undefined, pin: '' });
+      getWalletInfo();
+    } catch (e) {
+      Toast.show({ type: 'error', text1: Utils.handleError(e) });
+    }
   };
 
-  const loadTranx = () => {
-    getBalanceTransactions((trans: any[]) => {
-      if (trans && trans.length) {
-        pageIndexRef.current = pageIndexRef.current + 1;
-      }
-    });
-  }
+  /* ---------------- TRANSACTION ITEM ---------------- */
 
-  const [scrolling, setScrolling] = useState<boolean>(false);
-
-  const onEndReached = () => {
-    if (scrolling || !balance) {
-      return;
-    }
-    getBalanceTransactions((trans: any[]) => {
-      if (trans && trans.length) {
-        pageIndexRef.current = pageIndexRef.current + 1;
-      }
-    });
+  const renderTransaction = ({ item }: { item: Transaction }) => {
+    const isCredit = item.transactionType?.id === TransactionTypeEnum.credit;
+    return (
+      <GCCardOne
+        name={moment(item.createdAt).format('ddd MMM YYYY hh:mma')}
+        rate={`${isCredit ? '+' : '-'}₦${Utils.currencyFormat(item.amount, 0)}`}
+        cta={`Balance ₦${Utils.currencyFormat(item.currentBalance, 0)}`}
+        rateStyle={{ color: isCredit ? Colors.Primary : Colors.Red }}
+        containerStyle={{
+          backgroundColor: isCredit ? Colors.PrimaryBGLight : Colors.OrangeLight,
+        }}
+      />
+    );
   };
-
-  const showToast = (msg: string, theme = 'error') => { // TOAST types = success, error, info
-    Toast.show({
-      type: theme,
-      text1: msg,
-    });
-  }
-
 
   return (
-    <SafeAreaView
-      style={{
-        flex: 1,
-        backgroundColor: Colors.White,
-      }}>
+    <SafeAreaView style={styles.container}>
       <FlatList
-        contentContainerStyle={{
-          paddingBottom: '20%'
-        }}
         refreshControl={
-          <RefreshControl
-            refreshing={loading || loadingTranx}
-            onRefresh={refresh}
-            colors={[Colors.Primary]}
-          />
+          <RefreshControl refreshing={loading || loadingTranx} onRefresh={getWalletInfo} />
         }
-        data={transactions}
-        renderItem={({ item: i }) => {
-          const isCredit = [TransactionTypeEnum.credit].includes(i.transactionType?.id ?? 0)
-          return (
-            <GCCardOne
-              name={moment(i.tx_date).format('ddd MMM YYYY hh:mma')}
-              rate={`${isCredit ? '+' : '-'}${Values.NairaSymbol}${Utils.currencyFormat(i.amount, 0)}`}
-              cta={`Current balance: ${Values.NairaSymbol}${Utils.currencyFormat(i.currentBalance, 0)}`}
-              showImage={false}
-              ctaStyle={{
-                color: Colors.GreyText,
-                fontSize: RFPercentage(1.6)
-              }}
-              nameStyle={{
-                fontSize: RFPercentage(Platform.OS == 'android' ? 1.7 : 1.5)
-              }}
-              rateStyle={isCredit ? {
-                // Credit style
-                color: Colors.Primary,
-              } : {
-                // Debit style
-                color: Colors.Red
-              }}
-              containerStyle={{
-                backgroundColor: isCredit ? Colors.PrimaryBGLight : Colors.OrangeLight,
-              }}
+        data={activeTab === 'fiat' ? transactions : []}
+        keyExtractor={(i) => i.id.toString()}
+        renderItem={renderTransaction}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <MaterialCommunityIcons
+              name="emoticon-neutral-outline"
+              size={70}
+              color="#D9D9D9"
             />
-          )
-        }}
-        ListHeaderComponent={
-          <View
-            style={{
-              backgroundColor: Colors.White,
-              paddingBottom: 5,
-            }}>
-            {/* <AppText style={{ textAlign: 'center', fontSize: RFPercentage(4), marginTop: '5%' }}>
-              {balance?.currency.currencyCode}</AppText> */}
-            {/* <AppBoldText style={{ textAlign: 'center', fontSize: RFPercentage(4), marginTop: '8%' }}>{balance?.currency.currencyCode == "USD" ? Values.DollarSymbol : Values.NairaSymbol}{Utils.currencyFormat(balance?.amount ?? 0, 0)}</AppBoldText> */}
-            {
-              wallet?.balances.map((w, i) => <WalletCard
-                key={i}
-                containerStyle={{
-                  backgroundColor: Colors.Primary,
-                }}
-                onPress={() => {
-                  // @ts-ignore
-                  props.navigation.navigate("Wallet");
-                }}
-                top={`Wallet (${w.currency.currencyCode})`}
-                bottom={`${w.currency.currencyCode == "USD" ? Values.DollarSymbol : Values.NairaSymbol} ${Utils.currencyFormat(w.amount, 0)}`}
-
-              />)
-            }
-            <View
-              style={{
-                marginTop: 25,
-                marginBottom: 10,
-                paddingHorizontal: 10,
-                alignItems: 'center',
-              }}>
-              <TouchableOpacity
-                style={{
-                  backgroundColor: Colors.PrimaryBGLight,
-                }}
-                onPress={() => {
-                  if (!authState.user?.hasWithdrawalPin) return setShowSetWithdrawalPinModal(true);
-                  setShowWithdrawModal(true)
-                }}
-              >
-                <View
-                  style={[{
-                    // width: widthPercentageToDP(45),
-                    marginHorizontal: 5,
-                    borderRadius: 5,
-                    // backgroundColor: Colors.White,
-                    backgroundColor: Colors.PrimaryBGLight,
-                    shadowColor: 'grey',
-                    shadowOffset: {
-                      height: 0,
-                      width: 0,
-                    },
-                    elevation: 3,
-                    shadowOpacity: .3,
-                    shadowRadius: 4,
-                    padding: 10,
-                    alignItems: 'center',
-                    flexDirection: 'row',
-                  }]}>
-                  <AppBoldText
-                    style={[{
-                      // marginTop: 20,
-                      fontSize: RFPercentage(2),
-                      fontWeight: '700',
-                      marginLeft: 0,
-                      color: Colors.Primary,
-                      textAlign: 'center',
-                    }]}>Withdraw</AppBoldText>
-                  <View
-                    style={[{
-                      height: heightPercentageToDP(4),
-                      aspectRatio: 1,
-                      borderRadius: 100,
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      backgroundColor: Colors.Primary,
-                      shadowColor: 'grey',
-                      shadowOpacity: .3,
-                      shadowRadius: 3,
-                      elevation: 2,
-                      // marginTop: 20,
-                      marginLeft: 10,
-                    }]}>
-                    <MaterialCommunityIcons name={'cash'} size={RFPercentage(3)} color={Colors.White} />
-                  </View>
-                </View>
-              </TouchableOpacity>
-              {/* <CardicCard
-                centered={true}
-                onPress={() => {
-                  if (!authState.user?.hasWithdrawalPin) return setShowSetWithdrawalPinModal(true);
-                  setShowWithdrawModal(true)
-                }}
-                text="Withdraw"
-                textStyle={{
-                  marginTop: '5%'
-                }}
-                icon={
-                  <MaterialCommunityIcons name={'cash'} size={RFPercentage(3.5)} color={Colors.White} />
-                }
-                containerStyle={{
-                  height: heightPercentageToDP(14),
-                  aspectRatio: 1,
-                  backgroundColor: Colors.PrimaryBGLight,
-                  elevation: 0,
-                  // padding: 20
-                }}
-                iconContainerStyle={{
-                  backgroundColor: Colors.Primary,
-                  marginTop: '5%'
-                }}
-              /> */}
-            </View>
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                paddingHorizontal: 20,
-                marginTop: heightPercentageToDP(2),
-              }}>
-              <AppBoldText
-                style={{
-                  fontSize: RFPercentage(1.9),
-                  color: Colors.HomeBlack,
-                }}>
-                Transactions
-              </AppBoldText>
-            </View>
+            <AppBoldText style={styles.emptyText}>
+              {activeTab === 'fiat'
+                ? 'You do not have any Naira transactions at the moment'
+                : 'No completed crypto trade'}
+            </AppBoldText>
           </View>
         }
+        ListHeaderComponent={
+          <View>
+            {/* TABS */}
+            <View style={styles.tabRow}>
+              <TouchableOpacity
+                style={[styles.tabBtn, activeTab === 'fiat' && styles.activeTab]}
+                onPress={() => setActiveTab('fiat')}
+              >
+                <AppBoldText style={styles.tabText}>Fiat</AppBoldText>
+              </TouchableOpacity>
 
-        stickyHeaderIndices={[0]}
-        stickyHeaderHiddenOnScroll={true}
-        onEndReached={onEndReached}
-        onEndReachedThreshold={0.5}
-        onMomentumScrollBegin={() => setScrolling(true)}
-        onMomentumScrollEnd={() => setScrolling(false)}
+              <TouchableOpacity
+                style={[styles.tabBtn, activeTab === 'crypto' && styles.activeTab]}
+                onPress={() => setActiveTab('crypto')}
+              >
+                <AppBoldText style={styles.tabText}>Crypto</AppBoldText>
+              </TouchableOpacity>
+            </View>
+
+            {/* FIAT CARD */}
+            {activeTab === 'fiat' && (
+              <>
+                <View style={styles.balanceCard}>
+                  <View style={styles.balanceTop}>
+                    <AppText style={{ color: '#fff' }}>₦</AppText>
+                    <TouchableOpacity onPress={() => setShowBalance(!showBalance)}>
+                      <Entypo
+                        name={showBalance ? 'eye' : 'eye-with-line'}
+                        size={18}
+                        color="#fff"
+                      />
+                    </TouchableOpacity>
+                  </View>
+
+                  <AppBoldText style={styles.balanceAmount}>
+                    {showBalance
+                      ? Utils.currencyFormat(balance?.amount ?? 0, 2)
+                      : '••••'}
+                  </AppBoldText>
+
+                  {/* ACTION BUTTONS */}
+                  <View style={styles.actionRow}>
+                    <TouchableOpacity
+                      style={styles.withdrawBtn}
+                      onPress={() => props.navigation.navigate('WithdrawScreen')}                    >
+                      <AppBoldText>Withdraw</AppBoldText>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={styles.rateBtn} onPress={() => props.navigation.navigate('RateCalculatorScreen')}>
+                      <MaterialCommunityIcons name="calculator" size={18} color="#fff" />
+                      <AppBoldText style={{ color: '#fff' }}>
+                        Rate Calculator
+                      </AppBoldText>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+                {/* FILTERS */}
+                <View style={styles.filterRow}>
+                  {(['all', 'success', 'pending', 'failed'] as const).map((f) => {
+                    const isActive = activeFilter === f;
+
+                    const bgColor = {
+                      all: Colors.Black,
+                      success: Colors.Primary,
+                      pending: Colors.Yellow,
+                      failed: Colors.Red,
+                    }[f];
+
+                    return (
+                      <TouchableOpacity
+                        key={f}
+                        style={[
+                          styles.filterBtn,
+                          {
+                            backgroundColor: isActive ? bgColor : '#EFEFEF',
+                          },
+                        ]}
+                        onPress={() => setActiveFilter(f)}
+                      >
+                        <AppText
+                          style={{
+                            color: isActive ? Colors.White : Colors.Black,
+                            fontWeight: '600',
+                          }}
+                        >
+                          {f.toUpperCase()}
+                        </AppText>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+
+              </>
+            )}
+
+            {/* CRYPTO CARD */}
+            {activeTab === 'crypto' && (
+              <>
+                <View style={styles.balanceCardCrypto}>
+                  <AppText style={styles.totalLabel}>Total Balance</AppText>
+
+                  <View style={styles.topRow}>
+                    <View style={styles.valueRow}>
+                      <AppBoldText style={styles.usdValue}>
+                        {cryptoBalances.usd}
+                      </AppBoldText>
+
+                      <View style={styles.usdPill}>
+                        <AppText style={styles.usdText}>USD</AppText>
+                      </View>
+                    </View>
+
+                    <View style={styles.timeBox}>
+                      <AppText style={styles.timeText}>24 hrs</AppText>
+                      <Ionicons name="chevron-up" size={14} color="#000" />
+                    </View>
+                  </View>
+
+                  <AppText style={styles.percentChange}>
+                    {cryptoBalances.change}
+                  </AppText>
+
+                  <View style={styles.bottomRow}>
+                    <View style={styles.valueRow}>
+                      <AppBoldText style={styles.btcValue}>
+                        {cryptoBalances.btc}
+                      </AppBoldText>
+
+                      <View style={styles.btcPill}>
+                        <AppText style={styles.btcText}>BTC</AppText>
+                      </View>
+                    </View>
+
+                    <View style={styles.miniStats}>
+                      <AppText>$0.00</AppText>
+                      <Ionicons name="trending-up" size={16} />
+                      <AppText>$0.00</AppText>
+                    </View>
+                  </View>
+                </View>
+
+                {/* FILTERS */}
+                <View style={styles.filterRow}>
+                  {(['all', 'success', 'pending', 'failed'] as const).map((f) => {
+                    const isActive = activeFilter === f;
+
+                    const bgColor = {
+                      all: Colors.Black,
+                      success: Colors.Primary,
+                      pending: Colors.Yellow,
+                      failed: Colors.Red,
+                    }[f];
+
+                    return (
+                      <TouchableOpacity
+                        key={f}
+                        style={[
+                          styles.filterBtn,
+                          {
+                            backgroundColor: isActive ? bgColor : '#EFEFEF',
+                          },
+                        ]}
+                        onPress={() => setActiveFilter(f)}
+                      >
+                        <AppText
+                          style={{
+                            color: isActive ? Colors.White : Colors.Black,
+                            fontWeight: '600',
+                          }}
+                        >
+                          {f.toUpperCase()}
+                        </AppText>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              </>
+
+
+            )}
+          </View>
+        }
       />
 
+      {/* MODALS */}
       <CustomModal
-        autoClose={false}
         isVisible={showWithdrawModal}
-        onClose={() => {
-          setShowWithdrawModal(false)
-          setLoadingBanks(false)
-        }}
         title="Withdraw"
-        titleStyle={{
-          marginTop: 5,
-        }}
-        content="Enter withdrawal amount"
-        contentStyle={{
-          fontWeight: '400',
-          fontSize: 13,
-          marginTop: heightPercentageToDP(0.8),
-          lineHeight: 18,
-          marginVertical: 0,
-        }}
-
+        onClose={() => setShowWithdrawModal(false)}
         actions={[
           {
             element: (
-              <AppText style={{
-                margin: 0,
-                padding: 0,
-                textAlign: 'center',
-                display: form.errorMessage ? 'flex' : 'none',
-                color: Colors.DangerTwo,
-              }}>{form.errorMessage}</AppText>
+              <TextInputOne
+                placeholder="Amount"
+                keyboardType="number-pad"
+                value={form.amount}
+                onChange={(v) => setForm({ ...form, amount: v })}
+              />
+            ),
+          },
+          {
+            element: (
+              <TextContainer
+                child={<AppText>{form.bank?.bankName || 'Select Bank'}</AppText>}
+                onPress={() => setShowBanksModal(true)}
+              />
             ),
           },
           {
             element: (
               <TextInputOne
-                value={`${form.amount}`}
-                onChange={val => setForm({ ...form, amount: val })}
-                containerStyle={{
-                  width: '95%',
-                  alignSelf: 'center',
-                  marginBottom: 0,
-                }}
-                placeholder={`${Values.NairaSymbol}5,000`}
-                keyboardType='number-pad'
+                placeholder="PIN"
+                secureTextEntry
+                value={form.pin}
+                onChange={(v) => setForm({ ...form, pin: v })}
               />
-            )
-          },
-          {
-            element: (
-              <TextContainer
-                rightChild={
-                  loadingBanks ?
-                    <ActivityIndicator />
-                    : undefined
-                }
-                containerStyle={{
-                  width: '95%',
-                  height: heightPercentageToDP(6),
-                  alignSelf: 'center',
-                  alignItems: 'flex-start',
-                }}
-                child={<AppText
-                  props={{ numberOfLines: 1 }}
-                  style={{
-                    fontSize: RFPercentage(2),
-                    color: form.bank ? Colors.Black : Colors.PlaceHolder,
-                    overflow: 'hidden',
-                  }}>{form.bank ? `${form.bank.accountNo} - ${Utils.shortenText(form.bank.bankName, 25, '')}` : "Select Bank"}</AppText>}
-                onPress={() => {
-                  if (!loadingBanks) {
-                    if (Platform.OS == 'android') {
-                      setShowBanksModal(true)
-                      getBanks();
-                    } else {
-                      setWillShowWithdrawModal(true);
-                      setShowWithdrawModal(false);
-                      setTimeout(() => {
-                        setShowBanksModal(true);
-                        getBanks();
-                      }, 600)
-                    }
-
-                  }
-
-                }}
-              />
-            )
-          },
-          {
-            element: (
-              <TextInputOne
-                maxLength={4}
-                value={`${form.pin}`}
-                onChange={val => setForm({ ...form, pin: val })}
-                secureTextEntry={true}
-                containerStyle={{
-                  width: '95%',
-                  alignSelf: 'center',
-                  marginBottom: 0,
-                }}
-                placeholder={`PIN`}
-                keyboardType='number-pad'
-              />
-            )
+            ),
           },
           {
             text: 'Proceed',
-            onPress: () => {
-              withdraw();
-            },
-            containerStyle: {
-              backgroundColor: validateForm() == null ? Colors.Primary : Colors.CardicGreyBgOne,
-              marginTop: 10,
-              width: '95%',
-            },
-            loading: withdrawing,
-            textStyle: {
-              color: Colors.White,
-            },
+            onPress: withdraw,
+            containerStyle: { backgroundColor: Colors.Primary },
+            textStyle: { color: '#fff' },
           },
-          {
-            text: 'Cancel',
-            onPress: () => {
-              setShowWithdrawModal(false)
-              resetForm();
-            },
-            containerStyle: {
-              backgroundColor: Colors.White,
-              width: '95%',
-            },
-            textStyle: {
-              color: Colors.Black,
-            },
-          },
-
         ]}
       />
 
       <SelectBankModal
         isVisible={showBanksModal}
         banks={banks}
-        onClose={() => {
-          // console.log("onClose")
-          setShowBanksModal(false)
-          if (willShowWithdrawModal) {
-            setTimeout(() => setShowWithdrawModal(true), 600)
-          }
-        }}
-        onOpen={() => setShowBanksModal(true)}
-        onClosePure={() => {
-          // console.log("onClosePure")
-          setShowBanksModal(false)
-        }}
-        onSelect={val => {
-          setForm({
-            ...form,
-            bank: val
-          });
-        }}
+        onClose={() => setShowBanksModal(false)}
+        onSelect={(b) => setForm({ ...form, bank: b })}
       />
+
       <ConfirmModal
-        icon={
-          <View style={{
-            height: heightPercentageToDP(8), aspectRatio: 1, borderRadius: 100, backgroundColor: Colors.Primary,
-            justifyContent: 'center',
-            alignItems: 'center'
-          }}>
-            <AntDesign
-              name="check"
-              size={RFPercentage(3)}
-              color={Colors.White}
-            />
-          </View>
-        }
         isVisible={showWithdrawalSuccessModal}
-        showCancel={false}
-        proceedText={`Continue`}
-        onClose={() => {
-          setShowWithdrawalSuccessModal(false)
-        }}
-        onProceed={() => {
-          setShowWithdrawalSuccessModal(false)
-        }}
         title="Withdrawal successful"
+        proceedText="Continue"
+        onProceed={() => setShowWithdrawalSuccessModal(false)}
       />
-
-      <CustomModal
-        icon={
-          <View style={{
-            height: heightPercentageToDP(8), aspectRatio: 1, borderRadius: 100, backgroundColor: Colors.Red,
-            justifyContent: 'center',
-            alignItems: 'center'
-          }}>
-            <Entypo
-              name="cross"
-              size={RFPercentage(3)}
-              color={Colors.White}
-            />
-          </View>
-        }
-        isVisible={showSetWithdrawalPinModal}
-        onClose={() => {
-          setShowSetWithdrawalPinModal(false)
-        }}
-        title="No transaction PIN"
-        content='Kindly proceed to set up your transaction pin'
-        actions={[
-          {
-            text: 'Proceed',
-            onPress: () => props.navigation.push("CreateTransactionPin"),
-            containerStyle: {
-              backgroundColor: Colors.White,
-              width: '95%',
-            },
-            textStyle: {
-              color: Colors.Black,
-            },
-          },
-        ]}
-
-      />
-
     </SafeAreaView>
   );
 };
 
 export default WalletScreen;
 
+/* ---------------- STYLES ---------------- */
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: '#fff' },
+
+  tabRow: { flexDirection: 'row', padding: 16, gap: 10 },
+  tabBtn: {
+    flex: 1,
+    backgroundColor: '#E6E6E6',
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  activeTab: { backgroundColor: '#000' },
+  tabText: { color: '#fff' },
+
+  balanceCard: {
+    backgroundColor: '#D59B16',
+    borderBottomColor: Colors.Yellow,
+    borderBottomWidth: 5,
+    margin: 16,
+    borderRadius: 16,
+    padding: 16,
+  },
+  balanceTop: { flexDirection: 'row', justifyContent: 'space-between' },
+  balanceAmount: { fontSize: 32, color: '#fff', marginVertical: 10 },
+
+  actionRow: { flexDirection: 'row', gap: 10, marginTop: 10 },
+  withdrawBtn: {
+    flex: 1,
+    backgroundColor: '#FFE27A',
+    paddingVertical: 10,
+    borderRadius: 20,
+    alignItems: 'center',
+  },
+  rateBtn: {
+    flex: 1,
+    backgroundColor: '#000',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 10,
+    borderRadius: 20,
+  },
+
+  filterRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 10,
+  },
+  filterBtn: {
+    backgroundColor: '#EFEFEF',
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  activeFilter: {
+    backgroundColor: '#D0F0C0',
+  },
+
+  cryptoCard: {
+    backgroundColor: '#F1FFE6',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#9FE870',
+    padding: 16,
+    margin: 16,
+  },
+  /* BALANCE CARD */
+  balanceCardCrypto: {
+    borderWidth: 1.5,
+    borderColor: '#B7FF3C',
+    borderRadius: 18,
+    padding: 16,
+    marginTop: 20,
+    marginBottom: 30,
+    backgroundColor: '#F5FFE6',
+  },
+
+  totalLabel: {
+    fontSize: 13,
+    color: '#000',
+    marginBottom: 6,
+  },
+
+  topRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+
+  valueRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+
+  usdValue: {
+    fontSize: 24,
+    color: '#000',
+  },
+
+  usdPill: {
+    backgroundColor: '#3CDB3C',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+
+  usdText: {
+    fontSize: 11,
+    color: '#000',
+    fontWeight: '600',
+  },
+
+  percentChange: {
+    fontSize: 13,
+    color: '#2DBD5F',
+    marginTop: 4,
+  },
+
+  bottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 12,
+  },
+
+  btcValue: {
+    fontSize: 14,
+    color: '#000',
+  },
+
+  btcPill: {
+    backgroundColor: '#FFB703',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+
+  btcText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#000',
+  },
+
+  miniStats: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  timeBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+
+  timeText: {
+    fontSize: 13,
+    color: '#000',
+    fontWeight: '600',
+  },
+
+  row: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  // usdText: { fontSize: 22 },
+  usdBadge: { backgroundColor: '#12B76A', borderRadius: 6, paddingHorizontal: 6 },
+  btcBadge: { backgroundColor: '#FEC84B', borderRadius: 6, paddingHorizontal: 6 },
+  badgeText: { fontSize: 11 },
+  greenText: { color: '#12B76A', marginVertical: 4 },
+  timeFrame: { position: 'absolute', right: 16, top: 16 },
+
+  emptyContainer: { alignItems: 'center', marginTop: 80 },
+  emptyText: { marginTop: 16, color: '#777', textAlign: 'center' },
+});

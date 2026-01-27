@@ -23,7 +23,7 @@ const Onboarding = (props: Props) => {
   return (
     <SafeAreaView
       style={{
-        backgroundColor: Colors.White,
+        backgroundColor: Colors.Black,
         flex: 1,
         // justifyContent: 'flex-start',
         // alignItems: 'center',
@@ -36,45 +36,64 @@ const Onboarding = (props: Props) => {
 
         }}
         // showsButtons={false}
+        dotStyle={{
+          width: 30,
+          height: 5,
+          borderRadius: 5,
+          marginHorizontal: 3,
+          backgroundColor: Colors.Primary,
+        }}
+        activeDotStyle={{
+          width: 30,
+          height: 5,
+          borderRadius: 5,
+          marginHorizontal: 3,
+          backgroundColor: Colors.PrimaryBGLight,
+        }}
         dotColor={Colors.Primary}
         activeDotColor={Colors.PrimaryBGLight}
+        paginationStyle={{
+          top: Platform.OS === 'android' ? 40 : 60,
+          bottom: undefined,
+        }}
       // autoplay={true}
       >
         <OnboardingPage
-          titleText='Fast and seamless transaction'
-          description='Enjoy fast transactions and seamless whenever you need to.'
+          titleText='Gift Cards to Cash'
+          description='Trade your gift cards for instant value. Fast payouts, great rates, and a smooth experience every time.'
           image={Images.onboarding1}
+          showProceedButton={true}
         />
-        <ImageBackground
-          source={Images.cardicBgIcon}
-          resizeMode='cover'
-          style={{
-            flex: 1,
-            justifyContent: 'center',
-            height: heightPercentageToDP(100),
-            backgroundColor: Colors.Primary,
-          }}>
-          <OnboardingPage
-            titleText='Best rates and easy cashouts'
-            description='Buy and sell  at  the best and affordable rates and get instant cash out.'
-            titleStyle={{
-              color: Colors.White,
-            }}
-            descriptionStyle={{
-              color: Colors.White,
-            }}
-            image={Images.onboarding2}
-            pageStyle={{
-              backgroundColor: undefined,
-            }}
-          />
-        </ImageBackground>
+        <OnboardingPage
+          titleText='Buy and Sell crypto'
+          description='Explore top crypto tokens. Simple, secure, and built for everyone.'
+          // titleStyle={{
+          //   color: Colors.White,
+          // }}
+          // descriptionStyle={{
+          //   color: Colors.White,
+          // }}
+          image={Images.onboarding2}
+          // pageStyle={{
+          //   backgroundColor: undefined,
+          // }}
+          showProceedButton={true}
+        />
 
         <OnboardingPage
-          titleText='Easily Buy data and airtime'
-          description='Buy data and airtime at any time of the day'
+          titleText='Start Trading in Seconds'
+          description='Create your free account or log in to continue your journey.'
           image={Images.onboarding3}
+          titleStyle={{
+            color: Colors.Black,
+          }}
+          descriptionStyle={{
+            color: Colors.Black,
+          }}
           showProceedButton={true}
+          pageStyle={{
+            backgroundColor: Colors.White,
+          }}
         />
       </Swiper>
     </SafeAreaView>
@@ -120,19 +139,20 @@ const OnboardingPage = (props: OnboardingPageProps) => {
         source={image}
         style={[{
           height: 360,
-          width: 360,
-          marginTop: 30,
+          width: '100%',
+          marginTop: 60,
         }, imageStyle]}
         resizeMode='contain'
       />
       <AppBoldText style={[{
-        color: Colors.Primary,
+        color: Colors.White,
         marginTop: 5,
-        fontSize: 18
+        fontSize: 28
       }, titleStyle]}>{titleText}</AppBoldText>
       <AppText style={[{
-        color: Colors.Black,
+        color: Colors.White,
         marginTop: 15,
+        marginBottom: 80,
         fontSize: 14,
         textAlign: 'center',
         paddingHorizontal: "10%",
@@ -142,11 +162,13 @@ const OnboardingPage = (props: OnboardingPageProps) => {
           <View style={{
             paddingHorizontal: Platform.OS == 'android' ? '10%' : 20,
             marginTop: 'auto',
-            width: '50%',
-            marginBottom: "20%"
+            width: '100%',
+            marginBottom: "20%",
+            flex: 1,
+            gap: 10,
           }}>
             <ButtonOne
-              text={"Open Cardic"}
+              text={"Create an account"}
               textStyle={{
                 color: Colors.White,
                 fontWeight: 'bold'
@@ -156,6 +178,21 @@ const OnboardingPage = (props: OnboardingPageProps) => {
               }}
               containerStyle={{
                 backgroundColor: Colors.Primary,
+              }}
+            />
+            <ButtonOne
+              text={"Log In"}
+              textStyle={{
+                color: Colors.Primary,
+                fontWeight: 'bold'
+              }}
+              onPress={() => {
+                onProceed();
+              }}
+              containerStyle={{
+                backgroundColor: Colors.White,
+                borderColor: Colors.Primary,
+                borderWidth: 1,
               }}
             />
 
@@ -169,7 +206,7 @@ const OnboardingPage = (props: OnboardingPageProps) => {
 
 const styles = StyleSheet.create({
   page: {
-    backgroundColor: Colors.White,
+    backgroundColor: Colors.Black,
     flex: 1,
     justifyContent: 'flex-start',
     alignItems: 'center',

@@ -9,6 +9,8 @@ import TradeHomePageScreen from '../screens/User/Trade/TradeHomePage/TradeHomePa
 import WalletScreen from '../screens/User/Wallet/WalletScreen';
 import SettingsScreen from '../screens/User/Settings/SettingsScreen';
 import { RegularFontFamily } from '../components/AppText/AppText';
+import GiftCardScreen from '../screens/User/GiftCard/GiftCardScreen';
+import CryptoScreen from '../screens/User/Crypto/CryptoScreen';
 
 
 
@@ -38,18 +40,24 @@ export default function BottomTab() {
               : 'home-outline';
           } else if (route.name === 'Settings') {
             iconName = focused ? 'settings' : 'settings-outline';
-          } else if (route.name === 'Trades') {
+          } else if (route.name === 'Crypto') {
             iconName = focused ? 'pie-chart' : 'pie-chart-outline';
           } else if (route.name === 'Wallet') {
             iconName = focused ? 'wallet' : 'wallet-outline';
+          } else if (route.name === 'GiftCard') {
+            iconName = focused ? 'gift' : 'gift-outline';
           }
 
 
           // You can return any component that you like here!
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: Colors.Primary,
-        tabBarInactiveTintColor: 'gray',
+        tabBarActiveTintColor: Colors.White,
+        tabBarInactiveTintColor: Colors.IconLemon,
+        tabBarStyle: {
+          backgroundColor: Colors.Primary,
+          borderTopWidth: 0,
+        },
         headerShown: false,
       })}
     >
@@ -58,21 +66,34 @@ export default function BottomTab() {
           tabBarLabelStyle: tabBarStyle
         }}
       />
-      <Tab.Screen name="Wallet" component={WalletScreen} 
-      options={{
-        tabBarLabelStyle: tabBarStyle
-      }}
+
+      <Tab.Screen name="GiftCard" component={GiftCardScreen}
+        options={{
+          tabBarLabelStyle: tabBarStyle
+        }}
       />
 
-      <Tab.Screen name="Trades" component={TradeHomePageScreen} 
-      options={{
-        tabBarLabelStyle: tabBarStyle
-      }}
+      <Tab.Screen name="Crypto" component={CryptoScreen}
+        options={{
+          tabBarLabelStyle: tabBarStyle
+        }}
       />
-      <Tab.Screen name="Settings" component={SettingsScreen} 
+
+      <Tab.Screen name="Wallet" component={WalletScreen}
+        options={{
+          tabBarLabelStyle: tabBarStyle
+        }}
+      />
+
+      {/* <Tab.Screen name="Trades" component={TradeHomePageScreen} 
       options={{
         tabBarLabelStyle: tabBarStyle
       }}
+      /> */}
+      <Tab.Screen name="Settings" component={SettingsScreen}
+        options={{
+          tabBarLabelStyle: tabBarStyle
+        }}
       />
 
     </Tab.Navigator>
@@ -87,4 +108,4 @@ const tabBarStyle: StyleProp<TextStyle> = {
   fontFamily: RegularFontFamily
 }
 
-const tabBarOptions =  { tabBarBadgeStyle: tabBarStyle }
+const tabBarOptions = { tabBarBadgeStyle: tabBarStyle }

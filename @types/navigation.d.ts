@@ -3,6 +3,9 @@ import { StackScreenProps } from '@react-navigation/stack';
 
 export type MainParamsList = {
   Home: undefined;
+  TradeGiftCard: { card: any };
+  IdentityVerificationScreen: undefined;
+  VerificationScreen: undefined;
 };
 
 export type ApplicationStackParamList = {

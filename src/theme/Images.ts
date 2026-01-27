@@ -2,11 +2,14 @@ import { ThemeVariables } from '../../@types/theme';
 
 export default function ({}: ThemeVariables) {
   return {
-    onboarding1: require('./assets/images/sent-message.png'),
-    onboarding2: require('./assets/images/coin-carry.png'),
-    onboarding3: require('./assets/images/night-calls.png'),
+    artboard1: require('./assets/images/Artboard1.png'),
+    artboard2: require('./assets/images/Artboard.png'),
+    onboarding1: require('./assets/images/Glass-Img.png'),
+    onboarding2: require('./assets/images/Onboarding-2.png'),
+    onboarding3: require('./assets/images/Onboarding-3.png'),
     appIcon: require('./assets/images/cardic-logo.png'),
+    appLogo: require('./assets/images/Cardic-Icon.png'),
     cardicBgIcon: require('./assets/images/cardic-bg-icon.png'),
-    cardicBgIcon2: require('./assets/images/cardic-bg-icon-2.png'),
+    cardicBgIcon2: require('./assets/images/Loginbanner.png'),
   };
 }

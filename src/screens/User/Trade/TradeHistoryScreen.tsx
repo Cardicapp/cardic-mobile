@@ -71,7 +71,7 @@ const TradeHistoryScreen = (props: Props) => {
       page: pageIndex.current,
       limit: 20,
     }, trades => {
-      if (trades.length){
+      if (trades.length) {
         setAllTrades(trades)
         pageIndex.current = pageIndex.current + 1;
       }
@@ -105,9 +105,9 @@ const TradeHistoryScreen = (props: Props) => {
         backgroundColor: Colors.White,
       }}>
       <FlatList
-      contentContainerStyle={{
-        paddingBottom: 20,
-      }}
+        contentContainerStyle={{
+          paddingBottom: 20,
+        }}
         refreshControl={
           <RefreshControl
             refreshing={loading}
@@ -131,7 +131,7 @@ const TradeHistoryScreen = (props: Props) => {
               image={item.subCategory.category.photo.path}
               onPress={() => {
                 dispatch(setSelectedTrade(item))
-                props.navigation.push('TradeDetailScreen');
+                props.navigation.push('TradeChatScreen');
               }}
               ctaStyle={{
                 color: rejected ? Colors.Red : ongoing ? Colors.GreyText : Colors.Primary,
