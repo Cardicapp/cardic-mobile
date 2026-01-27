@@ -34,7 +34,7 @@ const OngoingTradeListScreen = (props: Props) => {
   const authState = useSelector(selectAuthState);
   const user = authState.user;
   const getTrades = async (data: any, fn: (trades: Trade[]) => void) => {
-    if(loading) return;
+    if (loading) return;
     try {
       setLoading(true)
       let payload = {
@@ -73,7 +73,7 @@ const OngoingTradeListScreen = (props: Props) => {
       limit: 20,
       status: 1, // 1 = ongoing/pending trades. 2 = completed trades
     }, trades => {
-      if (trades.length){
+      if (trades.length) {
         setOngoingTrades(trades)
         pageIndex.current = pageIndex.current + 1;
       }
@@ -127,7 +127,7 @@ const OngoingTradeListScreen = (props: Props) => {
             image={item.subCategory.category.photo.path}
             onPress={() => {
               dispatch(setSelectedTrade(item))
-              props.navigation.push('TradeDetailScreen');
+              props.navigation.push('TradeChatScreen');
             }}
             selected={item.id === tradeState.form?.subCategory?.id}
             containerStyle={{

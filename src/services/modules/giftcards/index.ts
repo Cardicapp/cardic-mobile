@@ -14,10 +14,10 @@ export interface GiftCard {
 export const giftCardApi = api.injectEndpoints({
   endpoints: (build) => ({
     getGiftCards: build.query<GiftCard[], void>({
-      query: () => '/giftcards',
+      query: () => 'api/v1/cards/categories',
     }),
     getGiftCardCategories: build.query<string[], void>({
-        query: () => '/giftcards/categories',
+        query: () => 'api/v1/cards/sub-categories',
     }),
   }),
   overrideExisting: false,

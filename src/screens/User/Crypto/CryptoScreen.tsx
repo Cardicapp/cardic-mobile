@@ -12,7 +12,8 @@ import Colors from '../../../theme/Colors';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSelector } from 'react-redux';
 import { selectAuthState } from '../../../store/auth';
-import { useGetWalletsQuery } from '../../../services/modules/crypto';
+import axiosExtended from 'CardicApp/src/lib/network/axios-extended';
+import routes from 'CardicApp/src/lib/network/routes';
 
 
 
@@ -20,7 +21,29 @@ const CryptoScreen = ({ navigation }: any) => {
   const { user } = useSelector(selectAuthState);
   const isKycApproved = (user as any)?.kycStatus === 'approved';
 
-  const { data, isLoading } = useGetWalletsQuery();
+  const [data, setData] = React.useState<any>(null);
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  React.useEffect(() => {
+    if (isKycApproved) {
+      fetchWallets();
+    }
+  }, [isKycApproved]);
+
+  const fetchWallets = async () => {
+    setIsLoading(true);
+    try {
+      const res = await axiosExtended.get(routes.wallet);
+      if (res.status === 200) {
+        setData(res.data.data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch wallets', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const cryptoBalances = data?.summary || { usd: '$0.00', btc: '0.00000', change: '+$0(0%)' };
   const cryptoAssets = data?.wallets || [];
 
@@ -60,7 +83,18 @@ const CryptoScreen = ({ navigation }: any) => {
 
 
       <View style={styles.assetBottom}>
-        <Image source={item.image} style={styles.assetIcon} />
+        <Image
+          source={
+            item.imageUrl ? { uri: item.imageUrl } :
+              item.symbol === 'BTC' ? require('@/theme/assets/images/BTC.png') :
+                item.symbol === 'ETH' ? require('@/theme/assets/images/ETH.png') :
+                  item.symbol === 'USDT' ? require('@/theme/assets/images/Usdt.png') :
+                    item.symbol === 'LTC' ? require('@/theme/assets/images/LTC.png') :
+                      item.symbol === 'TRX' ? require('@/theme/assets/images/TRX.png') :
+                        require('@/theme/assets/images/coin.png')
+          }
+          style={styles.assetIcon}
+        />
         <View style={styles.assetBalanceContainer}>
           <AppText style={styles.balanceLabel}>Balance</AppText>
           <AppBoldText style={styles.assetBalance}>

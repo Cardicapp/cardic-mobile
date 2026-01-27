@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     profileCard: {
-        borderRadius: 16,
+        borderRadius: 20,
         padding: 20,
         flexDirection: 'row',
         alignItems: 'center',
@@ -228,12 +228,14 @@ const styles = StyleSheet.create({
     gradientLayerOne: {
         ...StyleSheet.absoluteFillObject,
         backgroundColor: '#1DB954',
+        borderRadius: 20,
     },
 
     gradientLayerTwo: {
         ...StyleSheet.absoluteFillObject,
         backgroundColor: '#81F73F',
         opacity: 0.6,
+        borderRadius: 20,
     },
 
     profileContent: {

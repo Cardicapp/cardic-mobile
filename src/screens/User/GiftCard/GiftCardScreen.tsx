@@ -7,6 +7,9 @@ import {
   FlatList,
   Image,
 } from 'react-native';
+import { Svg, Defs, LinearGradient as SvgGradient, Stop, Rect } from 'react-native-svg';
+import { RFPercentage } from 'react-native-responsive-fontsize';
+import moment from 'moment';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { ApplicationStackParamList } from 'CardicApp/@types/navigation';
 import AppText, { AppBoldText } from 'CardicApp/src/components/AppText/AppText';
@@ -15,18 +18,52 @@ import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import File from 'CardicApp/src/theme/assets/images/File.png';
 import CashImng from 'CardicApp/src/theme/assets/images/Cashimg.png';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { useGetTradesQuery } from '../../../services/modules/trades';
+import axiosExtended from 'CardicApp/src/lib/network/axios-extended';
+import routes from 'CardicApp/src/lib/network/routes';
+import { useSelector, useDispatch } from 'react-redux';
+import { selectAuthState } from 'CardicApp/src/store/auth';
+import { setSelectedTrade } from 'CardicApp/src/store/trade';
+import queryString from 'query-string';
 
 interface Props {
   navigation: StackNavigationProp<ApplicationStackParamList, keyof ApplicationStackParamList, undefined>;
 }
 
 const GiftCardScreen = (props: Props) => {
-  const { data: trades, isLoading } = useGetTradesQuery();
+  const { user } = useSelector(selectAuthState);
+  const dispatch = useDispatch();
+  const [ongoingTrades, setOngoingTrades] = React.useState<any[]>([]);
+  const [historyTrades, setHistoryTrades] = React.useState<any[]>([]);
+  const [isLoading, setIsLoading] = React.useState(false);
 
-  // Filter trades for display
-  const ongoingTrade = trades?.find((t: any) => t.status === 'ongoing'); // Adjust based on actual status enums
-  const historyData = trades?.filter((t: any) => t.status !== 'ongoing') || [];
+  React.useEffect(() => {
+    if (user?.id) {
+      fetchTrades(1, setOngoingTrades);
+      fetchTrades(2, setHistoryTrades);
+    }
+  }, [user?.id]);
+
+  const fetchTrades = async (status: number, setter: (data: any[]) => void) => {
+    setIsLoading(true);
+    try {
+      const query = queryString.stringify({
+        page: 1,
+        limit: 20,
+        status: status,
+      });
+      const res = await axiosExtended.get(`${routes.trade}/user/${user?.id}?${query}`);
+      if (res.status === 200) {
+        setter(res.data.data || []);
+      }
+    } catch (err) {
+      console.error(`Failed to fetch trades for status ${status}`, err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const ongoingTrade = ongoingTrades?.[0]; // Show the most recent ongoing
+  const historyData = historyTrades || [];
 
   const hasOngoingTrade = !!ongoingTrade;
   const hasHistory = historyData.length > 0;
@@ -66,27 +103,65 @@ const GiftCardScreen = (props: Props) => {
 
       {/* ONGOING TRADE */}
       {hasOngoingTrade && (
-        <View style={styles.ongoingCard}>
-          <View style={styles.ongoingHeader}>
-            <AppBoldText style={styles.ongoingLabel}>Ongoing</AppBoldText>
-            <AppText style={styles.ongoingDate}>Nov 10, 2025</AppText>
+        <TouchableOpacity
+          activeOpacity={0.9}
+          onPress={() => {
+            dispatch(setSelectedTrade(ongoingTrade));
+            props.navigation.navigate('TradeChatScreen');
+          }}
+          style={styles.ongoingContainer}
+        >
+          <View style={styles.svgWrapper}>
+            <Svg height="100%" width="100%">
+              <Defs>
+                <SvgGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <Stop offset="0%" stopColor="#D9FF7A" stopOpacity="1" />
+                  <Stop offset="100%" stopColor="#9AC23C" stopOpacity="1" />
+                </SvgGradient>
+              </Defs>
+              <Rect width="100%" height="100%" fill="url(#grad)" rx={20} ry={20} />
+            </Svg>
           </View>
 
-          <View style={styles.ongoingBody}>
-            <View style={styles.avatar} />
-            <View>
-              <AppBoldText>Greg Orangeman</AppBoldText>
-              <AppText style={styles.online}>Online</AppText>
-              <AppText style={styles.hold}>
-                Less than a minute ago, please hold
-              </AppText>
+          <View style={styles.ongoingContent}>
+            <View style={styles.ongoingTopRow}>
+              <View>
+                <AppBoldText style={styles.ongoingLabel}>Ongoing</AppBoldText>
+                <AppText style={styles.ongoingDate}>
+                  {moment(ongoingTrade?.createdAt).format('MMM DD, YYYY')}
+                </AppText>
+              </View>
+
+              <View style={styles.adminBadge}>
+                <Image
+                  source={require('CardicApp/src/theme/assets/images/Artboard.png')}
+                  style={styles.adminAvatar}
+                />
+                <View style={styles.adminInfo}>
+                  <AppBoldText style={styles.adminName}>Admin</AppBoldText>
+                  <AppText style={styles.onlineStatus}>Online</AppText>
+                  <AppText style={styles.holdText}>Less than a minute ago, please hold</AppText>
+                </View>
+              </View>
+            </View>
+
+            <View style={styles.ongoingBottomRow}>
+              <View style={styles.cardIndicator}>
+                {ongoingTrade?.subCategory?.category?.photo?.path ? (
+                  <Image
+                    source={{ uri: ongoingTrade.subCategory.category.photo.path.replace('http', 'https') }}
+                    style={styles.cardIndicatorIcon}
+                  />
+                ) : (
+                  <View style={styles.cardIndicatorPlaceholder} />
+                )}
+              </View>
+              <AppBoldText style={styles.tradeTitle}>
+                {ongoingTrade?.subCategory?.name || 'Trade'}
+              </AppBoldText>
             </View>
           </View>
-
-          <AppBoldText style={styles.tradeTitle}>
-            USA SEPHORA (100-500)
-          </AppBoldText>
-        </View>
+        </TouchableOpacity>
       )}
 
       {/* EMPTY STATE */}
@@ -117,9 +192,15 @@ const GiftCardScreen = (props: Props) => {
 
           <FlatList
             data={historyData}
-            keyExtractor={(_, i) => i.toString()}
+            keyExtractor={(item) => item.id.toString()}
             renderItem={({ item }) => (
-              <View style={styles.historyCard}>
+              <TouchableOpacity
+                style={styles.historyCard}
+                onPress={() => {
+                  dispatch(setSelectedTrade(item));
+                  props.navigation.navigate('TradeChatScreen');
+                }}
+              >
                 <View style={styles.historyLeft}>
                   <View style={styles.historyIcon} />
                   <View>
@@ -138,12 +219,14 @@ const GiftCardScreen = (props: Props) => {
                     ${item.amount}
                   </AppText>
                 </View>
-              </View>
+              </TouchableOpacity>
             )}
+            horizontal={false}
+            showsVerticalScrollIndicator={false}
           />
         </>
       )}
-    </SafeAreaView>
+    </SafeAreaView >
   );
 };
 
@@ -190,51 +273,107 @@ const styles = StyleSheet.create({
   },
 
   /* ONGOING */
-  ongoingCard: {
-    backgroundColor: '#D9FF7A',
-    borderRadius: 12,
-    padding: 16,
+  ongoingContainer: {
     marginTop: 15,
+    height: 160, // Fixed height to manage SVG overlay properly
+    borderRadius: 20,
+    overflow: 'hidden',
   },
 
-  ongoingHeader: {
+  svgWrapper: {
+    ...StyleSheet.absoluteFillObject,
+  },
+
+  ongoingContent: {
+    flex: 1,
+    padding: 20,
+  },
+
+  ongoingTopRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    borderRadius: 20,
   },
 
   ongoingLabel: {
     color: '#1A7F00',
+    fontSize: 18,
   },
 
   ongoingDate: {
-    fontSize: 12,
+    fontSize: RFPercentage(2),
+    color: '#444',
+    marginTop: 5,
   },
 
-  ongoingBody: {
+  adminBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 12,
+    // backgroundColor: 'rgba(255,255,255,0.25)',
+    paddingHorizontal: 25,
+    paddingVertical: 8,
+    borderRadius: 15,
   },
 
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#999',
-    marginRight: 10,
+  adminAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
   },
 
-  online: {
-    color: 'green',
-    fontSize: 12,
+  adminInfo: {
+    marginLeft: 10,
   },
 
-  hold: {
+  adminName: {
+    fontSize: 15,
+    color: '#000',
+  },
+
+  onlineStatus: {
+    color: '#0A8F08',
     fontSize: 11,
   },
 
+  holdText: {
+    fontSize: 9,
+    color: '#333',
+    marginTop: 2,
+  },
+
+  ongoingBottomRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 15,
+  },
+
+  cardIndicator: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(0,0,0,0.78)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  cardIndicatorIcon: {
+    width: 28,
+    height: 28,
+    resizeMode: 'contain',
+  },
+
+  cardIndicatorPlaceholder: {
+    width: 24,
+    height: 24,
+    backgroundColor: '#333',
+    borderRadius: 12,
+  },
+
   tradeTitle: {
-    marginTop: 10,
+    marginLeft: 18,
+    fontSize: RFPercentage(2.4),
+    color: '#000',
   },
 
   /* EMPTY STATE */

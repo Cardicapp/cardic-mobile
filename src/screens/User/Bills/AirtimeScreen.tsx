@@ -6,7 +6,6 @@ import axiosExtended from 'CardicApp/src/lib/network/axios-extended';
 import routes from 'CardicApp/src/lib/network/routes';
 import { setBillForm } from 'CardicApp/src/store/bill';
 import Colors from 'CardicApp/src/theme/Colors';
-import { useGetBillersQuery, useCreateBillPaymentMutation } from '../../../services/modules/bills';
 import React, { useEffect, useState } from 'react';
 import {
   SafeAreaView,
@@ -36,8 +35,23 @@ const AirtimeScreen = (props: Props) => {
   const [network, setNetwork] = useState('');
 
 
-  const { data: billers = [] } = useGetBillersQuery('airtime');
-  const [createPayment, { isLoading: isPaying }] = useCreateBillPaymentMutation();
+  const [billers, setBillers] = useState<any[]>([]);
+  const [isPaying, setIsPaying] = useState(false);
+
+  useEffect(() => {
+    fetchBillers();
+  }, []);
+
+  const fetchBillers = async () => {
+    try {
+      const res = await axiosExtended.get(`${routes.bills}/billers/airtime`);
+      if (res.status === 200) {
+        setBillers(res.data.data || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch billers', err);
+    }
+  };
 
   const networkOptions = billers.map((b: any) => ({
     label: b.label || b.name,
@@ -55,24 +69,36 @@ const AirtimeScreen = (props: Props) => {
 
   const proceed = async () => {
     try {
-      await createPayment({
+      setIsPaying(true);
+      const res = await axiosExtended.post(`${routes.bills}/payment`, {
         recipient: phone,
         amount,
         network
-      }).unwrap();
+      });
 
-      dispatch(setBillForm({
-        recipient: phone,
-        amount: amount,
-        network: network,
-      }));
-      props.navigation.push("AirtimeBillsSummaryScreen");
-    } catch (error) {
+      if (res.status === 200 || res.status === 201) {
+        Toast.show({
+          type: 'success',
+          text1: 'Payment Successful',
+          text2: `You have successfully purchased N${amount} airtime for ${phone}.`,
+        });
+
+        dispatch(setBillForm({
+          recipient: phone,
+          amount: amount,
+          network: network,
+        }));
+        props.navigation.push("AirtimeBillsSummaryScreen");
+      }
+    } catch (error: any) {
+      console.log(error);
       Toast.show({
         type: 'error',
         text1: "Payment Failed",
-        text2: "Please try again later"
+        text2: error?.response?.data?.message || "Please try again later"
       });
+    } finally {
+      setIsPaying(false);
     }
   }
 

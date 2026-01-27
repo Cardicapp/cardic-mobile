@@ -17,18 +17,30 @@ const authNotRequiredURLs = [
 ];
 
 axiosExtended.interceptors.request.use((config) => {
+  console.log(`🚀 [Axios Request] ${config.method?.toUpperCase()} ${config.url}`, config.data || config.params || '');
   if (!getExcludedURLs(config)) {
     const auth = store.getState().auth;
     const {
       token
     } = auth;
-    if(!config.headers) config.headers = {};
+    if(!config.headers) config.headers = {} as any;
     config.headers.Authorization = `Bearer ${token}`;
     return config;
   } else {
     return config;
   }
 });
+
+axiosExtended.interceptors.response.use(
+  (response) => {
+    console.log(`✅ [Axios Success] ${response.config.method?.toUpperCase()} ${response.config.url}`, response.data);
+    return response;
+  },
+  (error) => {
+    console.log(`❌ [Axios Error] ${error.config?.method?.toUpperCase()} ${error.config?.url}`, error.response?.data || error.message);
+    return Promise.reject(error);
+  }
+);
 
 const getExcludedURLs = (config: AxiosRequestConfig) => {
   return config.url && endsWithAny(config.url, authNotRequiredURLs);

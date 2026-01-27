@@ -15,7 +15,9 @@ import { useNavigation } from '@react-navigation/native';
 
 import Colors from '@/theme/Colors';
 import AppText, { AppBoldText } from '@/components/AppText/AppText';
-import { useGetNotificationsQuery } from '../../../services/modules/notifications';
+import axiosExtended from 'CardicApp/src/lib/network/axios-extended';
+import routes from 'CardicApp/src/lib/network/routes';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 interface Notification {
     id: number;
@@ -28,10 +30,28 @@ interface Notification {
 const NotificationsScreen = () => {
     const navigation = useNavigation();
 
+    const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
     const [activeTab, setActiveTab] =
         useState<'notification' | 'inbox'>('notification');
 
-    const { data: notifications = [], isLoading, refetch } = useGetNotificationsQuery();
+    React.useEffect(() => {
+        fetchNotifications();
+    }, []);
+
+    const fetchNotifications = async () => {
+        setIsLoading(true);
+        try {
+            const res = await axiosExtended.get(routes.notifications);
+            if (res.status === 200) {
+                setNotifications(res.data.data || []);
+            }
+        } catch (err) {
+            console.error('Failed to fetch notifications', err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const renderNotification = ({ item }: { item: Notification }) => (
         <View style={styles.notificationCard}>
@@ -58,7 +78,7 @@ const NotificationsScreen = () => {
 
             <FlatList
                 refreshControl={
-                    <RefreshControl refreshing={isLoading} onRefresh={refetch} />
+                    <RefreshControl refreshing={isLoading} onRefresh={fetchNotifications} />
                 }
                 data={activeTab === 'notification' ? notifications : []}
                 keyExtractor={(i) => i.id.toString()}

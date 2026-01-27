@@ -18,21 +18,21 @@ export interface CreateBillPaymentRequest {
 export const billsApi = api.injectEndpoints({
   endpoints: (build) => ({
     getBillCategories: build.query<any[], void>({
-      query: () => '/bills/categories',
+      query: () => 'api/v1/bills/categories',
     }),
     getBillers: build.query<Biller[], string>({
-      query: (category) => `/bills/billers/${category}`,
+      query: (category) => `api/v1/bills/billers/${category}`,
     }),
     validateCustomer: build.mutation<any, { billerCode: string; customerId: string }>({
       query: (body) => ({
-        url: '/bills/validate',
+        url: 'api/v1/bills/validate',
         method: 'POST',
         body,
       }),
     }),
     createBillPayment: build.mutation<any, CreateBillPaymentRequest>({
       query: (body) => ({
-        url: '/bills/payment',
+        url: 'api/v1/bills/payment',
         method: 'POST',
         body,
       }),

@@ -14,40 +14,39 @@ export interface InitiateTradeRequest {
   cardId: string;
   amount: number;
   categoryId: string;
-  // Add other necessary fields based on the flow
 }
 
 export const tradeApi = api.injectEndpoints({
   endpoints: (build) => ({
     getTrades: build.query<Trade[], void>({
-      query: () => '/trades',
+      query: () => 'api/v1/trades',
       providesTags: ['Trade'],
     }),
     getTradeById: build.query<Trade, string>({
-      query: (id) => `/trades/${id}`,
+      query: (id) => `api/v1/trades/${id}`,
       providesTags: (result, error, id) => [{ type: 'Trade', id }],
     }),
     initiateTrade: build.mutation<Trade, InitiateTradeRequest>({
       query: (body) => ({
-        url: '/trades',
+        url: 'api/v1/trades',
         method: 'POST',
         body,
       }),
       invalidatesTags: ['Trade'],
     }),
     getTradeMessages: build.query<TradeMessage[], string>({
-      query: (tradeId) => `/trades/${tradeId}/messages`,
+      query: (tradeId) => `api/v1/trades/${tradeId}/messages`,
     }),
     sendMessage: build.mutation<TradeMessage, { tradeId: string; text: string }>({
       query: ({ tradeId, text }) => ({
-        url: `/trades/${tradeId}/messages`,
+        url: `api/v1/trades/${tradeId}/messages`,
         method: 'POST',
         body: { text },
       }),
     }),
     uploadTradeImage: build.mutation<TradeMessage, { tradeId: string; formData: FormData }>({
       query: ({ tradeId, formData }) => ({
-        url: `/trades/${tradeId}/messages/upload`,
+        url: `api/v1/trades/${tradeId}/messages/upload`,
         method: 'POST',
         body: formData,
       }),

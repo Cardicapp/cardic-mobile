@@ -1,189 +1,317 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
     StyleSheet,
     View,
-    SafeAreaView,
-    TouchableOpacity,
-    TextInput,
-    FlatList,
     Image,
+    FlatList,
+    TouchableOpacity,
+    SafeAreaView,
+    TextInput,
     KeyboardAvoidingView,
     Platform,
+    ActivityIndicator,
+    PermissionsAndroid,
 } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
-import {
-    useGetTradeMessagesQuery,
-    useSendMessageMutation,
-    useUploadTradeImageMutation,
-    useGetTradeByIdQuery
-} from '../../../services/modules/trades';
-import AppText, { AppBoldText } from '../../../components/AppText/AppText';
-import Colors from '../../../theme/Colors';
+import Entypo from 'react-native-vector-icons/Entypo';
+import AppText, { AppBoldText } from 'CardicApp/src/components/AppText/AppText';
+import Colors from 'CardicApp/src/theme/Colors';
+import { useNavigation } from '@react-navigation/native';
+import axiosExtended from 'CardicApp/src/lib/network/axios-extended';
+import routes from 'CardicApp/src/lib/network/routes';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectTradeState, setSelectedTrade } from 'CardicApp/src/store/trade';
+import { selectAuthState } from 'CardicApp/src/store/auth';
+import { TradeChat } from 'CardicApp/src/types/chat';
+import { TradeChatTypeEnum, TradeStatusEnum, UserRoleEnum } from 'CardicApp/src/types/enums';
+import queryString from 'query-string';
+import Utils from 'CardicApp/src/lib/utils/Utils';
+import { io } from "socket.io-client";
+import TradeEvents from 'CardicApp/src/lib/enums/trade-events.enum';
+import Config from "react-native-config";
+import { Asset, ImagePickerResponse, launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import CustomModal from 'CardicApp/src/components/Modal/CustomModal';
+import { RFPercentage } from 'react-native-responsive-fontsize';
+import { heightPercentageToDP, widthPercentageToDP } from 'react-native-responsive-screen';
+import moment from 'moment';
 
-
+const baseURL = Config.API_URL;
 
 const TradeChatScreen = () => {
     const navigation = useNavigation();
-    const route = useRoute<any>();
-    const { tradeId } = route.params || {};
+    const dispatch = useDispatch();
+    const { user } = useSelector(selectAuthState);
+    const { selectedTrade: trade } = useSelector(selectTradeState);
 
-    const [message, setMessage] = useState('');
+    const [messages, setMessages] = useState<TradeChat[]>([]);
+    const [loadingMessages, setLoadingMessages] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+    const [messageText, setMessageText] = useState('');
+    const [showImagePicker, setShowImagePicker] = useState(false);
 
-    // API Hooks
-    const { data: messages = [] } = useGetTradeMessagesQuery(tradeId, { skip: !tradeId });
-    const { data: trade } = useGetTradeByIdQuery(tradeId, { skip: !tradeId });
-    const [sendMessage] = useSendMessageMutation();
-    const [uploadImage] = useUploadTradeImageMutation();
+    const pageIndex = useRef(1);
+    const chatsRef = useRef<FlatList>(null);
 
-    const tradeStatus = trade?.status; // 'success' | 'failure' | 'ongoing'
+    useEffect(() => {
+        fetchMessages(() => {
+            scrollToBottom(false, 500);
+        });
+        const socketRes = setupWebsocket();
+        return () => {
+            socketRes && socketRes();
+        };
+    }, []);
 
-    const handleSend = async () => {
-        if (!message.trim() || !tradeId) return;
+    const fetchMessages = async (fn: any = undefined, optionalParams?: any) => {
+        if (!trade?.id) return;
+        setLoadingMessages(true);
+        let payload = {
+            page: pageIndex.current,
+            limit: 50,
+            ...optionalParams
+        };
+        try {
+            const res = await axiosExtended.get(`${routes.trade}/chat/${trade?.id}?${queryString.stringify(payload)}`);
+            if (res.status === 200) {
+                let newChats: TradeChat[] = res.data?.data || [];
+                let chats = processMessages(newChats);
+                setMessages(chats);
+                fn && fn(chats);
+            }
+        } catch (e) {
+            console.log("Fetch Error", e);
+        } finally {
+            setLoadingMessages(false);
+        }
+    };
+
+    const processMessages = (newChats: TradeChat[]) => {
+        let chats: TradeChat[] = [...messages, ...newChats].map(c => ({
+            ...c,
+            createdAt: new Date(c.createdAt),
+            updatedAt: new Date(c.updatedAt)
+        }));
+        chats = Utils.uniqueBy<TradeChat>(chats, (chat) => chat.id.toString());
+        chats = chats.sort((a, b) => Utils.compare<TradeChat>(a, b, "createdAt"));
+        return chats;
+    };
+
+    const setupWebsocket = () => {
+        const socket = io(baseURL);
+        socket.on(`${TradeEvents.chatAdded}:${trade?.id}`, onMessageAdded);
+        socket.on(`${TradeEvents.tradeAccepted}:${trade?.id}`, onTradeUpdated);
+        socket.on(`${TradeEvents.tradeRejected}:${trade?.id}`, onTradeUpdated);
+        return () => {
+            socket.removeAllListeners(`${TradeEvents.chatAdded}:${trade?.id}`);
+            socket.removeAllListeners(`${TradeEvents.tradeAccepted}:${trade?.id}`);
+            socket.removeAllListeners(`${TradeEvents.tradeRejected}:${trade?.id}`);
+        };
+    };
+
+    const onMessageAdded = (chat: any) => {
+        if (chat.from?.id !== user?.id) {
+            fetchMessages(() => {
+                setTimeout(scrollToBottom, 500);
+            });
+        }
+    };
+
+    const onTradeUpdated = (updatedTrade: any) => {
+        dispatch(setSelectedTrade(updatedTrade));
+    };
+
+    const scrollToBottom = (animated = true, delay = 0) => {
+        setTimeout(() => chatsRef.current?.scrollToEnd({ animated }), delay);
+    };
+
+    const sendMessage = async (type: TradeChatTypeEnum = TradeChatTypeEnum.text, assets?: Asset[]) => {
+        if (!messageText.trim() && type === TradeChatTypeEnum.text) return;
+        setSubmitting(true);
+
+        const data = new FormData();
+        if (assets && assets.length) {
+            assets.forEach(asset => {
+                data.append('images', {
+                    name: asset.fileName,
+                    type: asset.type,
+                    uri: Platform.OS === 'android' ? asset.uri : asset.uri?.replace('file://', ''),
+                } as any);
+            });
+        }
+        data.append('message', messageText);
+        data.append('tradeId', trade?.id.toString());
+        data.append('typeId', type.toString());
 
         try {
-            await sendMessage({ tradeId, text: message }).unwrap();
-            setMessage('');
-        } catch (err) {
-            console.error("Failed to send message", err);
-        }
-    };
-
-    const handleAttach = async () => {
-        if (!tradeId) return;
-        const result = await launchImageLibrary({ mediaType: 'photo', selectionLimit: 1 });
-        if (result.assets && result.assets.length > 0) {
-            const asset = result.assets[0];
-            const formData = new FormData();
-            formData.append('image', {
-                uri: asset.uri,
-                type: asset.type,
-                name: asset.fileName,
+            const res = await axiosExtended.post(`${routes.trade}/chat`, data, {
+                headers: { 'Content-Type': 'multipart/form-data' },
             });
-
-            try {
-                await uploadImage({ tradeId, formData }).unwrap();
-            } catch (err) {
-                console.error("Failed to upload image", err);
+            if (res.status === 201) {
+                setMessageText('');
+                fetchMessages(() => {
+                    setTimeout(scrollToBottom, 500);
+                });
             }
+        } catch (e) {
+            console.log(e);
+        } finally {
+            setSubmitting(false);
         }
     };
 
-    const renderMessage = ({ item }: any) => {
-        if (item.type === 'system') {
-            return (
-                <View style={styles.systemMessageContainer}>
-                    <View style={styles.systemMessageBubble}>
-                        <View style={styles.iconCircle}>
-                            <Ionicons name="ellipsis-horizontal" size={16} color="#FFF" />
-                        </View>
-                        <AppBoldText style={styles.systemMessageText}>{item.text}</AppBoldText>
-                    </View>
-                </View>
-            );
+    const openCamera = async () => {
+        const result = await launchCamera({ mediaType: 'photo' });
+        if (!result.didCancel && result.assets) {
+            sendMessage(TradeChatTypeEnum.image, result.assets);
         }
+    };
 
-        const isMe = item.sender === 'me';
+    const openGallery = async () => {
+        const result = await launchImageLibrary({ mediaType: 'photo' });
+        if (!result.didCancel && result.assets) {
+            sendMessage(TradeChatTypeEnum.image, result.assets);
+        }
+    };
+
+    const renderHeader = () => (
+        <View style={styles.header}>
+            <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+                <Ionicons name="arrow-back" size={20} color="#FFF" />
+            </TouchableOpacity>
+
+            <View style={styles.headerInfo}>
+                <Image
+                    source={require('CardicApp/src/theme/assets/images/Artboard.png')}
+                    style={styles.avatar}
+                />
+                <View style={styles.headerText}>
+                    <AppBoldText style={styles.adminName}>Admin</AppBoldText>
+                    <AppText style={styles.onlineStatus}>Online</AppText>
+                </View>
+            </View>
+
+            <AppText style={styles.headerDate}>
+                {moment(trade?.createdAt).format('MMM DD, YYYY')}
+            </AppText>
+        </View>
+    );
+
+    const renderItem = ({ item }: { item: TradeChat }) => {
+        const isMe = item.from?.id === user?.id;
+        const isAdmin = [UserRoleEnum.admin].includes(item.from?.role.id);
+
         return (
-            <View style={[styles.messageRow, isMe ? styles.myMessageRow : styles.otherMessageRow]}>
+            <View style={[styles.messageRow, isMe ? styles.rowMe : styles.rowAdmin]}>
                 {!isMe && (
                     <Image
-                        source={{ uri: 'https://via.placeholder.com/40' }} // Avatar placeholder
-                        style={styles.avatarSmall}
+                        source={require('CardicApp/src/theme/assets/images/Artboard.png')}
+                        style={styles.bubbleAvatar}
                     />
                 )}
-                <View style={[styles.bubble, isMe ? styles.myBubble : styles.otherBubble]}>
-                    {item.type === 'image' ? (
-                        <Image source={{ uri: item.image }} style={styles.messageImage} />
-                    ) : (
-                        <AppText style={styles.messageText}>{item.text}</AppText>
-                    )}
-                    <AppText style={styles.timeText}>{item.time}</AppText>
+                <View style={[
+                    styles.bubble,
+                    isMe ? styles.bubbleMe : styles.bubbleAdmin
+                ]}>
+                    {item.type.id === TradeChatTypeEnum.image && item.images?.map((img, idx) => (
+                        <Image
+                            key={idx}
+                            source={{ uri: img.path.replace('http', 'https') }}
+                            style={styles.msgImage}
+                        />
+                    ))}
+                    {item.message ? (
+                        <AppText style={styles.msgText}>{item.message}</AppText>
+                    ) : null}
+                    <AppText style={styles.msgTime}>
+                        {moment(item.createdAt).format('h.mm a')}
+                    </AppText>
                 </View>
+            </View>
+        );
+    };
+
+    const renderStatus = () => {
+        let statusText = "";
+        let icon = "ellipsis-horizontal-circle";
+
+        switch (trade?.status?.id) {
+            case TradeStatusEnum.active:
+                statusText = "This trade is now being processed";
+                break;
+            case TradeStatusEnum.completed:
+                statusText = "Trade Completed Successfully";
+                icon = "checkmark-circle";
+                break;
+            case TradeStatusEnum.rejected:
+                statusText = "Trade Rejected";
+                icon = "close-circle";
+                break;
+            default:
+                statusText = "Awaiting response";
+        }
+
+        return (
+            <View style={styles.statusBox}>
+                <Ionicons name={icon} size={24} color="#0A8F08" />
+                <AppBoldText style={styles.statusText}>{statusText}</AppBoldText>
             </View>
         );
     };
 
     return (
         <SafeAreaView style={styles.container}>
-            {/* HEADER */}
-            <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-                    <Ionicons name="arrow-back" size={24} color="#FFF" />
-                </TouchableOpacity>
+            {renderHeader()}
 
-                <View style={styles.headerProfile}>
-                    <View>
-                        <Image
-                            source={{ uri: 'https://via.placeholder.com/40' }}
-                            style={styles.headerAvatar}
-                        />
-                        <View style={styles.onlineDot} />
-                    </View>
-
-                    <View>
-                        <AppBoldText style={styles.headerName}>Greg Orangeman</AppBoldText>
-                        <AppText style={styles.headerStatus}>Online</AppText>
-                    </View>
-                </View>
-
-                <AppText style={styles.headerDate}>Nov 10,2025</AppText>
-            </View>
-
-            {/* CHAT LIST */}
             <FlatList
+                ref={chatsRef}
                 data={messages}
-                renderItem={renderMessage}
-                keyExtractor={(item) => item.id}
-                contentContainerStyle={styles.chatList}
+                renderItem={renderItem}
+                keyExtractor={(item) => item.id.toString()}
+                contentContainerStyle={styles.listContent}
+                ListFooterComponent={renderStatus()}
                 showsVerticalScrollIndicator={false}
             />
 
-            {/* STATUS CARD */}
-            {tradeStatus === 'success' && (
-                <View style={styles.statusCardSuccess}>
-                    <View style={styles.statusIconSuccess}>
-                        <Ionicons name="add" size={20} color="#FFF" />
-                    </View>
-                    <AppText style={styles.statusText}>
-                        Your trade was successful, your cardic wallet has been credited.
-                    </AppText>
-                </View>
-            )}
-
-            {tradeStatus === 'failure' && (
-                <View style={styles.statusCardFailure}>
-                    <View style={styles.statusIconFailure}>
-                        <Ionicons name="close" size={20} color="#FFF" />
-                    </View>
-                    <AppText style={styles.statusText}>
-                        Your trade failed. Please check the details and try again.
-                    </AppText>
-                </View>
-            )}
-
-            {/* INPUT AREA */}
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
                 keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
             >
                 <View style={styles.inputContainer}>
-                    <TouchableOpacity style={styles.attachBtn} onPress={handleAttach}>
-                        <Ionicons name="image-outline" size={24} color="#888" />
-                    </TouchableOpacity>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Type a message..."
-                        placeholderTextColor="#999"
-                        value={message}
-                        onChangeText={setMessage}
-                    />
-                    <TouchableOpacity style={styles.sendBtn} onPress={handleSend}>
-                        <Ionicons name="send" size={20} color="#FFF" />
-                    </TouchableOpacity>
+                    <View style={styles.inputWrapper}>
+                        <TouchableOpacity onPress={() => setShowImagePicker(true)}>
+                            <Ionicons name="image-outline" size={24} color="#999" />
+                        </TouchableOpacity>
+                        <TextInput
+                            placeholder="Type a message..."
+                            style={styles.input}
+                            value={messageText}
+                            onChangeText={setMessageText}
+                        />
+                        <TouchableOpacity
+                            style={styles.sendBtn}
+                            onPress={() => sendMessage()}
+                            disabled={submitting}
+                        >
+                            {submitting ? (
+                                <ActivityIndicator color="#FFF" size="small" />
+                            ) : (
+                                <Ionicons name="send" size={20} color="#FFF" />
+                            )}
+                        </TouchableOpacity>
+                    </View>
                 </View>
             </KeyboardAvoidingView>
+
+            <CustomModal
+                isVisible={showImagePicker}
+                onClose={() => setShowImagePicker(false)}
+                autoClose={true}
+                title="Share Image"
+                actions={[
+                    { text: 'Camera', onPress: openCamera, containerStyle: { backgroundColor: Colors.Primary } },
+                    { text: 'Gallery', onPress: openGallery, containerStyle: { backgroundColor: Colors.White }, textStyle: { color: Colors.Black } },
+                ]}
+            />
         </SafeAreaView>
     );
 };
@@ -191,217 +319,105 @@ const TradeChatScreen = () => {
 export default TradeChatScreen;
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#FFF',
-    },
+    container: { flex: 1, backgroundColor: '#FFF' },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: 20,
         paddingVertical: 15,
-        backgroundColor: '#FFF',
-        // borderBottomWidth: 1,
-        // borderBottomColor: '#F0F0F0',
+        borderBottomWidth: 0,
     },
     backBtn: {
-        width: 40,
-        height: 40,
+        width: 36,
+        height: 36,
+        borderRadius: 10,
         backgroundColor: '#000',
-        borderRadius: 12,
-        alignItems: 'center',
         justifyContent: 'center',
-        marginRight: 15,
+        alignItems: 'center',
     },
-    headerProfile: {
+    headerInfo: {
         flexDirection: 'row',
         alignItems: 'center',
+        marginLeft: 15,
         flex: 1,
     },
-    headerAvatar: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        marginRight: 10,
-        backgroundColor: '#DDD',
-    },
-    onlineDot: {
-        width: 10,
-        height: 10,
-        borderRadius: 5,
-        backgroundColor: '#2DBD5F',
-        position: 'absolute',
-        bottom: 0,
-        right: 10,
-        borderWidth: 1.5,
-        borderColor: '#FFF',
-    },
-    headerName: {
-        fontSize: 16,
-        color: '#000',
-    },
-    headerStatus: {
-        fontSize: 12,
-        color: '#2DBD5F',
-    },
-    headerDate: {
-        fontSize: 12,
-        color: '#888',
-    },
-    chatList: {
-        paddingHorizontal: 20,
-        paddingBottom: 20,
-        paddingTop: 10,
-    },
-    messageRow: {
-        marginBottom: 20,
-        flexDirection: 'row',
-        alignItems: 'flex-end',
-    },
-    myMessageRow: {
-        justifyContent: 'flex-end',
-    },
-    otherMessageRow: {
-        justifyContent: 'flex-start',
-    },
-    avatarSmall: {
-        width: 30,
-        height: 30,
-        borderRadius: 15,
-        marginRight: 8,
-        backgroundColor: '#DDD',
-    },
+    avatar: { width: 40, height: 40, borderRadius: 20 },
+    headerText: { marginLeft: 10 },
+    adminName: { fontSize: 16, color: '#000' },
+    onlineStatus: { fontSize: 12, color: '#0A8F08' },
+    headerDate: { fontSize: 13, color: '#999' },
+
+    listContent: { paddingHorizontal: 20, paddingBottom: 20 },
+    messageRow: { flexDirection: 'row', marginVertical: 8, maxWidth: '85%' },
+    rowMe: { alignSelf: 'flex-end', justifyContent: 'flex-end' },
+    rowAdmin: { alignSelf: 'flex-start' },
+    bubbleAvatar: { width: 32, height: 32, borderRadius: 16, marginRight: 8, alignSelf: 'flex-start' },
+
     bubble: {
-        maxWidth: '80%',
         padding: 12,
-        borderRadius: 16,
+        borderRadius: 14,
+        position: 'relative',
     },
-    myBubble: {
-        backgroundColor: '#F0FCD4', // Lime color
-        borderBottomRightRadius: 4,
+    bubbleMe: {
+        backgroundColor: '#F5FFD2', // Yellowish-green
+        borderTopRightRadius: 2,
     },
-    otherBubble: {
-        backgroundColor: '#E0FAEB', // Light Green
-        borderBottomLeftRadius: 4,
+    bubbleAdmin: {
+        backgroundColor: '#E7FCE8', // Light green
+        borderTopLeftRadius: 2,
     },
-    messageText: {
-        fontSize: 14,
-        color: '#000',
-        lineHeight: 20,
-    },
-    messageImage: {
-        width: 150,
-        height: 200,
-        borderRadius: 8,
-    },
-    timeText: {
+    msgText: { fontSize: 15, color: '#333', lineHeight: 20 },
+    msgTime: {
         fontSize: 10,
-        color: '#666',
+        color: '#999',
         alignSelf: 'flex-end',
         marginTop: 4,
     },
-    systemMessageContainer: {
-        alignItems: 'center',
-        marginVertical: 20,
+    msgImage: {
+        width: 200,
+        height: 150,
+        borderRadius: 10,
+        marginBottom: 5,
     },
-    systemMessageBubble: {
-        backgroundColor: '#E0FAEB',
-        borderRadius: 8,
-        padding: 10,
-        flexDirection: 'row',
-        alignItems: 'center',
-        width: '100%',
-        borderWidth: 1,
-        borderColor: '#B0EEC3',
-    },
-    iconCircle: {
-        width: 24,
-        height: 24,
-        borderRadius: 12,
-        backgroundColor: '#2DBD5F', // Green for processed
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginRight: 10,
-    },
-    systemMessageText: {
-        fontSize: 14,
-        color: '#000',
-    },
-    inputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 20,
+
+    statusBox: {
+        backgroundColor: '#E7FCE8',
+        borderRadius: 10,
         paddingVertical: 15,
-        backgroundColor: '#F5F5F5',
-        borderTopWidth: 1,
-        borderTopColor: '#EEE',
-        borderRadius: 20,
-        margin: 20,
+        paddingHorizontal: 15,
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 20,
+        borderWidth: 1,
+        borderColor: '#C2EBC4',
     },
-    attachBtn: {
-        padding: 5,
-        marginRight: 10,
+    statusText: { marginLeft: 10, fontSize: 15, color: '#000' },
+
+    inputContainer: {
+        paddingHorizontal: 20,
+        paddingBottom: Platform.OS === 'ios' ? 10 : 20,
+        backgroundColor: '#FFF',
+    },
+    inputWrapper: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#F1F1F1',
+        borderRadius: 15,
+        paddingHorizontal: 15,
+        height: 54,
     },
     input: {
         flex: 1,
-        fontSize: 14,
+        marginHorizontal: 10,
+        fontSize: 15,
         color: '#000',
-        maxHeight: 100,
     },
     sendBtn: {
         width: 40,
         height: 40,
+        borderRadius: 10,
         backgroundColor: '#000',
-        borderRadius: 12,
-        alignItems: 'center',
         justifyContent: 'center',
-        marginLeft: 10,
-    },
-    /* STATUS CARDS */
-    statusCardSuccess: {
-        backgroundColor: '#E0FAEB',
-        borderRadius: 12,
-        padding: 16,
-        marginHorizontal: 20,
-        marginBottom: 10,
-        flexDirection: 'row',
         alignItems: 'center',
-        borderWidth: 1,
-        borderColor: '#B0EEC3',
-    },
-    statusCardFailure: {
-        backgroundColor: '#FFE5E5',
-        borderRadius: 12,
-        padding: 16,
-        marginHorizontal: 20,
-        marginBottom: 10,
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: '#FFB3B3',
-    },
-    statusIconSuccess: {
-        width: 30,
-        height: 30,
-        borderRadius: 15,
-        backgroundColor: '#00AA00', // Green
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginRight: 14,
-    },
-    statusIconFailure: {
-        width: 30,
-        height: 30,
-        borderRadius: 15,
-        backgroundColor: '#FF3B30', // Red
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginRight: 14,
-    },
-    statusText: {
-        flex: 1,
-        fontSize: 13,
-        color: '#000',
-        lineHeight: 18,
     },
 });

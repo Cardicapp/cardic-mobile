@@ -7,7 +7,7 @@ export interface CryptoWallet {
   price: string;
   balance: string;
   change: string;
-  image?: any; // The existing mock uses require()
+  image?: any;
   imageUrl?: string;
   bg?: string;
   border?: string;
@@ -22,14 +22,14 @@ export interface CryptoBalanceSummary {
 export const cryptoApi = api.injectEndpoints({
   endpoints: (build) => ({
     getWallets: build.query<{ summary: CryptoBalanceSummary; wallets: CryptoWallet[] }, void>({
-      query: () => '/crypto/wallets',
+      query: () => 'api/v1/wallet',
     }),
     getTokens: build.query<any[], void>({
-      query: () => '/crypto/tokens',
+      query: () => 'api/v1/wallet/tokens',
     }),
     generateWallet: build.mutation<{ address: string }, { symbol: string }>({
       query: (body) => ({
-        url: '/crypto/wallet/generate',
+        url: 'api/v1/wallet/generate',
         method: 'POST',
         body,
       }),
