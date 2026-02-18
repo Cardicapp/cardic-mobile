@@ -265,8 +265,18 @@ const Login = (props: Props) => {
             padding: '5%',
             paddingTop: '15%',
           }}>
+          <Image
+            source={Images.appLogo}
+            style={{
+              width: 100,
+              height: 100,
+              alignSelf: 'center',
+            }}
+          />
           <View style={{
-            justifyContent: 'space-between',
+            marginTop: 20,
+            justifyContent: 'center',
+            alignItems: 'center',
           }}>
             <AppBoldText
               style={{
@@ -280,10 +290,10 @@ const Login = (props: Props) => {
               style={{
                 fontSize: RFPercentage(2.5),
                 color: Colors.White,
-                marginTop: 20,
+                marginTop: 10,
               }}
             >
-              Enter your details
+              Enter your login details to continue
             </AppText>
 
           </View>
@@ -399,7 +409,7 @@ const Login = (props: Props) => {
                 color: Colors.Primary,
               }}
             >
-              I forgot my password
+              Forgot Password?
             </AppText>
           </TouchableOpacity>
         </View>
@@ -408,21 +418,7 @@ const Login = (props: Props) => {
           paddingTop: 10,
           backgroundColor: Colors.White,
         }}>
-          <AppText
-            style={{
-              textAlign: 'center',
-              marginBottom: '2%',
-            }}>Don't have an account, <AppText
-              props={{
-                onPress: () => {
-                  // @ts-ignore
-                  props.navigation.push("Register")
-                }
-              }}
-              style={{
-                color: Colors.Primary,
-                alignSelf: 'center',
-              }}>create one</AppText></AppText>
+
           <View
             style={{
               paddingHorizontal: 20,
@@ -436,6 +432,7 @@ const Login = (props: Props) => {
               text="Log In"
               textStyle={{
                 fontSize: RFPercentage(2.2),
+                fontWeight: 'bold',
               }}
               loading={loading}
               containerStyle={{
@@ -487,6 +484,25 @@ const Login = (props: Props) => {
               ) : undefined
             }
           </View>
+          <AppText
+            style={{
+              textAlign: 'center',
+              marginTop: '2%',
+              fontWeight: 'bold',
+            }}>Don't have an account, <AppText
+              props={{
+                onPress: () => {
+                  // @ts-ignore
+                  props.navigation.push("Register")
+                }
+              }}
+              style={{
+                color: Colors.Primary,
+                alignSelf: 'center',
+                fontWeight: 'bold',
+
+              }}>create Account</AppText>
+          </AppText>
         </View>
       </KeyboardAwareScrollView>
     </ImageBackground>

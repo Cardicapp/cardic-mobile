@@ -17,4 +17,6 @@ export default {
     wallet: `${prefix}/wallet`,
     banks:  `${prefix}/banks`,
     bills:  `${prefix}/bills`,
+    notifications: `${prefix}/notifications`,
+    tokens: `${prefix}/wallet/tokens`,
 }

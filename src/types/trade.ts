@@ -13,5 +13,6 @@ export interface Trade {
     subCategory: SubCategory;
     user: User | null;
     assignee: User | null;
-    status: any
+    status: any;
+    createdAt?: string;
   }

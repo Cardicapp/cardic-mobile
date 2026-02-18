@@ -19,6 +19,8 @@ import Utils from 'CardicApp/src/lib/utils/Utils';
 import Colors from 'CardicApp/src/theme/Colors';
 import { AppBoldText } from '../AppText/AppText';
 import { useNavigation, useNavigationContainerRef } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { ApplicationStackParamList } from '../../../@types/navigation';
 
 interface Props {
   text?: string;
@@ -60,7 +62,7 @@ const SimpleBackHeader = (props: Props) => {
   // }
   //   }, [props.notifications]);
 
-  const navigation = useNavigation();
+  const navigation = useNavigation<StackNavigationProp<ApplicationStackParamList>>();
 
   return (
     <View
@@ -98,12 +100,26 @@ const SimpleBackHeader = (props: Props) => {
         {showBack ? (
           <TouchableOpacity
             onPress={() => {
-              navigation.goBack();
+              if (navigation.canGoBack()) {
+                navigation.goBack();
+              } 
+              else {
+                navigation.reset({
+                  index: 0,
+                  routes: [{ name: 'Onboarding' }], // or Login / Home
+                });
+              }
             }}
+
           >
             <AntDesign
               name="left"
-              color={iconColor || Colors.Primary}
+              color={iconColor || Colors.White}
+              style={{
+                backgroundColor: Colors.Black,
+                padding: 5,
+                borderRadius: 5
+              }}
               size={RFPercentage(2.8)}
             />
           </TouchableOpacity>

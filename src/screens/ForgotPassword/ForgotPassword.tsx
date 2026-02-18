@@ -112,6 +112,7 @@ const ForgotPassword = (props: Props) => {
           style={{
             marginLeft: wp(2),
             marginTop: 60,
+            marginBottom: 20,
           }}>
           {/* <AppText style={{
             marginTop: 80,
@@ -127,10 +128,18 @@ const ForgotPassword = (props: Props) => {
               <AppBoldText
                 style={{
                   fontSize: 24,
+                  marginBottom: 5,
                 }}
               >
-                Forgot Password
+                Let's Get Started!
               </AppBoldText>
+              <AppText
+                style={{
+                  fontSize: 16,
+                }}
+              >
+                Please enter the email address linked to your account
+              </AppText>
 
             </View>
 
